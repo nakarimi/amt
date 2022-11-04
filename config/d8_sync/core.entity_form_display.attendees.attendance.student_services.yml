@@ -1,0 +1,48 @@
+uuid: 941d7c5e-5cf4-4489-b1ae-a260607f9c79
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.attendees.student_services
+    - eck.eck_type.attendees.attendance
+    - field.field.attendees.attendance.field_description
+    - field.field.attendees.attendance.field_enrollment
+    - field.field.attendees.attendance.field_status
+    - field.field.attendees.attendance.field_student_account
+    - field.field.attendees.attendance.field_students
+id: attendees.attendance.student_services
+targetEntityType: attendees
+bundle: attendance
+mode: student_services
+content:
+  field_student_account:
+    weight: 1
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete_tags
+    region: content
+  field_students:
+    weight: 2
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete_tags
+    region: content
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  field_description: true
+  field_enrollment: true
+  field_status: true

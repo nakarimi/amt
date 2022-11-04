@@ -1,0 +1,16 @@
+form_modes:
+  node:
+    to_exclude: {  }
+  user:
+    to_exclude:
+      register: register
+  commerce_order_item:
+    to_exclude:
+      add_to_cart: add_to_cart
+  events:
+    to_exclude: {  }
+  packages:
+    to_exclude: {  }
+langcode: en
+_core:
+  default_config_hash: oS5Qfo4ThgQoDFRG6QjffXGPQFwPKc3CAj6tzbNEN4Q

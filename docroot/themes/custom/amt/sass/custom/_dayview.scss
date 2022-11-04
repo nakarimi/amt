@@ -1,0 +1,128 @@
+.dayview_col{
+  width: 31%;
+  margin: 5px;
+  display: inline-block;
+}
+.modal.calendar{
+	opacity: 0;
+}
+
+.path-day-view .popover.fade.show {
+	opacity: 1;
+}
+.tooltip-dayview {
+	padding : 10px;
+ * {
+	text-align: center;
+	}
+}
+#add-new-event{
+	z-index: 500;
+}
+ul.sf-menu.sf-style-white li, ul.sf-menu.sf-style-white.sf-navbar{
+  background-color: #f8f8f8;
+}
+ul.sf-menu.sf-style-white {
+  border-top: 2px solid #c3c3c3;
+}
+
+#spinner-amt {
+  width: 100%;
+  position: fixed;
+  z-index: 99999;
+  height: 100%;
+  text-align: center;
+  padding-top: 45vh;
+}
+.fc-row.fc-widget-header{
+  table > thead > tr> th.fc-resource-cell{
+    overflow: hidden;
+  }
+}
+.ui-dialog-titlebar-close:before {
+   content: "X";
+}
+@media screen and(min-width: 992px) {
+  div.fc-event-container a {
+    right: 10% !important;
+    margin-right: 0px !important;
+  }
+}
+
+#ui-datepicker-div {
+  z-index: 999 !important;
+}
+
+body {
+	padding-bottom: 50px;
+}
+.fixedTop {
+  position: fixed;
+  top: 39px;
+  background-color: #ffffff;
+  width: 100%;
+  z-index: 1000;
+
+  .page-header {
+    margin-top: 10px;
+  }
+
+  &+ section {
+    min-height: 600px;
+  }
+}
+
+table#studentsInventory th {
+  text-align: center;
+  width: 12% !important;
+  padding: 8px 13px;
+  vertical-align: middle;
+}
+
+div#studentsInventory_wrapper {
+  > .row:first-child {
+    padding: 10px 0px 20px 0px;
+    border-bottom: 2px solid #ddd;
+  }
+  div#studentsInventory_filter {
+    float: right;
+  }
+
+}
+
+form#views-exposed-form-lessons-list-page-1 {
+  > div:first-child {
+    column-count: 2;
+  }
+
+  .form--inline > .form-item{
+    float: none;
+    width: 100%;
+  }
+
+  .js-form-item-field-status-target-id select{
+    height: auto;
+    width: 100%;
+  }
+
+  .form-actions button {
+      margin-right: 10px;
+  }
+
+}
+
+.path-day-view .page-header {
+    text-align: center;
+    padding-bottom: 9px;
+    margin: 0px 0 20px;
+}
+
+#add_inquiry {
+  margin-left: 5px;
+}
+
+.path-day-view, .path-week-view {
+  .field--name-field-showed {
+    display: none;
+  }
+}

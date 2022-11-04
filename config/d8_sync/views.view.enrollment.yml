@@ -1,0 +1,1665 @@
+uuid: 73974887-1df6-451f-90d4-081896ee3f5e
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.field_additional_notes
+    - field.storage.packages.field_category
+    - field.storage.packages.field_enrollment_lesson_count
+    - field.storage.packages.field_enrollment_total_price
+    - field.storage.packages.field_lesson_available
+    - field.storage.packages.field_package_name
+    - field.storage.packages.field_sale_date
+    - field.storage.packages.field_total_paid
+    - field.storage.student_accounts.field_contacts
+    - field.storage.user.field_first_name
+    - field.storage.user.field_last_name
+    - taxonomy.vocabulary.enrollment_type
+    - user.role.administrator
+    - user.role.developer
+    - user.role.executive
+    - user.role.studio_director
+    - user.role.studio_manager
+  module:
+    - better_exposed_filters
+    - datetime
+    - eck
+    - link_to_entity
+    - taxonomy
+    - user
+    - views_autocomplete_filters
+id: enrollment
+label: Enrollment
+module: views
+description: ''
+tag: ''
+base_table: packages_field_data
+base_field: id
+core: 8.x
+display:
+  default:
+    display_plugin: default
+    id: default
+    display_title: Master
+    position: 0
+    display_options:
+      access:
+        type: role
+        options:
+          role:
+            administrator: administrator
+            executive: executive
+            studio_director: studio_director
+            studio_manager: studio_manager
+            developer: developer
+      cache:
+        type: tag
+        options: {  }
+      query:
+        type: views_query
+        options:
+          disable_sql_rewrite: false
+          distinct: false
+          replica: false
+          query_comment: ''
+          query_tags: {  }
+      exposed_form:
+        type: bef
+        options:
+          submit_button: Apply
+          reset_button: false
+          reset_button_label: Reset
+          exposed_sorts_label: 'Sort by'
+          expose_sort_order: true
+          sort_asc_label: Asc
+          sort_desc_label: Desc
+          text_input_required: 'Select any filter and click on Apply to see results'
+          text_input_required_format: null
+      pager:
+        type: full
+        options:
+          items_per_page: 20
+          offset: 0
+          id: 0
+          total_pages: null
+          tags:
+            previous: '‹ Previous'
+            next: 'Next ›'
+            first: '« First'
+            last: 'Last »'
+          expose:
+            items_per_page: false
+            items_per_page_label: 'Items per page'
+            items_per_page_options: '5, 10, 25, 50'
+            items_per_page_options_all: false
+            items_per_page_options_all_label: '- All -'
+            offset: false
+            offset_label: Offset
+          quantity: 9
+      style:
+        type: table
+        options:
+          grouping: {  }
+          row_class: ''
+          default_row_class: true
+          override: true
+          sticky: false
+          caption: ''
+          summary: ''
+          description: ''
+          columns:
+            title: title
+            field_category: field_category
+            field_instructor: field_instructor
+            field_enrollment_package_name: field_enrollment_package_name
+            field_sale_date: field_sale_date
+            field_student: field_student
+            dropbutton: dropbutton
+          info:
+            title:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            field_category:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            field_instructor:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            field_enrollment_package_name:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            field_sale_date:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            field_student:
+              sortable: true
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+            dropbutton:
+              sortable: false
+              default_sort_order: asc
+              align: ''
+              separator: ''
+              empty_column: false
+              responsive: ''
+          default: '-1'
+          empty_table: false
+      row:
+        type: fields
+      fields:
+        id:
+          id: id
+          table: packages_field_data
+          field: id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: ID
+          exclude: true
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: number_integer
+          settings:
+            thousand_separator: ''
+            prefix_suffix: true
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          entity_type: packages
+          entity_field: id
+          plugin_id: field
+        id_1:
+          id: id_1
+          table: student_accounts_field_data
+          field: id
+          relationship: field_student
+          group_type: group
+          admin_label: ''
+          label: 'Student account ID'
+          exclude: true
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: number_integer
+          settings:
+            thousand_separator: ''
+            prefix_suffix: true
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          entity_type: student_accounts
+          entity_field: id
+          plugin_id: field
+        field_contacts:
+          id: field_contacts
+          table: student_accounts__field_contacts
+          field: field_contacts
+          relationship: field_student
+          group_type: group
+          admin_label: ''
+          label: Student
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: true
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: target_id
+          type: link_entity_query_param
+          settings:
+            link_page: /student-dashboard
+            query_field: id
+          group_column: target_id
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        field_first_name:
+          id: field_first_name
+          table: user__field_first_name
+          field: field_first_name
+          relationship: field_instructor
+          group_type: group
+          admin_label: ''
+          label: 'First name'
+          exclude: true
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: string
+          settings:
+            link_to_entity: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        field_last_name:
+          id: field_last_name
+          table: user__field_last_name
+          field: field_last_name
+          relationship: field_instructor
+          group_type: group
+          admin_label: ''
+          label: 'Last Name'
+          exclude: true
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: string
+          settings:
+            link_to_entity: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        field_sale_date:
+          id: field_sale_date
+          table: packages__field_sale_date
+          field: field_sale_date
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Sale Date'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: datetime_default
+          settings:
+            timezone_override: ''
+            format_type: medium
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        view_user:
+          id: view_user
+          table: users
+          field: view_user
+          relationship: field_instructor
+          group_type: group
+          admin_label: 'Instructor Full Name'
+          label: Instructor
+          exclude: false
+          alter:
+            alter_text: true
+            text: '{{ field_first_name }} {{ field_last_name }}'
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          text: ''
+          output_url_as_text: false
+          absolute: false
+          entity_type: user
+          plugin_id: entity_link
+        field_category:
+          id: field_category
+          table: packages__field_category
+          field: field_category
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: Category
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: target_id
+          type: entity_reference_label
+          settings:
+            link: true
+          group_column: target_id
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        field_package_name:
+          id: field_package_name
+          table: packages__field_package_name
+          field: field_package_name
+          relationship: field_enrollment_package_name
+          group_type: group
+          admin_label: ''
+          label: 'Package Name'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: string
+          settings:
+            link_to_entity: true
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        field_enrollment_lesson_count:
+          id: field_enrollment_lesson_count
+          table: packages__field_enrollment_lesson_count
+          field: field_enrollment_lesson_count
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: '$ of Lessons'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: number_integer
+          settings:
+            thousand_separator: ''
+            prefix_suffix: false
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        field_enrollment_total_price:
+          id: field_enrollment_total_price
+          table: packages__field_enrollment_total_price
+          field: field_enrollment_total_price
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Total Price'
+          exclude: false
+          alter:
+            alter_text: true
+            text: '${{ field_enrollment_total_price }}'
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: number_decimal
+          settings:
+            thousand_separator: ''
+            prefix_suffix: true
+            decimal_separator: .
+            scale: 0
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        field_total_paid:
+          id: field_total_paid
+          table: packages__field_total_paid
+          field: field_total_paid
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Total Paid'
+          exclude: false
+          alter:
+            alter_text: true
+            text: '${{ field_total_paid }}'
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: number_integer
+          settings:
+            thousand_separator: ''
+            prefix_suffix: true
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        field_additional_notes:
+          id: field_additional_notes
+          table: packages__field_additional_notes
+          field: field_additional_notes
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Last Paid'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: basic_string
+          settings: {  }
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        field_lesson_available:
+          id: field_lesson_available
+          table: packages__field_lesson_available
+          field: field_lesson_available
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: 'Lessons Available'
+          exclude: false
+          alter:
+            alter_text: false
+            text: ''
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: true
+          click_sort_column: value
+          type: number_integer
+          settings:
+            thousand_separator: ''
+            prefix_suffix: true
+          group_column: value
+          group_columns: {  }
+          group_rows: true
+          delta_limit: 0
+          delta_offset: 0
+          delta_reversed: false
+          delta_first_last: false
+          multi_type: separator
+          separator: ', '
+          field_api_classes: false
+          plugin_id: field
+        nothing_1:
+          id: nothing_1
+          table: views
+          field: nothing
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: Hide
+          exclude: false
+          alter:
+            alter_text: true
+            text: '<a href="{{ id }}" class="btn-tobe-checkbox">Hide</a>'
+            make_link: false
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: true
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: false
+          plugin_id: custom
+        nothing:
+          id: nothing
+          table: views
+          field: nothing
+          relationship: none
+          group_type: group
+          admin_label: ''
+          label: Actions
+          exclude: false
+          alter:
+            alter_text: true
+            text: "<a href=\"{{ path('entity.packages.edit_form', {'packages': id }) }}?destination=/enrollment\"  class=\"btn\">Edit</a> <br>\r\n<a href=\"{{ path('entity.packages.delete_form', {'packages': id }) }}\"  class=\"btn\">Delete</a> <br>\r\n<a href=\"{{ path('entity.packages.canonical', {'packages': id }) }}\"  class=\"btn\">View</a> <br>\r\n<a href=\"/packages/{{ id }}/edit/enrollment_drop_mode?destination=/enrollment\" class=\"btn\">Drop Enrollment</a>\r\n"
+            make_link: true
+            path: ''
+            absolute: false
+            external: false
+            replace_spaces: false
+            path_case: none
+            trim_whitespace: false
+            alt: ''
+            rel: ''
+            link_class: ''
+            prefix: ''
+            suffix: ''
+            target: ''
+            nl2br: false
+            max_length: 0
+            word_boundary: true
+            ellipsis: true
+            more_link: false
+            more_link_text: ''
+            more_link_path: ''
+            strip_tags: false
+            trim: false
+            preserve_tags: ''
+            html: false
+          element_type: ''
+          element_class: ''
+          element_label_type: ''
+          element_label_class: ''
+          element_label_colon: false
+          element_wrapper_type: ''
+          element_wrapper_class: ''
+          element_default_classes: true
+          empty: ''
+          hide_empty: false
+          empty_zero: false
+          hide_alter_empty: false
+          plugin_id: custom
+      filters:
+        uid_raw:
+          id: uid_raw
+          table: users_field_data
+          field: uid_raw
+          relationship: field_instructor
+          group_type: group
+          admin_label: 'Instructor Full Name'
+          operator: '='
+          value:
+            min: ''
+            max: ''
+            value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: uid_raw_op
+            label: Instructor
+            description: ''
+            use_operator: false
+            operator: uid_raw_op
+            identifier: instructor
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+              studio_director: '0'
+              studio_manager: '0'
+              instructor: '0'
+              developer: '0'
+              executive: '0'
+            placeholder: 'Full Name'
+            min_placeholder: ''
+            max_placeholder: ''
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          entity_type: user
+          plugin_id: numeric
+        title:
+          id: title
+          table: contacts_field_data
+          field: title
+          relationship: field_contacts
+          group_type: group
+          admin_label: ''
+          operator: contains
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: title_op
+            label: Student
+            description: ''
+            use_operator: false
+            operator: title_op
+            identifier: title
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+              studio_director: '0'
+              studio_manager: '0'
+              instructor: '0'
+              developer: '0'
+              executive: '0'
+            placeholder: ''
+            autocomplete_filter: 1
+            autocomplete_min_chars: '0'
+            autocomplete_items: '10'
+            autocomplete_field: title
+            autocomplete_raw_suggestion: 1
+            autocomplete_raw_dropdown: 1
+            autocomplete_dependent: 0
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          entity_type: contacts
+          entity_field: title
+          plugin_id: views_autocomplete_filters_string
+        field_sale_date_value:
+          id: field_sale_date_value
+          table: packages__field_sale_date
+          field: field_sale_date_value
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: '='
+          value:
+            min: ''
+            max: ''
+            value: ''
+            type: date
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_sale_date_value_op
+            label: 'Sale Date'
+            description: ''
+            use_operator: false
+            operator: field_sale_date_value_op
+            identifier: field_sale_date_value
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+              studio_director: '0'
+              studio_manager: '0'
+              instructor: '0'
+              developer: '0'
+              executive: '0'
+            placeholder: ''
+            min_placeholder: ''
+            max_placeholder: ''
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          plugin_id: datetime
+        field_category_target_id:
+          id: field_category_target_id
+          table: packages__field_category
+          field: field_category_target_id
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: or
+          value: {  }
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_category_target_id_op
+            label: Category
+            description: ''
+            use_operator: false
+            operator: field_category_target_id_op
+            identifier: field_category_target_id
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+              studio_director: '0'
+              studio_manager: '0'
+              instructor: '0'
+              developer: '0'
+              executive: '0'
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          reduce_duplicates: false
+          type: textfield
+          limit: true
+          vid: enrollment_type
+          hierarchy: false
+          error_message: true
+          plugin_id: taxonomy_index_tid
+        field_package_name_value:
+          id: field_package_name_value
+          table: packages__field_package_name
+          field: field_package_name_value
+          relationship: field_enrollment_package_name
+          group_type: group
+          admin_label: ''
+          operator: contains
+          value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_package_name_value_op
+            label: 'Package Name'
+            description: ''
+            use_operator: false
+            operator: field_package_name_value_op
+            identifier: field_package_name_value
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+              studio_director: '0'
+              studio_manager: '0'
+              instructor: '0'
+              developer: '0'
+              executive: '0'
+            placeholder: ''
+            autocomplete_filter: 1
+            autocomplete_min_chars: '0'
+            autocomplete_items: '10'
+            autocomplete_field: field_package_name
+            autocomplete_raw_suggestion: 1
+            autocomplete_raw_dropdown: 1
+            autocomplete_dependent: 0
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          plugin_id: views_autocomplete_filters_string
+        field_lessons_paid_value:
+          id: field_lessons_paid_value
+          table: packages__field_lessons_paid
+          field: field_lessons_paid_value
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: '='
+          value:
+            min: ''
+            max: ''
+            value: ''
+          group: 1
+          exposed: true
+          expose:
+            operator_id: field_lessons_paid_value_op
+            label: 'Lessons Paid'
+            description: ''
+            use_operator: false
+            operator: field_lessons_paid_value_op
+            identifier: field_lessons_paid_value
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+              anonymous: '0'
+              administrator: '0'
+              studio_director: '0'
+              studio_manager: '0'
+              instructor: '0'
+              developer: '0'
+              executive: '0'
+            placeholder: ''
+            min_placeholder: ''
+            max_placeholder: ''
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          plugin_id: numeric
+        type:
+          id: type
+          table: packages_field_data
+          field: type
+          relationship: none
+          group_type: group
+          admin_label: ''
+          operator: in
+          value:
+            enrollment: enrollment
+          group: 1
+          exposed: false
+          expose:
+            operator_id: ''
+            label: ''
+            description: ''
+            use_operator: false
+            operator: ''
+            identifier: ''
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+            reduce: false
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          entity_type: packages
+          entity_field: type
+          plugin_id: bundle
+        field_hide_value:
+          id: field_hide_value
+          table: user__field_hide
+          field: field_hide_value
+          relationship: field_instructor
+          group_type: group
+          admin_label: ''
+          operator: '='
+          value: '0'
+          group: 1
+          exposed: false
+          expose:
+            operator_id: ''
+            label: ''
+            description: ''
+            use_operator: false
+            operator: ''
+            identifier: ''
+            required: false
+            remember: false
+            multiple: false
+            remember_roles:
+              authenticated: authenticated
+          is_grouped: false
+          group_info:
+            label: ''
+            description: ''
+            identifier: ''
+            optional: true
+            widget: select
+            multiple: false
+            remember: false
+            default_group: All
+            default_group_multiple: {  }
+            group_items: {  }
+          null_is_false: true
+          plugin_id: boolean
+      sorts:
+        field_sale_date_value:
+          id: field_sale_date_value
+          table: packages__field_sale_date
+          field: field_sale_date_value
+          relationship: none
+          group_type: group
+          admin_label: ''
+          order: DESC
+          exposed: false
+          expose:
+            label: ''
+          granularity: second
+          plugin_id: datetime
+      title: Enrollment
+      header:
+        area_text_custom:
+          id: area_text_custom
+          table: views
+          field: area_text_custom
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: true
+          tokenize: false
+          content: "<div style=\"width:100%\" class=\"text-right\"><a href=\"[site:url]admin/content/packages/add/enrollment?destination=/enrollment\" class=\"btn btn-primary\">Add Enrollment</a></div>\r\n"
+          plugin_id: text_custom
+      footer: {  }
+      empty: {  }
+      relationships:
+        field_instructor:
+          id: field_instructor
+          table: packages__field_instructor
+          field: field_instructor
+          relationship: none
+          group_type: group
+          admin_label: 'field_instructor: User'
+          required: false
+          plugin_id: standard
+        field_enrollment_package_name:
+          id: field_enrollment_package_name
+          table: packages__field_enrollment_package_name
+          field: field_enrollment_package_name
+          relationship: none
+          group_type: group
+          admin_label: 'field_enrollment_package_name: Packages'
+          required: false
+          plugin_id: standard
+        field_student:
+          id: field_student
+          table: packages__field_student
+          field: field_student
+          relationship: none
+          group_type: group
+          admin_label: 'field_student: Student Accounts'
+          required: false
+          plugin_id: standard
+        field_contacts:
+          id: field_contacts
+          table: student_accounts__field_contacts
+          field: field_contacts
+          relationship: field_student
+          group_type: group
+          admin_label: 'field_contacts: Students'
+          required: false
+          plugin_id: standard
+      arguments: {  }
+      display_extenders: {  }
+      use_more: false
+      use_more_always: false
+      use_more_text: more
+      filter_groups:
+        operator: AND
+        groups:
+          1: AND
+          2: OR
+      group_by: false
+      use_ajax: false
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+        - user
+        - user.roles
+      tags:
+        - 'config:field.storage.packages.field_additional_notes'
+        - 'config:field.storage.packages.field_category'
+        - 'config:field.storage.packages.field_enrollment_lesson_count'
+        - 'config:field.storage.packages.field_enrollment_total_price'
+        - 'config:field.storage.packages.field_lesson_available'
+        - 'config:field.storage.packages.field_package_name'
+        - 'config:field.storage.packages.field_sale_date'
+        - 'config:field.storage.packages.field_total_paid'
+        - 'config:field.storage.student_accounts.field_contacts'
+        - 'config:field.storage.user.field_first_name'
+        - 'config:field.storage.user.field_last_name'
+  page_1:
+    display_plugin: page
+    id: page_1
+    display_title: Page
+    position: 1
+    display_options:
+      display_extenders: {  }
+      path: enrollment
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - url
+        - url.query_args
+        - user
+        - user.roles
+      tags:
+        - 'config:field.storage.packages.field_additional_notes'
+        - 'config:field.storage.packages.field_category'
+        - 'config:field.storage.packages.field_enrollment_lesson_count'
+        - 'config:field.storage.packages.field_enrollment_total_price'
+        - 'config:field.storage.packages.field_lesson_available'
+        - 'config:field.storage.packages.field_package_name'
+        - 'config:field.storage.packages.field_sale_date'
+        - 'config:field.storage.packages.field_total_paid'
+        - 'config:field.storage.student_accounts.field_contacts'
+        - 'config:field.storage.user.field_first_name'
+        - 'config:field.storage.user.field_last_name'

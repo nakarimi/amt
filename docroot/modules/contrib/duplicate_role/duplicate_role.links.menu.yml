@@ -1,0 +1,7 @@
+duplicaterole.overview:
+  title: 'Duplicate Roles'
+  parent: entity.user.collection
+  description: 'A module that duplicates an existing role and its permissions.'
+  route_name: duplicaterole.overview
+  weight: -1
+

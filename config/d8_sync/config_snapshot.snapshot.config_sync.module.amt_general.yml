@@ -1,0 +1,11 @@
+uuid: 1744c460-0ade-4b1d-9ec5-8189e572326e
+langcode: en
+status: true
+dependencies:
+  module:
+    - amt_general
+id: config_sync.module.amt_general
+snapshotSet: config_sync
+extensionType: module
+extensionName: amt_general
+items: {  }

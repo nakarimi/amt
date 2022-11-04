@@ -1,0 +1,6 @@
+continuous_appointment_form:
+  version: 1.x
+  js:
+    assets/js/continuous_appointment_form.js: {}
+  dependencies:
+  - core/jquery

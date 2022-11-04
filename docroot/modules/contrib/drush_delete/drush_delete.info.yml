@@ -1,0 +1,11 @@
+name: Drush Delete
+type: module
+description: This module provides the drush commands to delete the contents for developers usage.
+# core: 8.x
+package: Drush
+
+# Information added by Drupal.org packaging script on 2017-07-01
+version: '8.x-2.2'
+core: '8.x'
+project: 'drush_delete'
+datestamp: 1498923544

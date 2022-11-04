@@ -1,0 +1,53 @@
+uuid: 50d7ed0c-0690-4363-b604-53ae0c30fd16
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.user.full_name
+    - field.field.user.user.feeds_item
+    - field.field.user.user.field_ami_id
+    - field.field.user.user.field_availability
+    - field.field.user.user.field_first_name
+    - field.field.user.user.field_last_name
+    - field.field.user.user.field_legacy_id
+    - field.field.user.user.field_lesson_types
+    - field.field.user.user.field_teacher_category
+    - field.field.user.user.user_picture
+  module:
+    - user
+_core:
+  default_config_hash: V51QPCKkgNREKtSmB9Iu2wmAMEpktVpnzklWaZV8UYo
+id: user.user.full_name
+targetEntityType: user
+bundle: user
+mode: full_name
+content:
+  field_first_name:
+    weight: 0
+    label: hidden
+    settings:
+      link_to_entity: true
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_last_name:
+    weight: 1
+    label: hidden
+    settings:
+      link_to_entity: true
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden:
+  feeds_item: true
+  field_ami_id: true
+  field_availability: true
+  field_birthday: true
+  field_hide: true
+  field_hiring_date: true
+  field_legacy_id: true
+  field_lesson_types: true
+  field_phone_number: true
+  field_teacher_category: true
+  member_for: true
+  user_picture: true

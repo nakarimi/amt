@@ -1,0 +1,29 @@
+uuid: 85531fb9-846d-4f70-8fa0-354d7f61d816
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.payments.payment
+    - field.storage.payments.field_payment_type
+    - taxonomy.vocabulary.payment_type
+id: payments.payment.field_payment_type
+field_name: field_payment_type
+entity_type: payments
+bundle: payment
+label: 'Payment Type'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      payment_type: payment_type
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

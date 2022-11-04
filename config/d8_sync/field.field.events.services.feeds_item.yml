@@ -1,0 +1,23 @@
+uuid: 578e2c5f-0293-4ff3-945e-ded97935805e
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.services
+    - field.storage.events.feeds_item
+  module:
+    - feeds
+id: events.services.feeds_item
+field_name: feeds_item
+entity_type: events
+bundle: services
+label: 'Feeds item'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:feeds_feed'
+  handler_settings: {  }
+field_type: feeds_item

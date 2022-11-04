@@ -1,0 +1,6 @@
+amt_notification.adminsettings:  
+  title: 'Twilio SMS Settings'  
+  route_name: amt_notification.TwilioSettingsForm  
+  description: 'Twilio Setting page'  
+  parent: system.admin_config_system  
+  weight: 99

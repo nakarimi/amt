@@ -1,0 +1,9 @@
+uuid: 2315e9b5-e554-4777-a0f1-db8e3054cbda
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_entity_type.payments
+name: Payment
+type: payment
+description: ''

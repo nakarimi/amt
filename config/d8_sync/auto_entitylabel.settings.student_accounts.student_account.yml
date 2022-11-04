@@ -1,0 +1,7 @@
+status: 1
+pattern: '[student_accounts:field_contacts]'
+php: false
+escape: false
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account

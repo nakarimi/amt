@@ -1,0 +1,11 @@
+uuid: a0906c97-6d9b-49e9-91a8-d4a6fca03b37
+langcode: en
+status: true
+dependencies:
+  module:
+    - amt_copypaste
+id: config_sync.module.amt_copypaste
+snapshotSet: config_sync
+extensionType: module
+extensionName: amt_copypaste
+items: {  }

@@ -1,0 +1,20 @@
+uuid: 02d06a6b-47dd-4e8b-9d5e-812eba5bf711
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: payments.field_gross_tuition
+field_name: field_gross_tuition
+entity_type: payments
+type: decimal
+settings:
+  precision: 10
+  scale: 2
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

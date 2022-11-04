@@ -1,0 +1,5 @@
+amt_userdashboard_general:
+  version: 1.x
+  css:
+    theme:
+      assets/css/amt_userdashboard.css: {}

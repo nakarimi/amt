@@ -1,0 +1,78 @@
+collapsible_fields:
+  version: 1.x
+  js:
+    assets/js/collapsible_fields.js: {}
+  dependencies:
+    - core/jquery
+
+couple_inline_entity:
+  version: 1.x
+  js:
+    assets/js/couple_inline_entity.js: {}
+  dependencies:
+    - core/jquery
+
+hide_toolbar:
+  version: 1.x
+  js:
+    assets/js/hide_toolbar.js: {}
+  dependencies:
+    - core/jquery
+
+jquery_print:
+  version: 1.6.2
+  js:
+    assets/js/jquery.print.js: {}
+  dependencies:
+    - core/jquery
+
+print:
+  version: 1.x
+  css:
+      theme:
+        assets/css/print.css: {}
+  js:
+    assets/js/print.js: {}
+  dependencies:
+    - jquery_print
+
+color_picker_input:
+  version: 1.x
+  css:
+    theme:
+      assets/css/jquery.minicolors.css: {}
+  js:
+    assets/js/jquery.minicolors.js: {}
+    assets/js/color_picker_input.js: {}
+  dependencies:
+    - core/jquery
+
+instructor_sortable_views:
+  version: 1.x
+  css:
+    theme:
+      #assets/css/amt_general.css: {}
+  js:
+    assets/js/instructor_sortable_views.js: {}
+  dependencies:
+    - core/jquery
+
+hide_show_package_code:
+  version: 1.x
+  css:
+    theme:
+      #assets/css/amt_general.css: {}
+  js:
+    assets/js/hide_show_package_code.js: {}
+  dependencies:
+    - core/jquery
+
+view_display:
+  version: 1.x
+  css:
+    theme:
+      #assets/css/amt_general.css: {}
+  js:
+    assets/js/view_display.js: {}
+  dependencies:
+    - core/jquery

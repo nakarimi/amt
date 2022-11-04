@@ -1,0 +1,45 @@
+uuid: b07daf15-af82-4b0f-9482-f5ed3fc492cb
+langcode: en
+status: true
+dependencies:
+  module:
+    - form_mode_manager
+id: config_sync.module.form_mode_manager
+snapshotSet: config_sync
+extensionType: module
+extensionName: form_mode_manager
+items:
+  -
+    collection: ''
+    name: form_mode_manager.links
+    data:
+      local_tasks:
+        node:
+          position: secondary
+        user:
+          position: secondary
+        block_content:
+          position: secondary
+        comment:
+          position: primary
+        contact_message:
+          position: primary
+        media:
+          position: secondary
+        taxonomy_term:
+          position: secondary
+      langcode: en
+  -
+    collection: ''
+    name: form_mode_manager.settings
+    data:
+      form_modes:
+        node:
+          to_exclude: {  }
+        user:
+          to_exclude:
+            register: register
+        commerce_order_item:
+          to_exclude:
+            add_to_cart: add_to_cart
+      langcode: en

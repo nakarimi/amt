@@ -1,0 +1,31 @@
+uuid: 09d490bd-d7b0-4ed1-bd93-06da67390ef8
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_color
+    - taxonomy.vocabulary.group_lesson_types
+  module:
+    - color_field
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: taxonomy_term.group_lesson_types.field_color
+field_name: field_color
+entity_type: taxonomy_term
+bundle: group_lesson_types
+label: Color
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  opacity: 1
+field_type: color_field_type

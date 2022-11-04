@@ -1,0 +1,10 @@
+uuid: c0b97096-a339-4264-8f16-6cc26a4098af
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: packages.enrollment_drop_mode
+label: Drop
+targetEntityType: packages
+cache: true

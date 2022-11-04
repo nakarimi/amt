@@ -1,0 +1,28 @@
+uuid: ad21b63d-f600-4b98-9b0b-3b31e1b8cdf0
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.group_lesson
+    - eck.eck_type.events.lesson
+    - field.storage.events.field_base_lesson
+id: events.group_lesson.field_base_lesson
+field_name: field_base_lesson
+entity_type: events
+bundle: group_lesson
+label: 'Base Lesson'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:events'
+  handler_settings:
+    target_bundles:
+      lesson: lesson
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

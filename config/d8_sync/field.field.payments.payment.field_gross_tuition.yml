@@ -1,0 +1,33 @@
+uuid: f528777f-ac5d-41ca-968b-fa54b13eba4d
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.payments.payment
+    - field.storage.payments.field_gross_tuition
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: payments.payment.field_gross_tuition
+field_name: field_gross_tuition
+entity_type: payments
+bundle: payment
+label: 'Payment Amount'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: $
+  suffix: ''
+field_type: decimal

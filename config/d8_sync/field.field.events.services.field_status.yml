@@ -1,0 +1,43 @@
+uuid: cd2d7269-94e9-418d-aa10-615a69a3db41
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.services
+    - field.storage.events.field_status
+    - taxonomy.vocabulary.service_status
+  content:
+    - 'taxonomy_term:service_status:f304be97-4bf3-4a95-a537-5ea39a9fe437'
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.services.field_status
+field_name: field_status
+entity_type: events
+bundle: services
+label: Status
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    target_uuid: f304be97-4bf3-4a95-a537-5ea39a9fe437
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      service_status: service_status
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

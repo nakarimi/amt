@@ -1,0 +1,74 @@
+  {# Enrollments List Heading #}
+  <h1 id="filtersTitle" data-toggle="collapse" href="#collapseFilter" role="button" aria-expanded="false" aria-controls="collapseFilter"> <span class="collapseBtn"> <img src="core/misc/icons/bebebe/hamburger.svg"> </span> Filters </h1>
+  {# Enrollments List Filters Container #}
+  <form method="GET">
+    <div class="studentsFilters" id="studentsFilters">
+      <div class="row">
+        <div class="collapse" id="collapseFilter">
+          <div class="form-group col-md-4 col-sm-12">
+            <input type="text" id="nameFilter" name="name" value="{{ filterData.name }}" class="form-control" placeholder="Name">
+          </div>
+          <div class="form-group col-md-4 col-sm-12">
+            <input type="text" id="emailFilter" name="email" value="{{ filterData.email }}" class="form-control" placeholder="Email">
+          </div>
+          <div class="form-group col-md-4 col-sm-12">
+            <input type="tel" id="phoneFilter" name="phone" value="{{ filterData.phone }}" class="form-control" placeholder="Phone">
+          </div>
+          <div class="form-group col-md-4 col-sm-12">
+                <select name="instructor[]" class="form-control" id="multiselect" multiple="multiple">
+                  {% if filterData.instructors %}
+                  {% for instructor in filterData.instructors %}
+                    {% if instructor.value in filterData.instructor %}
+                      <option value="{{ instructor.value }}" selected="selected">{{ instructor.label }}</option>
+                    {% else %}
+                      <option value="{{ instructor.value }}">{{ instructor.label }}</option>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+                </select>
+          </div>
+          <div class="form-group col-md-4 col-sm-12">
+            <select class="form-control" name="department" id="studentDepartmentFilter">
+              <option value="" {{ (filterData.department == dep_id) ? 'selected' : '' }}>Select Department</option>
+              {% if departments %}
+                {% for dep_id, department in departments %}
+                  <option value="{{ dep_id }}" {{ (filterData.department == dep_id) ? 'selected' : '' }}>{{ department }}</option>
+                {% endfor %}
+              {% endif %}
+            </select>
+          </div>
+          <div class="form-group col-md-4 col-sm-12">
+            <input type="date" id="dateFilter" name="date" value="{{ filterData.date }}" class="form-control" placeholder="Date Of Last Lesson">
+          </div>
+        </div>
+      </div>
+      <input type="hidden" value="1" name="page">
+      <div style="margin-bottom: 10px; overflow:auto">
+        <div class="form-group col-md-6 col-sm-12">
+          <div class="checkbox form-group">
+            <label>
+              <input type="checkbox" name="status[]" value="active" {{ ('active' in filterData.statusCheck) ? 'checked' : '' }} id="active">
+              Active
+            </label>
+            <label>
+              <input type="checkbox" name="status[]" value="inactive" {{ ('inactive' in filterData.statusCheck) ? 'checked' : '' }} id="inactive">
+              Inactive
+            </label>
+            <label>
+              <input type="checkbox" name="status[]" {{ ('nfa' in filterData.statusCheck) ? 'checked' : '' }} value="nfa" id="nfa">
+              NFA
+            </label>
+            <label>
+              <input type="checkbox" name="paid_finished" {{ (filterData.paid_finished == 1) ? 'checked' : '' }} value="1" id="paid_finished">
+              Paid Finished
+            </label>
+          </div>
+        </div>
+        <a href="/student-list-csv-export" class="btn btn-default pull-right filterStudentsButton" >CSV</a>
+        <a onclick="window.print();" class="btn btn-warning pull-right filterStudentsButton" id="printTableButton"> Print </a>
+        <button type="submit" class="btn btn-primary pull-right filterStudentsButton" id="filterStudentsButton"> Filter </button>
+        <button type="button" class="btn btn-info pull-right ml-1 filterStudentsButton" id="studentDepartmentButton" data-toggle="modal" data-target="#update_mass_student_department"> Student Department </button>
+      </div>
+    </div>
+  </form>
+{# End of Filters input #}

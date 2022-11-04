@@ -1,0 +1,36 @@
+enable: 1
+rid_anonymous:
+  weigth: '0'
+  path: ''
+rid_authenticated:
+  weigth: '0'
+  path: ''
+rid_administrator:
+  enabled: '1'
+  weigth: '0'
+  path: /dashboard
+rid_studio_director:
+  enabled: '1'
+  weigth: '0'
+  path: /dashboard
+rid_studio_manager:
+  enabled: '1'
+  weigth: '0'
+  path: /dashboard
+rid_instructor:
+  enabled: '1'
+  weigth: '0'
+  path: /day-view
+rid_developer:
+  enabled: '1'
+  weigth: '0'
+  path: /user
+rid_site_admin:
+  enabled: '1'
+  weigth: '0'
+  path: /user
+rid_executive:
+  enabled: '1'
+  weigth: '0'
+  path: /day-view
+home_link_path: ''

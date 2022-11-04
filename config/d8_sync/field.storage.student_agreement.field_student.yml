@@ -1,0 +1,19 @@
+uuid: 3a0f0479-7c68-4c88-8511-6bf15d88f1f9
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: student_agreement.field_student
+field_name: field_student
+entity_type: student_agreement
+type: entity_reference
+settings:
+  target_type: student_accounts
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,38 @@
+uuid: 2df3bbb9-49ea-4faa-8b93-5b0269c87a2e
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.field_inquiry_taker
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: student_accounts.student_account.field_inquiry_taker
+field_name: field_inquiry_taker
+entity_type: student_accounts
+bundle: student_account
+label: 'Inquiry Taker'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:user'
+  handler_settings:
+    include_anonymous: false
+    filter:
+      type: _none
+    target_bundles: null
+    sort:
+      field: _none
+    auto_create: false
+field_type: entity_reference

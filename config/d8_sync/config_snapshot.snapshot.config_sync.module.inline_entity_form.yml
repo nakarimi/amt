@@ -1,0 +1,11 @@
+uuid: a837bf4a-54b7-4872-8ab6-8409bde2537c
+langcode: en
+status: true
+dependencies:
+  module:
+    - inline_entity_form
+id: config_sync.module.inline_entity_form
+snapshotSet: config_sync
+extensionType: module
+extensionName: inline_entity_form
+items: {  }

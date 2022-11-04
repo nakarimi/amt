@@ -1,0 +1,19 @@
+uuid: 71330255-4d3a-4dcd-95c1-c02ff166ede6
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.services
+    - field.storage.events.field_notes
+id: events.services.field_notes
+field_name: field_notes
+entity_type: events
+bundle: services
+label: Notes
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

@@ -1,0 +1,23 @@
+uuid: cdb13c8d-7bc4-46e5-8233-352c515f83c4
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.feeds_item
+  module:
+    - feeds
+id: packages.enrollment.feeds_item
+field_name: feeds_item
+entity_type: packages
+bundle: enrollment
+label: 'Feeds item'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:feeds_feed'
+  handler_settings: {  }
+field_type: feeds_item

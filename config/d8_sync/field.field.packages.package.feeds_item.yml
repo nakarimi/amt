@@ -1,0 +1,23 @@
+uuid: 3ed80d3a-f973-4357-86fb-6bbe36a2b002
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.package
+    - field.storage.packages.feeds_item
+  module:
+    - feeds
+id: packages.package.feeds_item
+field_name: feeds_item
+entity_type: packages
+bundle: package
+label: 'Feeds item'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:feeds_feed'
+  handler_settings: {  }
+field_type: feeds_item

@@ -1,0 +1,10 @@
+uuid: 49802ab7-34bb-4e14-ab86-c3d7ce1861ad
+langcode: en
+status: true
+dependencies: {  }
+id: student_accounts
+label: 'Student Accounts'
+created: true
+changed: false
+uid: true
+title: true

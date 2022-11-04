@@ -1,0 +1,20 @@
+uuid: 365a4ae6-77ed-4d62-92dc-e92772be9075
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: events.field_parent
+field_name: field_parent
+entity_type: events
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

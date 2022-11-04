@@ -1,0 +1,59 @@
+<!-- Modal for Updating Multiple appointments statuses -->
+<div class="modal" tabindex="-1" role="dialog" id="update_multiple_status">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Updating Multiple
+					<span id="appointment_type_identifier"></span>' statuses</h3>
+			</div>
+			<div class="modal-body">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>
+								<div class="checkbox" id="multiple_status_update_select_all">
+									<label>
+										<input type="checkbox" id="multiple_status_update_select_all_checkbox">
+										select All
+									</label>
+								</div>
+							</th>
+							<th>Title</th>
+							<th>Instructor</th>
+							<th>Time</th>
+							<th id="multiple_status_update_status_column">Status</th>
+						</tr>
+					</thead>
+					<tbody id="update_multiple_status_table_body"></tbody>
+				</table>
+			</div>
+			<div class="modal-footer" id="modal-footer">
+
+				<div class="col-md-8">
+					<select class="form-control" id="lessons_status_selectbox">
+						{% if lesson_status_list %}
+							{% for key,val in lesson_status_list %}
+								<option value="{{val.id}}" {% if val.name == "Pending Status" %} selected {% endif %} >{{val.name}}</option>
+							{% endfor %}
+						{% endif %}
+					</select>
+					<select class="form-control" id="services_status_selectbox">
+						{% if service_status_list %}
+							{% for key,val in service_status_list %}
+								<option value="{{val.id}}" {% if val.name == "Pending Status" %} selected {% endif %} >{{val.name}}</option>
+							{% endfor %}
+						{% endif %}
+					</select>
+				</div>
+
+				<div class="col-md-4">
+					<button class="btn btn-success" id="update_multiple_status_submit_btn">Update All</button>
+				</div>
+
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+<!-- End of modal for Updating Multiple appointments statuses -->

@@ -1,0 +1,137 @@
+uuid: 0477477b-5015-4db5-affe-59b51d17bddb
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.group_lesson
+    - field.field.events.group_lesson.field_date_and_time
+    - field.field.events.group_lesson.field_duration
+    - field.field.events.group_lesson.field_importer
+    - field.field.events.group_lesson.field_instructor
+    - field.field.events.group_lesson.field_repetition_frequency
+    - field.field.events.group_lesson.field_students
+    - field.field.events.group_lesson.field_type
+  module:
+    - eck
+    - feeds_tamper
+third_party_settings:
+  feeds_tamper:
+    tampers:
+      ce7cce58-f6c4-48eb-a0b7-e9886ab2aaa8:
+        text: '[student]'
+        plugin: rewrite
+        source: sname
+        weight: 0
+        label: Rewrite
+        uuid: ce7cce58-f6c4-48eb-a0b7-e9886ab2aaa8
+      71c259cf-18f7-42b0-8449-f026e1c34101:
+        text: '[service][tcode][date_and_time][scode][duration][student]'
+        plugin: rewrite
+        source: importer
+        weight: 0
+        label: Rewrite
+        uuid: 71c259cf-18f7-42b0-8449-f026e1c34101
+label: 'Group Lesson'
+id: group_lesson
+description: ''
+import_period: -1
+fetcher: upload
+fetcher_configuration:
+  allowed_extensions: 'txt csv tsv xml opml'
+  directory: 'private://feeds'
+parser: csv
+parser_configuration:
+  delimiter: ','
+  no_headers: false
+  line_limit: 100
+processor: 'entity:events'
+processor_configuration:
+  update_existing: 0
+  update_non_existent: _keep
+  expire: -1
+  owner_feed_author: false
+  owner_id: 0
+  authorize: true
+  skip_hash_check: false
+  values:
+    type: group_lesson
+custom_sources:
+  tcode:
+    label: tcode
+    value: tcode
+    machine_name: tcode
+  student:
+    label: student
+    value: student
+    machine_name: student
+  date_and_time:
+    label: 'date and time'
+    value: 'date and time'
+    machine_name: date_and_time
+  duration:
+    label: duration
+    value: duration
+    machine_name: duration
+  sname:
+    label: sname
+    value: sname
+    machine_name: sname
+  service:
+    label: service
+    value: service
+    machine_name: service
+  frequency:
+    label: frequency
+    value: frequency
+    machine_name: frequency
+  importer:
+    label: importer
+    value: importer
+    machine_name: importer
+mappings:
+  -
+    target: field_instructor
+    map:
+      target_id: tcode
+    settings:
+      reference_by: field_legacy_id
+      feeds_item: guid
+      autocreate: 0
+  -
+    target: field_students
+    map:
+      target_id: student
+    settings:
+      reference_by: id
+      autocreate: 0
+  -
+    target: field_date_and_time
+    map:
+      value: date_and_time
+    settings:
+      timezone: UTC
+  -
+    target: field_duration
+    map:
+      value: duration
+  -
+    target: title
+    map:
+      value: sname
+    unique: {  }
+  -
+    target: field_repetition_frequency
+    map:
+      value: frequency
+  -
+    target: field_importer
+    map:
+      value: importer
+    unique: {  }
+  -
+    target: field_type
+    map:
+      target_id: service
+    settings:
+      reference_by: name
+      autocreate: '1'

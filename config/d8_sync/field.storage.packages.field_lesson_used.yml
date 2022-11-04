@@ -1,0 +1,20 @@
+uuid: 8ee6cd60-2f1f-4ad8-bf34-c5f708cc3e7f
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: packages.field_lesson_used
+field_name: field_lesson_used
+entity_type: packages
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

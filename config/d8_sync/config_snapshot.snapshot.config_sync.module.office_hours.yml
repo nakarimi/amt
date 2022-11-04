@@ -1,0 +1,11 @@
+uuid: 0e586c80-1c9c-466c-92b4-24d88554f238
+langcode: en
+status: true
+dependencies:
+  module:
+    - office_hours
+id: config_sync.module.office_hours
+snapshotSet: config_sync
+extensionType: module
+extensionName: office_hours
+items: {  }

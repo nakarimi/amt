@@ -1,0 +1,72 @@
+uuid: f5a08853-60f2-4f3e-a020-75c412a51eea
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.attendees.attendance
+    - field.field.attendees.attendance.field_description
+    - field.field.attendees.attendance.field_enrollment
+    - field.field.attendees.attendance.field_status
+    - field.field.attendees.attendance.field_student_account
+    - field.field.attendees.attendance.field_students
+  module:
+    - link_to_entity
+id: attendees.attendance.default
+targetEntityType: attendees
+bundle: attendance
+mode: default
+content:
+  field_description:
+    weight: 4
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_enrollment:
+    weight: 3
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_status:
+    weight: 5
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_student_account:
+    weight: 1
+    label: above
+    settings:
+      link_page: /student-dashboard
+      query_field: nid
+    third_party_settings: {  }
+    type: link_entity_query_param
+    region: content
+  field_students:
+    weight: 2
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  title:
+    label: hidden
+    type: string
+    weight: 0
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+hidden:
+  changed: true
+  created: true
+  entity_print_view_epub: true
+  entity_print_view_pdf: true
+  entity_print_view_word_docx: true

@@ -1,0 +1,11 @@
+uuid: f5e4fae3-90eb-4696-86d0-5fe26bd2c608
+langcode: en
+status: true
+dependencies:
+  module:
+    - color_field
+id: config_sync.module.color_field
+snapshotSet: config_sync
+extensionType: module
+extensionName: color_field
+items: {  }

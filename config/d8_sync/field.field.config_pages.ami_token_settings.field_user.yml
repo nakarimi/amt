@@ -1,0 +1,29 @@
+uuid: ce8ed1f5-e2df-42a6-a422-059bd7b0acfd
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.ami_token_settings
+    - field.storage.config_pages.field_user
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.ami_token_settings.field_user
+field_name: field_user
+entity_type: config_pages
+bundle: ami_token_settings
+label: 'User Name'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

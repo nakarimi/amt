@@ -1,0 +1,21 @@
+uuid: 7b291ad4-8c81-485d-b03e-349aefd56180
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+id: config_pages.field_sunday
+field_name: field_sunday
+entity_type: config_pages
+type: string
+settings:
+  max_length: 600
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

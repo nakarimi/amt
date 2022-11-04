@@ -1,0 +1,20 @@
+uuid: 66489350-09e0-4924-871c-b347fe7b9793
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: student_accounts.field_lesson_available
+field_name: field_lesson_available
+entity_type: student_accounts
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

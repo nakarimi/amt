@@ -1,0 +1,154 @@
+uuid: 58af4fc8-eb92-4dc4-9a8d-b0697a7a998e
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.field.student_accounts.student_account.field_booked_on
+    - field.field.student_accounts.student_account.field_contacts
+    - field.field.student_accounts.student_account.field_inquired
+    - field.field.student_accounts.student_account.field_inquiry_method
+    - field.field.student_accounts.student_account.field_inquiry_taker
+    - field.field.student_accounts.student_account.field_legacy_id
+    - field.field.student_accounts.student_account.field_notes
+    - field.field.student_accounts.student_account.field_showed
+    - field.field.student_accounts.student_account.field_teacher
+  module:
+    - eck
+    - feeds_tamper
+third_party_settings:
+  feeds_tamper:
+    tampers:
+      cfabc29b-2e14-4842-a8c0-359f12276c83:
+        separator: ','
+        limit: null
+        plugin: explode
+        source: contacts
+        weight: 0
+        uuid: cfabc29b-2e14-4842-a8c0-359f12276c83
+label: 'Student Accounts'
+id: student_account
+description: 'To import studens '
+import_period: -1
+fetcher: upload
+fetcher_configuration:
+  allowed_extensions: 'txt csv tsv xml opml'
+  directory: 'private://feeds'
+parser: csv
+parser_configuration:
+  delimiter: ','
+  no_headers: false
+  line_limit: 100
+processor: 'entity:student_accounts'
+processor_configuration:
+  update_existing: 2
+  update_non_existent: _keep
+  expire: -1
+  owner_feed_author: false
+  owner_id: 0
+  authorize: true
+  skip_hash_check: false
+  values:
+    type: student_account
+custom_sources:
+  inqmethod:
+    label: inqmethod
+    value: inqmethod
+    machine_name: inqmethod
+  inqtaker:
+    label: inqtaker
+    value: inqtaker
+    machine_name: inqtaker
+  inqdate:
+    label: inqdate
+    value: inqdate
+    machine_name: inqdate
+  inqbooked:
+    label: inqbooked
+    value: inqbooked
+    machine_name: inqbooked
+  inqshowed:
+    label: inqshowed
+    value: inqshowed
+    machine_name: inqshowed
+  notes:
+    label: notes
+    value: notes
+    machine_name: notes
+  scode:
+    label: scode
+    value: scode
+    machine_name: scode
+  tcode1:
+    label: tcode1
+    value: tcode1
+    machine_name: tcode1
+  title:
+    label: Title
+    value: Title
+    machine_name: title
+  contacts:
+    label: Contacts
+    value: Contacts
+    machine_name: contacts
+mappings:
+  -
+    target: field_inquiry_method
+    map:
+      value: inqmethod
+  -
+    target: field_inquiry_taker
+    map:
+      target_id: inqtaker
+    settings:
+      reference_by: field_legacy_id
+      feeds_item: guid
+      autocreate: 0
+  -
+    target: field_inquired
+    map:
+      value: inqdate
+    settings:
+      timezone: UTC
+  -
+    target: field_booked_on
+    map:
+      value: inqbooked
+    settings:
+      timezone: UTC
+  -
+    target: field_showed
+    map:
+      value: inqshowed
+    settings:
+      timezone: UTC
+  -
+    target: field_notes
+    map:
+      value: notes
+  -
+    target: field_legacy_id
+    map:
+      value: scode
+    unique:
+      value: '1'
+  -
+    target: field_teacher
+    map:
+      target_id: tcode1
+    settings:
+      reference_by: field_legacy_id
+      feeds_item: guid
+      autocreate: 0
+  -
+    target: title
+    map:
+      value: title
+    unique: {  }
+  -
+    target: field_contacts
+    map:
+      target_id: contacts
+    settings:
+      reference_by: id
+      autocreate: 0

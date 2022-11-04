@@ -1,0 +1,7 @@
+status: 1
+pattern: '[events:field_type:entity:name]'
+php: false
+escape: false
+dependencies:
+  config:
+    - eck.eck_type.events.schedules

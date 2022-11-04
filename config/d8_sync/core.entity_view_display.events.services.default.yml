@@ -1,0 +1,158 @@
+uuid: 4312cbce-0645-40bb-8419-a1454f955941
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.services
+    - field.field.events.services.feeds_item
+    - field.field.events.services.field_date_and_time
+    - field.field.events.services.field_duration
+    - field.field.events.services.field_executive
+    - field.field.events.services.field_expiration_date
+    - field.field.events.services.field_importer
+    - field.field.events.services.field_instructor
+    - field.field.events.services.field_notes
+    - field.field.events.services.field_parent
+    - field.field.events.services.field_repetition_frequency
+    - field.field.events.services.field_repetition_units
+    - field.field.events.services.field_status
+    - field.field.events.services.field_student
+    - field.field.events.services.field_type
+  module:
+    - datetime
+    - field_group
+    - options
+third_party_settings:
+  field_group:
+    group_standing_appointment:
+      children:
+        - field_expiration_date
+        - field_repetition_frequency
+        - field_repetition_units
+      parent_name: ''
+      weight: 9
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        description: ''
+        formatter: open
+      label: 'Standing Appointment'
+      region: content
+id: events.services.default
+targetEntityType: events
+bundle: services
+mode: default
+content:
+  entity_print_view_pdf:
+    weight: 9
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_date_and_time:
+    weight: 4
+    label: above
+    settings:
+      timezone_override: ''
+      date_format: 'm-d-Y h:i A'
+    third_party_settings: {  }
+    type: datetime_custom
+    region: content
+  field_duration:
+    weight: 5
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_executive:
+    weight: 3
+    label: above
+    settings:
+      view_mode: full_name
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_expiration_date:
+    weight: 1
+    label: above
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_instructor:
+    weight: 1
+    label: inline
+    settings:
+      view_mode: full_name
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_notes:
+    weight: 8
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_repetition_frequency:
+    weight: 2
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+  field_repetition_units:
+    weight: 3
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_status:
+    weight: 6
+    label: above
+    settings:
+      link: true
+      view_mode: default
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_student:
+    type: entity_reference_label
+    weight: 7
+    region: content
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+  field_type:
+    type: entity_reference_label
+    weight: 2
+    region: content
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+  title:
+    label: hidden
+    type: string
+    weight: 0
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+hidden:
+  changed: true
+  created: true
+  entity_print_view_epub: true
+  entity_print_view_word_docx: true
+  feeds_item: true
+  field_importer: true
+  field_parent: true

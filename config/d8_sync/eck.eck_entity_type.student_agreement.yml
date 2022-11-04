@@ -1,0 +1,10 @@
+uuid: ac697c0c-2a05-47bd-9dc3-44f81d29fa21
+langcode: en
+status: true
+dependencies: {  }
+id: student_agreement
+label: 'Student Agreement'
+created: false
+changed: false
+uid: false
+title: false

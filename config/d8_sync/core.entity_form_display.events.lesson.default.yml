@@ -1,0 +1,133 @@
+uuid: 82327dd7-241f-45aa-a28a-0f57580708db
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.lesson
+    - field.field.events.lesson.feeds_item
+    - field.field.events.lesson.field_date_and_time
+    - field.field.events.lesson.field_duration
+    - field.field.events.lesson.field_expiration_date
+    - field.field.events.lesson.field_importer
+    - field.field.events.lesson.field_instructor
+    - field.field.events.lesson.field_parent
+    - field.field.events.lesson.field_repetition_frequency
+    - field.field.events.lesson.field_repetition_units
+    - field.field.events.lesson.field_reschedule_date
+    - field.field.events.lesson.field_student
+    - field.field.events.lesson.field_type
+  module:
+    - amt_appointment
+    - datetime
+    - field_group
+    - inline_entity_form
+third_party_settings:
+  field_group:
+    group_standing_appointment:
+      children:
+        - field_expiration_date
+        - field_repetition_units
+        - field_repetition_frequency
+      parent_name: ''
+      weight: 5
+      format_type: tab
+      format_settings:
+        description: ''
+        formatter: closed
+        required_fields: true
+        id: ''
+        classes: ''
+      label: 'Standing Appointment'
+      region: content
+    group_personal_information:
+      children:
+        - field_student
+      parent_name: ''
+      weight: 6
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: open
+        description: ''
+        required_fields: true
+      label: 'Personal Information'
+      region: content
+id: events.lesson.default
+targetEntityType: events
+bundle: lesson
+mode: default
+content:
+  field_date_and_time:
+    weight: 4
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_duration:
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_expiration_date:
+    type: datetime_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_instructor:
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select_empty
+    region: content
+  field_repetition_frequency:
+    type: number
+    weight: 2
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_repetition_units:
+    type: options_select
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_student:
+    weight: 7
+    settings:
+      form_mode: default
+      label_singular: ''
+      label_plural: ''
+      allow_new: true
+      match_operator: CONTAINS
+      override_labels: false
+      collapsible: false
+      collapsed: false
+      allow_existing: false
+      allow_duplicate: false
+    third_party_settings: {  }
+    type: inline_entity_form_complex
+    region: content
+  field_type:
+    weight: 1
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  feeds_item: true
+  field_importer: true
+  field_parent: true
+  field_reschedule_date: true

@@ -1,0 +1,9 @@
+uuid: 4b6b8b97-80fd-4876-84c8-81c9cfd10e47
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_entity_type.contacts
+name: 'Student Record'
+type: student_record
+description: ''

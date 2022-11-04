@@ -1,0 +1,6 @@
+name: AMT Event Copy & Paste
+description: Copy and Paste an event in Dayview FullCalendar
+package: Custom
+type: module
+version: 1.0
+core: 8.x

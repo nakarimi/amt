@@ -1,0 +1,38 @@
+uuid: d73c8a6a-95ef-496e-ad6a-bcf2b33e8e88
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.attendees.attendance
+    - eck.eck_type.contacts.student_record
+    - field.storage.attendees.field_students
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: attendees.attendance.field_students
+field_name: field_students
+entity_type: attendees
+bundle: attendance
+label: Students
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:contacts'
+  handler_settings:
+    target_bundles:
+      student_record: student_record
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

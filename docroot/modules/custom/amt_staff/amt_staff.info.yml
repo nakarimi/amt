@@ -1,0 +1,10 @@
+name: AMT Staff Profarmance Report
+description: Generate the Staff Profarmance Report.
+package: Custom
+type: module
+version: 1.0
+core: 8.x
+
+dependencies:
+- amt_general
+- amt_dayview

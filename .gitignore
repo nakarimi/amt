@@ -1,0 +1,23 @@
+.DS_Store
+.phpintel
+.phpintel/*
+*.zip
+*.gz
+*.sql
+*.bz2
+*awstats*
+.idea
+.idea/*
+stats
+stats/*
+docroot/vendor/bin/drush_x.bat
+docroot/vendor/bin/drush.php.bat
+docroot/vendor/bin/drush.phar
+docroot/vendor/bin/drush.bat
+
+# Generated
+#
+docroot/sites/default/files/css/optimized/*
+docroot/sites/default/files/js/optimized/*
+docroot/modules/custom/amt_autocomplete/sftp-config.json
+docroot/sftp-config.json

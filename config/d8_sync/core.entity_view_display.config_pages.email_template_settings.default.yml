@@ -1,0 +1,46 @@
+uuid: c65f7024-00ee-4e40-b1fc-07d173aae435
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.email_template_settings
+    - field.field.config_pages.email_template_settings.field_reminder_email_body
+    - field.field.config_pages.email_template_settings.field_reminder_email_subject
+    - field.field.config_pages.email_template_settings.field_thank_you_email_body
+    - field.field.config_pages.email_template_settings.field_thank_you_email_subject
+id: config_pages.email_template_settings.default
+targetEntityType: config_pages
+bundle: email_template_settings
+mode: default
+content:
+  field_reminder_email_body:
+    weight: 3
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_reminder_email_subject:
+    weight: 2
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_thank_you_email_body:
+    weight: 1
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_thank_you_email_subject:
+    weight: 0
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden: {  }

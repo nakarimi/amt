@@ -1,0 +1,16 @@
+uuid: 28d61a12-14c1-4ae3-8b2b-e44965839e7b
+langcode: en
+status: true
+dependencies:
+  theme:
+    - amt
+id: config_sync.theme.amt
+snapshotSet: config_sync
+extensionType: theme
+extensionName: amt
+items:
+  -
+    collection: ''
+    name: amt.settings
+    data:
+      schemas: {  }

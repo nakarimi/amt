@@ -1,0 +1,73 @@
+uuid: b03518f5-1fa3-4338-b895-9737e6a0741c
+langcode: en
+status: true
+dependencies:
+  module:
+    - backup_migrate
+id: config_sync.module.backup_migrate
+snapshotSet: config_sync
+extensionType: module
+extensionName: backup_migrate
+items:
+  -
+    collection: ''
+    name: backup_migrate.backup_migrate_destination.private_files
+    data:
+      langcode: en
+      status: true
+      dependencies: {  }
+      id: private_files
+      label: 'Private Files Directory'
+      type: Directory
+      config:
+        directory: 'private://backup_migrate/'
+  -
+    collection: ''
+    name: backup_migrate.backup_migrate_schedule.daily
+    data:
+      id: daily_schedule
+      label: 'Daily Schedule'
+  -
+    collection: ''
+    name: backup_migrate.backup_migrate_source.default_db
+    data:
+      langcode: en
+      status: true
+      dependencies: {  }
+      id: default_db
+      label: 'Default Drupal Database'
+      type: DefaultDB
+  -
+    collection: ''
+    name: backup_migrate.backup_migrate_source.entire_site
+    data:
+      langcode: en
+      status: true
+      dependencies: {  }
+      id: entire_site
+      label: 'Entire Site'
+      type: EntireSite
+  -
+    collection: ''
+    name: backup_migrate.backup_migrate_source.private_files
+    data:
+      langcode: en
+      status: true
+      dependencies: {  }
+      id: private_files
+      label: 'Private Files Directory'
+      type: DrupalFiles
+      config:
+        directory: 'private://'
+  -
+    collection: ''
+    name: backup_migrate.backup_migrate_source.public_files
+    data:
+      langcode: en
+      status: true
+      dependencies: {  }
+      id: public_files
+      label: 'Public Files Directory'
+      type: DrupalFiles
+      config:
+        directory: 'public://'

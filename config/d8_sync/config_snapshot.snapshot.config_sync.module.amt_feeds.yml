@@ -1,0 +1,11 @@
+uuid: 7a57503e-3f0b-442a-a3df-3ca46058a5b9
+langcode: en
+status: true
+dependencies:
+  module:
+    - amt_feeds
+id: config_sync.module.amt_feeds
+snapshotSet: config_sync
+extensionType: module
+extensionName: amt_feeds
+items: {  }

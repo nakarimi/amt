@@ -1,0 +1,33 @@
+uuid: efa7acb2-142c-4dbd-a59b-b37f6773f2a1
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.package
+    - field.storage.packages.field_retired
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: packages.package.field_retired
+field_name: field_retired
+entity_type: packages
+bundle: package
+label: Retired
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

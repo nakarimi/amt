@@ -1,0 +1,27 @@
+uuid: 944bc570-d935-48f9-b9a7-6b6fa9e0728c
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - amt
+_core:
+  default_config_hash: 1TQP4b3ZnlzvIH9bj6cpCz_SyUHdJjLQkZnHpikjjhw
+id: amt_page_title
+theme: amt
+region: header
+weight: 0
+provider: null
+plugin: page_title_block
+settings:
+  id: page_title_block
+  label: 'Page title'
+  provider: core
+  label_display: '0'
+visibility:
+  request_path:
+    id: request_path
+    pages: '/user/*'
+    negate: true
+    context_mapping: {  }

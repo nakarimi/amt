@@ -1,0 +1,28 @@
+/* override styles when printing */
+@media print
+    #studentsFilters,
+    .tableCellHideOnPrint,
+    .region-sidebar-second,
+    th:after,
+    #studentsListTable_length,
+    #printTableButton,
+    #filtersTitle,
+    .dataTables_paginate,
+    .region-footer,
+    .pagination
+        display: none !important
+
+    .page-header
+        text-align: center
+
+    @page
+        size: A4
+        margin: 0mm
+
+    /* Hides the ajax loading spinner while printing */
+    #spinner-amt
+        display: none !important
+
+td,
+th
+    width: fit-content !important

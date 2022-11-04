@@ -1,0 +1,20 @@
+uuid: bbc02d15-34df-4396-be77-f1285c0703f5
+langcode: en
+status: true
+dependencies:
+  module:
+    - datetime
+    - eck
+id: packages.field_sale_date
+field_name: field_sale_date
+entity_type: packages
+type: datetime
+settings:
+  datetime_type: date
+module: datetime
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

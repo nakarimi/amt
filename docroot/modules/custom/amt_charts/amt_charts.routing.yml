@@ -1,0 +1,14 @@
+amt_dashboard.charts:
+  path: '/amt_dashboard/charts' 
+  defaults: 
+    _controller: '\Drupal\amt_charts\Controller\AmtChartsController::ajaxLoadChartData' 
+    _title: 'Load charts data for dashboard page over ajax.'
+  requirements: 
+    _permission: 'Main Dashboard'
+amt_dashboard.page:
+  path: '/dashboard' 
+  defaults: 
+    _controller: '\Drupal\amt_charts\Controller\AmtChartsController::loadDashboardPage' 
+    _title: 'Dashboard'
+  requirements: 
+    _permission: 'Main Dashboard'

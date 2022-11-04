@@ -1,0 +1,106 @@
+amt_dayview.page:
+  path: '/day-view'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::basePageCallback'
+    _title: 'Day View'
+  requirements:
+    _permission: 'Day View Page'
+amt_dayview.unsetSessions:
+  path: '/day-view-unset-session'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::unsetSessions'
+    _title: 'Day View'
+  requirements:
+    _permission: 'Day View Page'
+amt_dayview_full.page:
+  path: '/day-view-full'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::basePageCallback'
+    _title: 'Day View'
+  requirements:
+    _permission: 'Day View Page'
+amt_week_view.page:
+  path: '/week-view'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::weekViewCallback'
+    _title: 'Week View'
+  requirements:
+    _permission: 'Week View Page'
+amt_week_view_full.page:
+  path: '/week-view-full'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::weekViewCallback'
+    _title: 'Week View'
+  requirements:
+    _permission: 'Week View Page'
+amt_dayview.content:
+  path: '/amt_dayview/load'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::callbackAjaxLoadDayView'
+    _title: 'Load day view data on load page.'
+  requirements:
+    _permission: 'Day View Page'
+amt_dayview.content_delete:
+  path: '/amt_dayview/delete/event'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::callbackAjaxDeleteEvent'
+    _title: 'callbackAjaxDeleteEvent'
+  requirements:
+    _permission: 'Day View Page'
+amt_dayview.resources:
+  path: '/amt_dayview/resources'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::callbackAjaxLoadResources'
+    _title: 'Load day view data on load page.'
+  requirements:
+    _permission: 'Day View Page'
+amt_dayview.popup:
+  path: '/amt_dayview/popup'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::callbackAjaxPopup'
+    _title: 'Load popup model for onclick of insturctor lesson.'
+  requirements:
+    _permission: 'Day View Page'
+amt_dayview.configuration:
+  path: '/amt_dayview/main-configuration'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::callbackAjaxConfiguration'
+    _title: 'Load configuration model for onclick of insturctor lesson.'
+  requirements:
+    _permission: 'Day View Page'
+amt_dayview.configurationstartsession:
+  path: '/amt_dayview/configurations-session'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::callbackAjaxConfigurationSessionStart'
+    _title: 'Load configuration model for start session time.'
+  requirements:
+    _permission: 'Day View Page'
+amt_dayview.autocomplete:
+  path: '/amt_dayview/autocomplete'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::callbackAjaxAutocomplete'
+    _title: 'Load autocomplete model for onclick of insturctor lesson.'
+  requirements:
+    _permission: 'Day View Page'
+
+amt_dayview.updateStatus:
+  path: '/amt_dayview/updateStatus'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::updateStatus'
+    _title: 'Update Status of attendees using Dayview popup form.'
+  requirements:
+    _permission: 'Day View Page'
+amt_dayview.updateMultipleStatus:
+  path: '/amt_dayview/update-multiple-status'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::updateMultipleStatus'
+    _title: 'Update Status of attendees using Dayview popup form.'
+  requirements:
+    _permission: 'Day View Page'
+amt_dayview.cancelFutureStandingAppts:
+  path: '/amt_dayview/cancelFutureStandingAppts'
+  defaults:
+    _controller: '\Drupal\amt_dayview\Controller\AmtDayViewController::cancelFutureStandingAppts'
+    _title: 'Cancel future appointments.'
+  requirements:
+    _permission: 'Day View Page'

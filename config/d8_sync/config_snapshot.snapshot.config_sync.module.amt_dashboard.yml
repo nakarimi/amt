@@ -1,0 +1,11 @@
+uuid: 2744517d-7261-4c39-9c89-f92a31c1a404
+langcode: en
+status: true
+dependencies:
+  module:
+    - amt_dashboard
+id: config_sync.module.amt_dashboard
+snapshotSet: config_sync
+extensionType: module
+extensionName: amt_dashboard
+items: {  }

@@ -1,0 +1,11 @@
+uuid: c5698dca-2c3f-4b58-b479-ec72ad7dd774
+langcode: en
+status: true
+dependencies:
+  module:
+    - field_group
+id: config_sync.module.field_group
+snapshotSet: config_sync
+extensionType: module
+extensionName: field_group
+items: {  }

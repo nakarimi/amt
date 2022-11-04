@@ -1,0 +1,11 @@
+uuid: 24259805-51a3-49cb-88f2-7597091c0508
+langcode: en
+status: true
+dependencies:
+  module:
+    - migrate_plus
+id: config_sync.module.migrate_plus
+snapshotSet: config_sync
+extensionType: module
+extensionName: migrate_plus
+items: {  }

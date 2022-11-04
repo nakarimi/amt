@@ -1,0 +1,20 @@
+uuid: 367a8fee-a2c5-4cb3-86b8-2cc8512f88f8
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - taxonomy
+id: packages.field_lesson_type
+field_name: field_lesson_type
+entity_type: packages
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

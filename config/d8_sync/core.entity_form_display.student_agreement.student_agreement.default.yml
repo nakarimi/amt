@@ -1,0 +1,52 @@
+uuid: 6e92882e-99e3-4997-8d8f-af216bf711d7
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_agreement.student_agreement
+    - field.field.student_agreement.student_agreement.field_agreement_date
+    - field.field.student_agreement.student_agreement.field_enrollment
+    - field.field.student_agreement.student_agreement.field_student
+    - field.field.student_agreement.student_agreement.field_student_signature
+    - image.style.thumbnail
+  module:
+    - datetime
+    - image
+id: student_agreement.student_agreement.default
+targetEntityType: student_agreement
+bundle: student_agreement
+mode: default
+content:
+  field_agreement_date:
+    weight: 6
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_enrollment:
+    weight: 4
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_student:
+    weight: 3
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_student_signature:
+    weight: 5
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+    type: image_image
+    region: content
+hidden: {  }

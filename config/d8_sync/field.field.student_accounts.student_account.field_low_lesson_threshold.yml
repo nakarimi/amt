@@ -1,0 +1,23 @@
+uuid: 1b27db25-9cb1-46f2-80cc-c456d1789e99
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.field_low_lesson_threshold
+id: student_accounts.student_account.field_low_lesson_threshold
+field_name: field_low_lesson_threshold
+entity_type: student_accounts
+bundle: student_account
+label: 'Low Lesson Threshold'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

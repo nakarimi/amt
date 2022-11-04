@@ -1,0 +1,41 @@
+uuid: cc850421-4223-462f-b0a5-648c6e289719
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.schedule_type.field_color
+    - taxonomy.vocabulary.schedule_type
+  module:
+    - color_field
+    - text
+id: taxonomy_term.schedule_type.default
+targetEntityType: taxonomy_term
+bundle: schedule_type
+mode: default
+content:
+  description:
+    type: text_textarea
+    weight: 2
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_color:
+    weight: 1
+    settings:
+      placeholder_color: ''
+      placeholder_opacity: ''
+    third_party_settings: {  }
+    type: color_field_widget_default
+    region: content
+  name:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  path: true

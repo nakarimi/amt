@@ -1,0 +1,20 @@
+uuid: 7aa1166e-976d-45fc-a9a4-4d64b90438f6
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: events.field_repetition_frequency
+field_name: field_repetition_frequency
+entity_type: events
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,8 @@
+uuid: 2c3e1d3d-5d82-4cdb-a66b-20076ab9c53f
+langcode: en
+status: true
+dependencies: {  }
+name: 'Lesson Status'
+vid: lesson_status
+description: ''
+weight: 0

@@ -1,0 +1,90 @@
+uuid: 55e0210e-54f3-4cdf-a5cf-2fb452739895
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.main
+  module:
+    - superfish
+    - system
+    - user
+  theme:
+    - amt
+id: mainnavigation
+theme: amt
+region: navigation_collapsible
+weight: -5
+provider: null
+plugin: 'superfish:main'
+settings:
+  id: 'superfish:main'
+  label: 'Main navigation'
+  provider: superfish
+  label_display: '0'
+  level: '1'
+  depth: '0'
+  expand_all_items: false
+  menu_type: horizontal
+  style: white
+  arrow: 1
+  shadow: 1
+  speed: fast
+  delay: '800'
+  slide: horizontal
+  supposition: 1
+  hoverintent: 1
+  touch: '0'
+  touchbh: '2'
+  touchbp: '1024'
+  touchua: '0'
+  touchual: ''
+  touchuam: '0'
+  small: '0'
+  smallbp: '768'
+  smallua: '0'
+  smallual: ''
+  smalluam: '0'
+  smallact: '1'
+  smallset: ''
+  smallasa: 0
+  smallcmc: 0
+  smallecm: ''
+  smallchc: 0
+  smallech: ''
+  smallicm: ''
+  smallich: ''
+  smallamt: ''
+  smallabt: '1'
+  supersubs: 0
+  minwidth: '22'
+  maxwidth: '37'
+  multicolumn: 0
+  multicolumn_depth: '1'
+  multicolumn_levels: '1'
+  pathlevels: '1'
+  expanded: 0
+  clone_parent: 1
+  hide_linkdescription: 1
+  add_linkdescription: 0
+  link_depth_class: 1
+  custom_list_class: ''
+  custom_item_class: ''
+  custom_link_class: ''
+visibility:
+  user_role:
+    id: user_role
+    roles:
+      administrator: administrator
+      studio_director: studio_director
+      studio_manager: studio_manager
+      instructor: instructor
+      developer: developer
+      executive: executive
+    negate: false
+    context_mapping:
+      user: '@user.current_user_context:current_user'
+  request_path:
+    id: request_path
+    pages: "/day-view-full\r\n/week-view-full"
+    negate: true
+    context_mapping: {  }

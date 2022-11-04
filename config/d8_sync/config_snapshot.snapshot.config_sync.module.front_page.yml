@@ -1,0 +1,11 @@
+uuid: 6c830b94-2927-4647-9ac5-062b8f31f1d2
+langcode: en
+status: true
+dependencies:
+  module:
+    - front_page
+id: config_sync.module.front_page
+snapshotSet: config_sync
+extensionType: module
+extensionName: front_page
+items: {  }

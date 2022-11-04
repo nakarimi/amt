@@ -1,0 +1,19 @@
+Chat Success Rate Page:
+  title: 'Chat Success Rate Page'
+  description: 'A custom permission for chat success rate page.'
+
+Students List:
+  title: 'Students List'
+  description: 'A custom permission for students List page.'
+
+Projections Report:
+  title: 'Projections Report'
+  description: 'A custom permission for projections report page.'
+
+Auto Complete:
+  title: 'Auto Complete'
+  description: 'A custom permission for Auto Complete filter page.'
+
+Instructor Time Conflict:
+  title: 'Instructor Time Conflict'
+  description: 'A custom permission for Instructor Time Conflict page.'

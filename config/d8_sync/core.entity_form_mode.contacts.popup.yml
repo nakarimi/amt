@@ -1,0 +1,10 @@
+uuid: 4c32071e-297a-40b1-add6-7e0a90debc67
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: contacts.popup
+label: popup
+targetEntityType: contacts
+cache: true

@@ -1,0 +1,28 @@
+uuid: 9aa5629d-2bef-457a-bdbc-f002fd747688
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.attendees.attendance
+    - eck.eck_type.events.services
+    - field.storage.events.field_student
+id: events.services.field_student
+field_name: field_student
+entity_type: events
+bundle: services
+label: Student
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:attendees'
+  handler_settings:
+    target_bundles:
+      attendance: attendance
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

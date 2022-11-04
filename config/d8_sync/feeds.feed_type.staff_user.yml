@@ -1,0 +1,158 @@
+uuid: 51dd0d08-2687-43c3-8023-833dd244eba7
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.user.user.field_ami_id
+    - field.field.user.user.field_first_name
+    - field.field.user.user.field_last_name
+    - field.field.user.user.field_legacy_id
+  module:
+    - user
+label: Staff
+id: staff_user
+description: 'for importing User'
+import_period: -1
+fetcher: upload
+fetcher_configuration:
+  allowed_extensions: 'txt csv tsv xml opml'
+  directory: 'private://feeds'
+parser: csv
+parser_configuration:
+  delimiter: ','
+  no_headers: false
+  line_limit: 100
+processor: 'entity:user'
+processor_configuration:
+  update_existing: 0
+  update_non_existent: _keep
+  expire: -1
+  skip_hash_check: false
+  owner_id: 0
+  values: {  }
+  authorize: false
+  owner_feed_author: false
+custom_sources:
+  ami_id:
+    label: ami_id
+    value: ami_id
+    machine_name: ami_id
+  feed_ami_id:
+    label: 'AMI ID'
+    value: 'AMI ID'
+    machine_name: feed_ami_id
+  user_name:
+    label: 'User Name'
+    value: 'User Name'
+    machine_name: user_name
+  first_name:
+    label: 'First Name'
+    value: 'First Name'
+    machine_name: first_name
+  last_name:
+    label: 'Last Name'
+    value: 'Last Name'
+    machine_name: last_name
+  email:
+    label: Email
+    value: Email
+    machine_name: email
+  legacy_id:
+    label: 'Legacy ID'
+    value: 'Legacy ID'
+    machine_name: legacy_id
+  executive:
+    label: Executive
+    value: Executive
+    machine_name: executive
+  user_status:
+    label: 'User Status'
+    value: 'User Status'
+    machine_name: user_status
+  teacher_category:
+    label: 'Teacher Category'
+    value: 'Teacher Category'
+    machine_name: teacher_category
+  username:
+    label: Username
+    value: Username
+    machine_name: username
+  user_role:
+    label: 'User Role'
+    value: 'User Role'
+    machine_name: user_role
+  first_name_:
+    label: first_name
+    value: first_name
+    machine_name: first_name_
+  last_name_:
+    label: last_name
+    value: last_name
+    machine_name: last_name_
+  email_:
+    label: email
+    value: email
+    machine_name: email_
+  tcode:
+    label: tcode
+    value: tcode
+    machine_name: tcode
+  code:
+    label: code
+    value: code
+    machine_name: code
+  scategory:
+    label: scategory
+    value: scategory
+    machine_name: scategory
+  '':
+    label: executive
+    value: executive
+    machine_name: ''
+  executive_on:
+    label: executive
+    value: executive
+    machine_name: executive_on
+  ami_id_col:
+    label: ami_id_col
+    value: ami_id_col
+    machine_name: ami_id_col
+mappings:
+  -
+    target: field_first_name
+    map:
+      value: first_name_
+    unique: {  }
+  -
+    target: field_last_name
+    map:
+      value: last_name_
+    unique: {  }
+  -
+    target: mail
+    map:
+      value: email_
+    unique: {  }
+    settings:
+      defuse: false
+  -
+    target: field_legacy_id
+    map:
+      value: code
+    unique: {  }
+  -
+    target: name
+    map:
+      value: code
+    unique: {  }
+  -
+    target: roles
+    map:
+      target_id: scategory
+    settings:
+      reference_by: id
+  -
+    target: field_ami_id
+    map:
+      value: ami_id_col
+    unique: {  }

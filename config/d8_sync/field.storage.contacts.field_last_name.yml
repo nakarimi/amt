@@ -1,0 +1,21 @@
+uuid: b4de6ede-13e0-4617-b6ae-74d551f3c1f0
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: contacts.field_last_name
+field_name: field_last_name
+entity_type: contacts
+type: string
+settings:
+  max_length: 255
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

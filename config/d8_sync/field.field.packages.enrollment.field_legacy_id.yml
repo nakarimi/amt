@@ -1,0 +1,19 @@
+uuid: ad635285-c1fe-49dc-a604-847499b408bd
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.field_legacy_id
+id: packages.enrollment.field_legacy_id
+field_name: field_legacy_id
+entity_type: packages
+bundle: enrollment
+label: 'Legacy ID'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

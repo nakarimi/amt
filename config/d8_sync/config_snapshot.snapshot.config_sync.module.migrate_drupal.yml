@@ -1,0 +1,20 @@
+uuid: 95979d94-3d3d-4d2f-8951-6e24e1e2db17
+langcode: en
+status: true
+dependencies:
+  module:
+    - migrate_drupal
+id: config_sync.module.migrate_drupal
+snapshotSet: config_sync
+extensionType: module
+extensionName: migrate_drupal
+items:
+  -
+    collection: ''
+    name: migrate_drupal.settings
+    data:
+      enforce_source_module_tags:
+        - 'Drupal 6'
+        - 'Drupal 7'
+      follow_up_migration_tags:
+        - 'Follow-up migration'

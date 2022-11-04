@@ -1,0 +1,36 @@
+uuid: afe235bf-a435-48b7-a9ab-3579cacd0e75
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.user.compact
+    - field.field.user.user.feeds_item
+    - field.field.user.user.field_ami_id
+    - field.field.user.user.field_availability
+    - field.field.user.user.field_first_name
+    - field.field.user.user.field_last_name
+    - field.field.user.user.field_legacy_id
+    - field.field.user.user.field_lesson_types
+    - field.field.user.user.field_teacher_category
+    - field.field.user.user.user_picture
+  module:
+    - user
+_core:
+  default_config_hash: '-cLsS3M3JycipXQt9rEb81_HxKneReoGuRh8ijcOPXs'
+id: user.user.compact
+targetEntityType: user
+bundle: user
+mode: compact
+content: {  }
+hidden:
+  feeds_item: true
+  field_ami_id: true
+  field_availability: true
+  field_first_name: true
+  field_last_name: true
+  field_legacy_id: true
+  field_lesson_types: true
+  field_teacher_category: true
+  member_for: true
+  profile_studio_director: true
+  user_picture: true

@@ -1,0 +1,85 @@
+uuid: e069ca3a-b418-4490-9800-544caaf04775
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.email_template_settings
+    - field.field.config_pages.email_template_settings.field_reminder_email_body
+    - field.field.config_pages.email_template_settings.field_reminder_email_subject
+    - field.field.config_pages.email_template_settings.field_thank_you_email_body
+    - field.field.config_pages.email_template_settings.field_thank_you_email_subject
+  module:
+    - field_group
+third_party_settings:
+  field_group:
+    group_thank_you_email:
+      children:
+        - field_thank_you_email_subject
+        - field_thank_you_email_body
+      parent_name: ''
+      weight: 0
+      format_type: fieldset
+      format_settings:
+        id: ''
+        classes: ''
+        effect: none
+        description: ''
+        required_fields: true
+        formatter: closed
+        direction: vertical
+      label: 'Thank You Email'
+      region: content
+    group_reminder_email:
+      children:
+        - field_reminder_email_subject
+        - field_reminder_email_body
+      parent_name: ''
+      weight: 1
+      format_type: fieldset
+      format_settings:
+        id: ''
+        classes: ''
+        direction: vertical
+        description: ''
+        required_fields: true
+      label: 'Reminder Email'
+      region: content
+id: config_pages.email_template_settings.default
+targetEntityType: config_pages
+bundle: email_template_settings
+mode: default
+content:
+  field_reminder_email_body:
+    weight: 3
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textarea
+    region: content
+  field_reminder_email_subject:
+    weight: 2
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_thank_you_email_body:
+    weight: 2
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textarea
+    region: content
+  field_thank_you_email_subject:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  label: true

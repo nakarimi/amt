@@ -1,0 +1,174 @@
+uuid: 108b82c4-3dc3-42c1-abd0-e28928be3065
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.group_lesson
+    - field.field.events.group_lesson.feeds_item
+    - field.field.events.group_lesson.field_base_lesson
+    - field.field.events.group_lesson.field_date_and_time
+    - field.field.events.group_lesson.field_duration
+    - field.field.events.group_lesson.field_expiration_date
+    - field.field.events.group_lesson.field_importer
+    - field.field.events.group_lesson.field_instructor
+    - field.field.events.group_lesson.field_notes
+    - field.field.events.group_lesson.field_parent
+    - field.field.events.group_lesson.field_repetition_frequency
+    - field.field.events.group_lesson.field_repetition_units
+    - field.field.events.group_lesson.field_reschedule_date
+    - field.field.events.group_lesson.field_students
+    - field.field.events.group_lesson.field_type
+  module:
+    - datetime
+    - field_group
+    - options
+third_party_settings:
+  field_group:
+    group_stand:
+      children:
+        - field_expiration_date
+        - field_repetition_frequency
+        - field_repetition_units
+        - field_base_lesson
+        - created
+        - field_importer
+      parent_name: ''
+      weight: 10
+      format_type: details
+      format_settings:
+        open: true
+        id: ''
+        classes: ''
+        required_fields: false
+      label: 'Standing Lesson'
+      region: hidden
+    group_per:
+      children:
+        - field_students
+      parent_name: ''
+      weight: 11
+      format_type: details
+      format_settings:
+        open: true
+        id: ''
+        classes: ''
+        required_fields: false
+      label: 'Personal Information'
+      region: hidden
+id: events.group_lesson.default
+targetEntityType: events
+bundle: group_lesson
+mode: default
+content:
+  entity_print_view_pdf:
+    weight: 15
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_base_lesson:
+    weight: 15
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_date_and_time:
+    weight: 3
+    label: above
+    settings:
+      timezone_override: ''
+      date_format: 'm-d-Y h:i A'
+    third_party_settings: {  }
+    type: datetime_custom
+    region: content
+  field_duration:
+    weight: 5
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_expiration_date:
+    weight: 12
+    label: above
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_instructor:
+    weight: 2
+    label: above
+    settings:
+      view_mode: full_name
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_notes:
+    weight: 6
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_repetition_frequency:
+    weight: 13
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+  field_repetition_units:
+    weight: 14
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_reschedule_date:
+    weight: 4
+    label: above
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_students:
+    weight: 4
+    label: above
+    settings:
+      link: true
+      view_mode: default
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_type:
+    weight: 0
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  title:
+    label: hidden
+    type: string
+    weight: 1
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+hidden:
+  changed: true
+  created: true
+  entity_print_view_epub: true
+  entity_print_view_word_docx: true
+  feeds_item: true
+  field_importer: true
+  field_parent: true

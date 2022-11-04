@@ -1,0 +1,54 @@
+{{ attach_library('amt_reports/amt_filters') }}
+<div class="success-rate">
+  {# Lessons List Heading #}
+  <br>
+  <div class="success-rate-filters">
+    <div class="row">
+      <h1 id="filtersTitle" data-toggle="collapse" href="#collapseFilter" role="button" aria-expanded="false" aria-controls="collapseFilter"> <span class="collapseBtn"> <img src="core/misc/icons/bebebe/hamburger.svg"> </span> Filters </h1>
+      <div class="collapse" id="collapseFilter">
+        <form method="get">
+          <div class="form-group col-md-3 col-sm-6">
+            <label style="display: inline-block;text-align: right;">Service Type:</label>
+            <input type="text" id="service_type" name="service_type" data-id="" class="form-control" placeholder="Service Type" value="{{ service_type }}">
+          </div>
+          <div class="form-group col-md-3 col-sm-6">
+            <label style="display: inline-block;text-align: right;">Date: </label>
+            <input type="date" id="start_date" name="start_date" data-id="" class="form-control" placeholder="Start Date" value="{{ start_date }}">
+          </div>
+          <div class="form-group col-md-3 col-sm-6">
+            <label style="display: inline-block;text-align: right;">Through: </label>
+            <input type="date" id="end_date" name="end_date" data-id=""  class="form-control numberFields" placeholder="End Date" value="{{ end_date }}">
+          </div>
+            <div class="form-group col-md-3 col-sm-6">
+              <label style="display: inline-block;text-align: right;">Role: </label>
+              <select class="form-control" name="role">
+                <option value="" selected >- Any -</option>
+                <option value="instructor" {% if userRole == 'instructor' %} selected="selected" {% endif %}>Instructor</option>
+                <option value="executive" {% if userRole == 'executive' %} selected="selected" {% endif %}>Executive</option>
+              </select>
+            </div>
+          <div class="form-group col-md-3 col-sm-3">
+            <label style="display: inline-block;"></label>
+            <button type="submit" id="filtersuccssrateBtn"  class="btn btn-info btn-block">Filter</button>
+          </div>
+            <div class="form-group col-md-2 col-sm-2">
+              <label style="display: inline-block;"></label>
+              <a type="button" href="{{url('<front>')}}chat-success-rate" id="resetfiltersuccssrateBtn"  class="btn btn-danger btn-block">Clear Filter</a>
+            </div>
+          </form>
+        </div>
+    </div>
+  </div>
+
+{% if rate_table %}
+  <div class="view-tables">
+    {{ rate_table }}
+  </div>
+{% endif %}
+
+{% if table_empty %}
+  <div class="show-empty-message">
+    {{ empty_text }}
+  </div>
+
+{% endif %}

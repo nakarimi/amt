@@ -1,0 +1,18 @@
+uuid: 54876065-3553-4693-9aa0-2e9bb3a87470
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+id: config_pages.field_display_event_time
+field_name: field_display_event_time
+entity_type: config_pages
+type: boolean
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,19 @@
+amt_notification.TwilioSettingsForm:
+  path: '/admin/config/amt_notification/twilio'
+  defaults:
+    _form: '\Drupal\amt_notification\Form\TwilioSettingsForm'
+    _title: 'Twilio Settings'
+  requirements:
+    _permission: 'administer site configuration'
+  options:  
+    _admin_route: TRUE  
+
+amt_notification.SMSTestForm:
+  path: '/smstest'
+  defaults:
+    _form: '\Drupal\amt_notification\Form\SMSTestForm'
+    _title: 'SMS Test'
+  requirements:
+    _permission: 'administer site configuration'
+  options:  
+    _admin_route: TRUE 

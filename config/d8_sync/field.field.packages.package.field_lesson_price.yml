@@ -1,0 +1,23 @@
+uuid: 669b450b-69b4-4027-a69a-9dd4e75bf31b
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.package
+    - field.storage.packages.field_lesson_price
+id: packages.package.field_lesson_price
+field_name: field_lesson_price
+entity_type: packages
+bundle: package
+label: 'Lesson Price'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: decimal

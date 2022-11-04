@@ -1,0 +1,8 @@
+uuid: fb734498-5ab6-4c73-aa92-5c9beebf4cf3
+langcode: en
+status: true
+dependencies: {  }
+name: 'Group Lesson Types'
+vid: group_lesson_types
+description: ''
+weight: 0

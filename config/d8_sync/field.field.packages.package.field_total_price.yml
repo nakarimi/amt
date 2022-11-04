@@ -1,0 +1,23 @@
+uuid: c2fe7965-d107-498c-aaf5-6a3a7e224670
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.package
+    - field.storage.packages.field_total_price
+id: packages.package.field_total_price
+field_name: field_total_price
+entity_type: packages
+bundle: package
+label: 'Total Price'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: decimal

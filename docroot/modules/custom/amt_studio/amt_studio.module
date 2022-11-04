@@ -1,0 +1,967 @@
+<?php
+
+/**
+ * @file
+ * Provides Reports functionality and alterations for AMT AMI.
+ */
+
+use Drupal\amt_staff\SendReportsToAPI;
+use Drupal\amt_general\LogMessage;
+
+/**
+ * Implements hook_theme().
+ */
+function amt_studio_theme($existing, $type, $theme, $path)
+{
+  return [
+    'amt_studio' => [
+      'variables' => [
+        'studio_content_table' => NULL,
+        'date_range' => NULL,
+        'table_empty' => TRUE,
+        'empty_text' => t('Select Year and Week then "Apply" to generate the report!'),
+        'years' => NULL,
+        'weeks' => NULL,
+        'selectedData' => NULL,
+      ],
+      'path' => $path . '/templates',
+      'template' => 'amt-studio-report',
+    ],
+  ];
+}
+
+/**
+ * Generating the studio business reports.
+ *
+ * This report get data from enrollment, payment, lesson, group lesson,
+ * services and attendees.
+ */
+function _amt_studio_api_submit_sps()
+{
+  // Load the current user.
+  $user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
+  // retrieve field legacy id  from that user.
+  $staffLegacyId = $user->get('field_legacy_id')->value;
+  // We exclude Pro Coach from report.
+  // So the loop will skip this index.
+  if (($_GET['week'] != '' || $_GET['year'] != '') && $staffLegacyId != "6-procoach") {
+    $weekNumber = $_GET['week'];
+    $weekYear = $_GET['year'];
+
+    $studentFrontDeptIDs = _amt_staff_get_student_account_ids_from_specific_department('Front Dept');
+    $studentBackDeptIDs = _amt_staff_get_student_account_ids_from_specific_department('Back Dept');
+
+    // Getting the date in start and end range.
+    $dateRange = SendReportsToAPI::convertStartEndDate($weekNumber, $weekYear);
+    // In all of this module the $start and $end is the start and
+    // end date of the week we generate the reports.
+    $startDate = $dateRange['week_start'];
+    $endDate = $dateRange['week_end'];
+
+    // Get the eck Id of the service type from taxonomy term.
+    $serviecPreOriginalId = _amt_studio_find_single_eck_id('service_type', 'Pre-Original Chat');
+    $serviecPreChatId = _amt_studio_find_single_eck_id('service_type', 'Pre Chat');
+    $serviecOriginalId = _amt_studio_find_single_eck_id('service_type', 'Original Chat');
+    $serviecExtensionId = _amt_studio_find_single_eck_id('service_type', 'Extension Chat');
+    $serviecRenewalId = _amt_studio_find_single_eck_id('service_type', 'Renewal Chat');
+
+    // Calculate all number of chat base on service type.
+    $preOriginalChat = _amt_studio_package_tried($serviecPreOriginalId, $startDate, $endDate);
+    $preChat = _amt_studio_package_tried($serviecPreChatId, $startDate, $endDate);
+    $originalChat = _amt_studio_package_tried($serviecOriginalId, $startDate, $endDate);
+    $extensionChat = _amt_studio_package_tried($serviecExtensionId, $startDate, $endDate);
+    $renewalChat = _amt_studio_package_tried($serviecRenewalId, $startDate, $endDate);
+
+    // Get the eck id of the enrollment category from taxonomy term.
+    $enrollPreOriginalId = _amt_studio_find_single_eck_id('enrollment_type', 'Pre-Original');
+    $enrollOriginalId = _amt_studio_find_single_eck_id('enrollment_type', 'Original');
+    $enrollRenewalId = _amt_studio_find_single_eck_id('enrollment_type', 'Renewal');
+    if ($enrollRenewalId == -1) {
+      $enrollRenewalId = _amt_studio_find_single_eck_id('enrollment_type', 'Renewals');
+    }
+    $enrollExtensionId = _amt_studio_find_single_eck_id('enrollment_type', 'Extension');
+    $enrollMiscellaneousId = _amt_studio_find_single_eck_id('enrollment_type', 'Miscellaneous');
+
+    // Calculate the Sale and Unit of all enrollment base on
+    // enrollment category.
+    $preOriginal = _amt_studio_package_sales_units_calculator($enrollPreOriginalId, $startDate, $endDate);
+    $original = _amt_studio_package_sales_units_calculator($enrollOriginalId, $startDate, $endDate);
+    $renewal = _amt_studio_package_sales_units_calculator($enrollRenewalId, $startDate, $endDate);
+    $extension = _amt_studio_package_sales_units_calculator($enrollExtensionId, $startDate, $endDate);
+    $nonUnitLesson = _amt_studio_find_non_unit_Lessons(['Coaching Lesson', 'Non Unit Coaching Lessons', 'Non Unit Private Lessons'], $startDate, $endDate);
+    $nonUnitClass = _amt_studio_find_non_unit_Lessons(['Master Class', 'Master Class/Dance Camp', 'Non Unit Group Class'], $startDate, $endDate);
+    $miscellaneous = _amt_studio_package_sales_units_calculator($enrollMiscellaneousId, $startDate, $endDate);
+
+    // Get number of active student that participated in
+    // front dept and back dept.
+    $activeStudent = _amt_studio_number_of_sps_active_student($studentBackDeptIDs, $studentFrontDeptIDs, $startDate, $endDate);
+    $generalCash = _amt_studio_sps_cash($startDate, $endDate);
+    $generalMiscellaneous = _amt_studio_sps_miscellaneous($startDate, $endDate);
+    $studioBusinessAPIData = SendReportsToAPI::getReportHeaders('studio_business');
+
+    $lessons_interviewed = _amt_studio_sps_number_of_lesson($studentFrontDeptIDs, $startDate, $endDate);
+    $lessons_renewed = _amt_studio_sps_number_of_lesson($studentBackDeptIDs, $startDate, $endDate);
+
+    $studioBusinessAPIData += [
+      "cash"                      => (int) $generalCash['cash'],
+      "miscellaneous"             => (int) $generalMiscellaneous['cash'],
+      "refund_cash"               => (int) $generalCash['refund'],
+      "refund_miscellaneous"      => (int) $generalMiscellaneous['refund'],
+      "contact"                   => (int) _amt_studio_sps_stu_record('field_inquired', $startDate, $endDate),
+      "booked"                    => (int) _amt_studio_sps_stu_record('field_booked_on', $startDate, $endDate),
+      "showed"                    => (int) _amt_studio_sps_stu_record('field_showed', $startDate, $endDate),
+      "lessons_interviewed"       => $lessons_interviewed,
+      "lessons_renewed"           => $lessons_renewed,
+      "PVT_interview_lessons_taught"     => $lessons_interviewed,
+      "PVT_renewal_lessons_taught"       => $lessons_renewed,
+      "number_in_class"           => _amt_studio_number_in_class($startDate, $endDate),
+      // Number of student associated in Front Dept department in this week.
+      "active_students_interview_dpt" => $activeStudent['interview'],
+      // Number of student associated in Back Dept department in this week.
+      "active_students_renewal_dpt"   => $activeStudent['renewal'],
+      // Pre-Original Chat Tried is the number of services with
+      // pre-original chat service type and any status.
+      "pre_original_tried"        => ((int) $preOriginalChat['tried'] + (int) $preChat['tried']), // map Pre Chat to Pre Original Tried items.
+      // Pre-Original Chat Sold is the number of services
+      // with this service type and with sale status.
+      "pre_original_sold"         => ((int) $preOriginalChat['sold'] + (int) $preChat['sold']), // map Pre Chat to Pre Original Sold items.
+      // Pre-Original Units is the number of Lesson of enrollment
+      // sold during the week with category of the Pre-Original.
+      "pre_original_units"        => (int) $preOriginal['units'],
+      // Pre-Original Sales the sum of total price of enrollment
+      // we sold during the week with category of the Pre-Original.
+      "pre_original_sales"        => (int) $preOriginal['sales'],
+      // Original Chat Tried is the number of services with original
+      // Chat service type and any status.
+      "original_tried"            => (int) $originalChat['tried'],
+      // Original Chat Tried is the number of services with
+      // Original Chat service type and sale status.
+      "original_sold"             => (int) $originalChat['sold'],
+      // Original Units is the number of Lesson of enrollment sold during
+      // the week with Original enrollment category and after subtracting
+      // the number of drop lesson.
+      "original_units"            => (int) $original['units'],
+      // Original Sales is the sum of enrollment total price sold during
+      // the week with Original enrollment category and after subtracting
+      // the sum of drop amount.
+      "original_sales"            => (int) $original['sales'],
+      // Tried is the number of services with Extension Chat service type
+      // and any status.
+      "extension_tried"           => (int) $extensionChat['tried'],
+      // Sold is the number of services with Extension Chat service
+      // type and sale status.
+      "extension_sold"            => (int) $extensionChat['sold'],
+      // Extension Units is the number of Lesson of enrollment sold during
+      // the week with Extension enrollment category and after subtracting
+      // the number of drop lesson.
+      "extension_units"           => (int) $extension['units'],
+      // Extension Sales is the sum of enrollment total price sold during
+      // the week with Extension enrollment category and after subtracting
+      // the sum of drop amount.
+      "extension_sales"           => (int) $extension['sales'],
+      // Renewal Chat Tried is the number of services with Renewal Chat
+      // service type and any status.
+      "renewal_tried"             => (int) $renewalChat['tried'],
+      // Renewal Chat Tried is the number of services with Renewal Chat
+      // service type and sale status.
+      "renewal_sold"              => (int) $renewalChat['sold'],
+      // Renewal Units is the number of Lesson of enrollment sold during
+      // the week with Renewal enrollment category and after subtracting
+      // the number of drop lesson.
+      "renewal_units"             => (int) $renewal['units'],
+      // Renewal Sales is the sum of enrollment total price sold during
+      // the week with Renewal enrollment category and after subtracting
+      // the sum of drop amount.
+      "renewal_sales"             => (int) $renewal['sales'],
+      // Non-Units Lesson Units is the number of Lesson of enrollment
+      // sold during the week with Non-Units enrollment category and Package code of (Coaching Lesson) and after
+      // subtracting the number of drop lesson.
+      "non_unit_private_lessons"  => (int) $nonUnitLesson['units'],
+      // Non-Units Sales is the sum of enrollment total price sold during
+      // the week with Non-Units enrollment category and Package code of (Coaching Lesson) and after subtracting
+      // the sum of drop amount.
+      "non_unit_private_sales"    => (float) $nonUnitLesson['sales'],
+      // Non-Units Lesson Units is the number of Lesson of enrollment
+      // sold during the week with Non-Units enrollment category and Package code of (Master Class) and after
+      // subtracting the number of drop lesson.
+      "non_unit_class_lessons"    => (int) $nonUnitClass['units'],
+      // Non-Units Lesson Units is the number of Lesson of enrollment
+      // sold during the week with Non-Units enrollment category and Package code of (Master Class) and after
+      // subtracting the number of drop lesson.
+      "non_unit_class_sales"      => (float) $nonUnitClass['sales'],
+      // Miscellaneous Sales is the sum of enrollment total price sold during
+      // the week with Miscellaneous enrollment category and after subtracting
+      // the sum of drop amount.
+      "miscellaneous_sales"       => (int) $miscellaneous['sales'],
+    ];
+
+    // Checks if the "Send API" button is clicked, the data will be sent.
+    if (isset($_GET['operation'])) {
+      unset($studioBusinessAPIData['PVT_interview_lessons_taught']);
+      unset($studioBusinessAPIData['PVT_renewal_lessons_taught']);
+
+      $studioBusinessAPIData['active_students_interview'] = $studioBusinessAPIData['active_students_interview_dpt'];
+      unset($studioBusinessAPIData['active_students_interview_dpt']);
+
+      $studioBusinessAPIData['active_students_renewal'] = $studioBusinessAPIData['active_students_renewal_dpt'];
+      unset($studioBusinessAPIData['active_students_renewal_dpt']);
+      $response = SendReportsToAPI::sendReports($studioBusinessAPIData);
+      // Show Message.
+      LogMessage::showMessage($response['message'], $response['message_type'], TRUE, 'amt_studio');
+    }
+    unset($studioBusinessAPIData['lessons_renewed']);
+    unset($studioBusinessAPIData['lessons_interviewed']);
+
+    // Return the data to twig template view where the containing
+    // function is called.
+    return $studioBusinessAPIData;
+  }
+
+  return [];
+}
+
+/**
+ * Fetch the student records from student account for studio business.
+ *
+ * @param string $field
+ *   This field defined that according to which field name should filter data.
+ * @param string $start
+ *   The start date of the week for report.
+ * @param string $end
+ *   The end week date for report week.
+ *
+ * @return int
+ *   Return the number of records that fetched.
+ */
+function _amt_studio_sps_stu_record($field, $start, $end, $staffId = false)
+{
+  $query = Drupal::service('entity.query')
+    ->get('student_accounts');
+
+  if ($staffId) {
+    $query = $query->condition('field_inquiry_taker', $staffId);
+  }
+
+  $query = $query->condition($field, [$start, $end], 'BETWEEN');
+
+  return $query->count()->execute();
+}
+
+/**
+ * Fetch the  number of guests for studio business.
+ * A guest should be any inquiry with a "guest" inquired method. 
+ * They should only count as a guest for 1 lesson after which they are no longer an inquiry but a student
+ * 
+ * @param string $field
+ *   This field defined that according to which field name should filter data.
+ * @param string $start
+ *   The start date of the week for report.
+ * @param string $end
+ *   The end week date for report week.
+ *
+ * @return int
+ *   Return the number of records that fetched.
+ */
+function _amt_studio_number_of_guests($field, $start, $end, $staffid)
+{
+  $numOfGuest = 0;
+  $start = date('Y-m-d', strtotime($start));
+  $end = date('Y-m-d', strtotime($end));
+  $query = Drupal::service('entity.query')
+    ->get('student_accounts')
+    ->condition('field_teacher', $staffid)
+    ->condition('field_inquiry_method', 'Guest');
+  $studentId = array_keys($query->execute());
+  foreach ($studentId as $sid) {
+    $connection = \Drupal::database();
+    $query = $connection->select('events_field_data', 'events');
+    $query->leftjoin('events__field_date_and_time', 'ev_dt', 'ev_dt.entity_id = events.id');
+    $query->leftjoin('events__field_type', 'ev_t', 'ev_t.entity_id = events.id');
+    $query->leftjoin('events__field_instructor', 'ev_ins', 'ev_ins.entity_id = events.id');
+    $query->leftjoin('events__field_student', 'ev_s', 'ev_s.entity_id = events.id');
+    $query->leftJoin('attendees__field_student_account', 'att_st', 'att_st.entity_id = ev_s.field_student_target_id');
+    $query->condition('ev_t.bundle', 'lesson');
+    $query->condition('att_st.field_student_account_target_id', $sid);
+
+    $query_past = clone $query;
+
+    $query->condition('ev_ins.field_instructor_target_id', $staffid);
+    $query->condition('ev_dt.field_date_and_time_value', [$start, $end], 'BETWEEN');
+    if ($query->countQuery()->execute()->fetchCol()[0] != 0) {
+      $query_past->condition('ev_dt.field_date_and_time_value', $start, '<');
+      if ($query_past->countQuery()->execute()->fetchCol()[0] == 0) {
+        $numOfGuest += 1;
+      }
+    }
+  }
+  return $numOfGuest;
+}
+
+/**
+ * Calculate the amount of cash for studio business summary report.
+ *
+ * @param string $start
+ *   The start date of the report week.
+ * @param string $end
+ *   The end date of the report week.
+ *
+ * @return array
+ *   The cash and refund cash will return.
+ */
+function _amt_studio_sps_cash($start, $end)
+{
+  $cashed = 0;
+  $cashedRef = 0;
+
+  $sundryId = _amt_studio_find_single_eck_id('enrollment_type', 'Sundry');
+  $miscId = _amt_studio_find_single_eck_id('enrollment_type', 'Miscellaneous');
+
+  if ($sundryId != NULL && $miscId != NULL) {
+    $enrollmentQuery = Drupal::service('entity.query')
+      ->get('packages')
+      ->condition('type', 'enrollment')
+      ->condition('field_category', [$sundryId, $miscId], 'IN');
+    $enrollmentIds = $enrollmentQuery->execute();
+  }
+
+  // Load DANCE-O-RAMA, and its enrollments to ignore from the cach value.
+  $DORQuery = Drupal::service('entity.query')
+    ->get('packages')
+    ->condition('type', 'package')
+    ->condition('title', 'DANCE-O-RAMA');
+  $DORId = $DORQuery->execute();
+
+  // By defautl DorIds is 0;
+  $enrollmentDORIds = [];
+
+  // If there was any DOR, then load their Ids.
+  if (count($DORId) > 0) {
+    $DORenrQuery = Drupal::service('entity.query')
+      ->get('packages')
+      ->condition('type', 'enrollment')
+      ->condition('field_enrollment_package_name', $DORId);
+
+    $enrollmentDORIds = $DORenrQuery->execute();
+  }
+
+  $enrollmentIds = array_unique(array_merge($enrollmentDORIds, $enrollmentIds), SORT_REGULAR);
+
+  // Load the payments data according start and end date.
+  $query = Drupal::service('entity.query')
+    ->get('payments')
+    ->condition('field_status', 'Paid');
+
+  // Exclude sundry and Miscellaneous from being counted.
+  if ($enrollmentIds != NULL) {
+    $query->condition('field_enrollment_name', $enrollmentIds, 'NOT IN');
+  }
+  $query->condition('field_date_and_time', [$start, $end], 'BETWEEN');
+  $paymentIds = $query->execute();
+
+  if ($paymentIds != NULL) {
+    $payments = \Drupal::entityTypeManager()->getStorage('payments')->loadMultiple($paymentIds);
+    // Loop on the fetched payments based on id.
+    foreach ($payments as $key => $payment) {
+      // If the loaded data was valid then get the field data.
+      $thisPayCash = $payment->field_gross_tuition->getString();
+      // If value is more the 0 it should be cash.
+      if ($thisPayCash > 0) {
+        $cashed += $thisPayCash;
+      }
+      // If the payment amount was negative we add it in refund cash.
+      else {
+        $cashedRef += $thisPayCash;
+      }
+    }
+  }
+
+  return ['cash' => $cashed, 'refund' => $cashedRef];
+}
+
+/**
+ * Fetch data for miscellaneous data.
+ *
+ * @param string $start
+ *   The start date of the report week.
+ * @param string $end
+ *   The end date of the report week.
+ *
+ * @return array
+ *   The miscellaneous and refund miscellaneous will return.
+ */
+function _amt_studio_sps_miscellaneous($start, $end)
+{
+  $miscellaneousCashedRef = 0;
+  $miscellaneousCashed = 0;
+  $miscellaneousId = _amt_studio_find_single_eck_id('enrollment_type', 'Miscellaneous');
+
+  if ($miscellaneousId != -1) {
+    // Query for find the enrollment that has Miscellaneous category.
+    $miscellaneousQuery = Drupal::service('entity.query')
+      ->get('packages')
+      ->condition('type', 'enrollment')
+      ->condition('field_category', $miscellaneousId);
+    $enrollmentIds = $miscellaneousQuery->execute();
+
+    if ($enrollmentIds != NULL) {
+      // Get all of payment with status of paid and with enrollment Ids of
+      // above during the reported week.
+      $queryEnrPayment = Drupal::service('entity.query')
+        ->get('payments')
+        ->condition('field_status', 'Paid')
+        ->condition('field_enrollment_name', $enrollmentIds, 'IN')
+        ->condition('field_date_and_time', [$start, $end], 'BETWEEN');
+      $paymentIds = $queryEnrPayment->execute();
+      if ($paymentIds != NULL) {
+        $entities = \Drupal::entityTypeManager()->getStorage('payments')->loadMultiple($paymentIds);
+        foreach ($entities as $key => $entity) {
+          $thisPayCash = $entity->field_gross_tuition->getString();
+
+          // Check the gross tuition field is more then zero (0) it is
+          // the miscellaneous cash.
+          if ($thisPayCash > 0) {
+            $miscellaneousCashed += $thisPayCash;
+          }
+          // If the gross tuition field is negative it is the
+          // refund miscellaneous cash.
+          else {
+            $miscellaneousCashedRef += $thisPayCash;
+          }
+        }
+      }
+    }
+  }
+
+  return ['cash' => $miscellaneousCashed, 'refund' => $miscellaneousCashedRef];
+}
+
+/**
+ * Get the interview and renewal number of lesson.
+ *
+ * Load the lesson in date range and for every lesson get the enrollment
+ * and check if the enrollment category is the front or back dept.
+ *
+ * @param array $deptType
+ *   Have Front department category value.
+ * @param string $start
+ *   The start date of the report week.
+ * @param string $end
+ *   The end date of the report week.
+ *
+ * @return array
+ *   All lesson of renewal and interview from group lesson and lesson.
+ */
+function _amt_studio_sps_number_of_lesson($studentDeptIds, $start, $end)
+{
+  $counter = 0;
+  // Front and back Dept enrollment category Id.
+  $lessonStatusIds = _amt_studio_find_multi_eck_id('lesson_status', ['Showed', 'No Showed, Charged']);
+
+  // Check if the department ids exit we load the enrollment with that category.
+  if ($studentDeptIds != NULL) {
+
+    $enrollmentIds = _amt_studio_load_enrollments('field_student', $studentDeptIds, $start, $end);
+
+    if ($enrollmentIds != NULL && $lessonStatusIds != NULL) {
+      // Load the attendance Id with status of the showed and no showed charged.
+      $attendIds = _amt_studio_load_attendees($enrollmentIds, $lessonStatusIds);
+
+      if ($attendIds != NULL) {
+        // Count the number of lesson with above attendance in this week.
+        $bundleQuery = \Drupal::entityQuery('events')
+          ->condition('type', 'lesson')
+          ->condition('field_date_and_time', [$start, $end], 'BETWEEN')
+          ->condition('field_student', $attendIds, 'IN');
+        $counter = $bundleQuery->count()->execute();
+      }
+    }
+  }
+  return $counter;
+}
+
+/**
+ * Provide the number of class student.
+ *
+ * Load all of group lesson and count the number of student contact
+ * for every group lesson.
+ *
+ * @param string $start
+ *   The start date of the report week.
+ * @param string $end
+ *   The end date of the report week.
+ *
+ * @return array
+ *   The number of student will return..
+ */
+function _amt_studio_number_in_class($start, $end)
+{
+
+  // Front and back Dept enrollment category Id.
+  $lessonStatusIds = _amt_studio_find_multi_eck_id('lesson_status', ['Showed', 'No Showed, Charged']);
+  // Load the attendance Id with status of the showed and no showed charged.
+  $attendQuery = \Drupal::entityQuery('attendees')
+    ->condition('field_status', $lessonStatusIds, 'IN');
+  $attendIds = $attendQuery->execute();
+  $numberInClass = 0;
+
+  // Check if attendance exist load the group lesson of this attendance.
+  if ($attendIds != NULL) {
+    $bundleQuery = \Drupal::entityQuery('events')
+      ->condition('type', 'group_lesson')
+      ->condition('field_date_and_time', [$start, $end], 'BETWEEN')
+      ->condition('field_students', $attendIds, 'IN');
+    $groupLessonIds = $bundleQuery->execute();
+    // Load the event entity by Id.
+    $storage = Drupal::service('entity_type.manager')->getStorage('events');
+
+    foreach ($groupLessonIds as $key => $groupLessonId) {
+      $entity = $storage->load($groupLessonId);
+      // Load attendance by reference entity relationship.
+      $attendEntities = $entity->field_students->referencedEntities();
+      foreach ($attendEntities as $key => $attendEntity) {
+        // Check the status of student if it was showed
+        // or not showed, charged it should true.
+        if (in_array($attendEntity->field_status->getString(), $lessonStatusIds)) {
+          // Count the number of student contact.
+          $numberInClass += count($attendEntity->field_students->getValue());
+        }
+      }
+    }
+  }
+
+  return $numberInClass;
+}
+
+/**
+ * Fetch data for tried from package.
+ *
+ * @param string $serviceTypeID
+ *   The id of the package.
+ * @param string $start
+ *   The start date of the report week.
+ * @param string $end
+ *   The end date of the report week.
+ *
+ * @return array
+ *   The number of student will return..
+ */
+function _amt_studio_package_tried($serviceTypeID, $start, $end)
+{
+  $saleStatusId = _amt_studio_find_single_eck_id('service_status', 'Sale');
+  $counter = ['tried' => 0, 'sold' => 0];
+
+  // Get all services with specific service type we pass to function.
+  $query = Drupal::service('entity.query')
+    ->get('events')
+    ->condition('type', 'services')
+    ->condition('field_type', $serviceTypeID)
+    ->condition('field_date_and_time', [$start, $end], 'BETWEEN');
+  // We copy the above query in new query for count the
+  // number of services with sale status.
+  $newQuery = clone $query;
+  $newQuery->condition('field_status', $saleStatusId);
+  $counter['tried'] = $query->count()->execute();
+  $counter['sold'] = $newQuery->count()->execute();
+
+  return $counter;
+}
+
+/**
+ * Provide the sale, sold and units base on the enrollment category.
+ *
+ * Load enrollment base on category and date range and
+ * calculate the above field.
+ *
+ * @param string $categoryID
+ *   The package id that will come from sps term.
+ * @param string $start
+ *   The start date of the report week.
+ * @param string $end
+ *   The end date of the report week.
+ *
+ * @return array
+ *   The sold, sales and units will return.
+ */
+function _amt_studio_package_sales_units_calculator($categoryID, $start, $end)
+{
+  $sales = 0;
+  $units = 0;
+
+  // Load all enrollment with category we pass to function and
+  // sale date is during this week.
+  $enrollmentIds = _amt_studio_load_enrollments('field_category', $categoryID, $start, $end);
+
+  if ($enrollmentIds != NULL) {
+    $enrollmentEntities = \Drupal::entityTypeManager()
+      ->getStorage('packages')
+      ->loadMultiple($enrollmentIds);
+    foreach ($enrollmentEntities as $key => $enrEntity) {
+      $sales += (int) $enrEntity->field_enrollment_total_price->getString();
+      $units += (int) $enrEntity->field_enrollment_lesson_count->getString();
+    }
+  }
+
+  // Load all enrollment have drop date in this week and the category
+  // we pass to function and the drop date is during this week.
+  $dropEnrollmentQuery = Drupal::service('entity.query')
+    ->get('packages')
+    ->condition('type', 'enrollment')
+    ->condition('field_category', $categoryID)
+    ->condition('field_drop', '', '!=')
+    ->condition('field_dropped_date', [$start, $end], 'BETWEEN');
+  $dropEnrollmentIds = $dropEnrollmentQuery->execute();
+
+  if ($dropEnrollmentIds != NULL) {
+    $enrollmentEntities = \Drupal::entityTypeManager()
+      ->getStorage('packages')
+      ->loadMultiple($dropEnrollmentIds);
+    foreach ($enrollmentEntities as $key => $enrEntity) {
+      $lessonPrice = $enrEntity->field_enrollment_lesson_price->getString();
+      $thisDropValue = $enrEntity->field_drop->getString();
+      $sales -= $thisDropValue;
+      if ($lessonPrice > 0) {
+        $units -= $thisDropValue / $lessonPrice;
+      }
+    }
+  }
+
+  return ['sales' => $sales, 'units' => $units];
+}
+
+/**
+ * Get the data of active student on Front Department and Back Department.
+ *
+ * Load the active student account id and check if the student have any
+ * enrollment in this week and category is front or back dept.
+ * Logics:
+ * 1- Load lessons
+ * 2- lessons with showed status
+ * 3- Between end date of week and 30 days before.
+ * 4- specific department Back Dept or front dept
+ * 5- get number of contacts of student accounts.
+ *
+ * @param array $studentBackDeptIDs
+ *   It have back dept or back dept enrollment category.
+ * @param array $studentFrontDeptIDs
+ *   It have front dept or back dept enrollment category.
+ * @param string $start
+ *   The start of the week date.
+ * @param string $end
+ *   The end of the week date.
+ *
+ * @return int
+ *   Number of student that is active.
+ */
+function _amt_studio_number_of_sps_active_student($studentBackDeptIDs, $studentFrontDeptIDs, $start, $end)
+{
+  $counter = ['interview' => 0, 'renewal' => 0];
+
+  // All students that have had a lesson in the last 30 days
+  $activeDateRange = [
+    date("Y-m-d", strtotime('-30 day', strtotime($end))),
+    date("Y-m-d", strtotime($end))
+  ];
+  $searchdate = NULL;
+  // Getting the attendance with showed status to filter the events based on for active students.
+  $lessonStatusIds = _amt_studio_find_multi_eck_id('lesson_status', ['Showed']);
+  if ($lessonStatusIds) {
+    $attendanceIds = \Drupal::entityQuery('attendees')
+      ->condition('field_status', $lessonStatusIds, 'IN')->execute();
+      // Selecting the event entity for querying.
+      $query = \Drupal::entityQuery('events')
+      ->condition('type', 'lesson')
+      ->condition('field_student', $attendanceIds, 'IN')
+      ->condition('field_date_and_time', $activeDateRange, 'BETWEEN');
+      $searchdate = $query->execute();
+  }
+
+  if ($searchdate != NULL) {
+    // Fetching the whole entity using the IDs.
+    $entities = \Drupal::entityTypeManager()->getStorage('events')->loadMultiple($searchdate);
+    // Load all active student Id and remove duplicate.
+    $studentIds = _amt_studio_active_student_account_get_ids($entities);
+
+    foreach ($studentIds as $key => $studentId) {
+      
+      if ($studentFrontDeptIDs != NULL) {
+        // Check this student have any enrollment with studentFrontDeptIDs category.
+        // number of student in interview counter.
+        if (array_search($studentId, $studentFrontDeptIDs) == TRUE) {
+          $studentEntity = \Drupal::entityTypeManager()->getStorage('student_accounts')->load($studentId);
+          $counter['interview'] += count($studentEntity->field_contacts->getValue());
+        }
+      }
+
+      if ($studentBackDeptIDs != NULL) {
+
+        // Check the Enrollment, if has anyone then add the
+        // number of student in renewal counter.
+        if (array_search($studentId, $studentBackDeptIDs) == TRUE) {
+          $studentEntity = \Drupal::entityTypeManager()->getStorage('student_accounts')->load($studentId);
+          $counter['renewal'] += count($studentEntity->field_contacts->getValue());
+        }
+      }
+    }
+  }
+  return $counter;
+}
+
+/**
+ * Provide the list of the active student account id.
+ *
+ * Load the attendance of lesson and group lesson and get
+ * the student account id and push it in an array.
+ *
+ * @param string $entities
+ *   All active student lesson and group lesson entities.
+ *
+ * @return int
+ *   Number of student that is active.
+ */
+function _amt_studio_active_student_account_get_ids($entities)
+{
+  $activeStudentId = [];
+
+  foreach ($entities as $key => $entity) {
+    if ($entity->bundle() == 'lesson') {
+      $attendaceEntity = isset($entity->field_student->referencedEntities()[0]) ? $entity->field_student->referencedEntities()[0] : NULL;
+      if ($attendaceEntity != NULL) {
+        $activeStudentId[] = $attendaceEntity->field_student_account->getString();
+      }
+    } else {
+      $attendaceEntities = $entity->field_students->referencedEntities();
+      foreach ($attendaceEntities as $key => $attendaceEntity) {
+        $activeStudentId[] = $attendaceEntity->field_student_account->getString();
+      }
+    }
+  }
+
+  return $activeStudentId = array_unique($activeStudentId);
+}
+
+/**
+ * Provide the single id of term taxonomy.
+ *
+ * Load the taxonomy term entity base on name and check it have
+ * the same type return the id.
+ *
+ * @param string $type
+ *   The taxonomy type.
+ * @param string $term
+ *   The item that should search.
+ *
+ * @return int
+ *   The term id.
+ */
+function _amt_studio_find_single_eck_id($type, $term)
+{
+  $termId = array_keys(\Drupal::entityTypeManager()
+    ->getStorage('taxonomy_term')
+    ->loadByProperties([
+      'name' => $term,
+      'vid' => $type,
+    ]))[0];
+  return ($termId != NULL) ? $termId : -1;
+}
+
+/**
+ * Provide the multi id of term taxonomy.
+ *
+ * Load the taxonomy term entity base on name and check it have
+ * the same type return the id.
+ *
+ * @param object $type
+ *   The taxonomy type.
+ * @param string $term
+ *   The item that should search.
+ *
+ * @return array
+ *   The term id.
+ */
+function _amt_studio_find_multi_eck_id($type, $term)
+{
+  $termId = array_keys(\Drupal::entityManager()
+    ->getStorage('taxonomy_term')
+    ->loadByProperties([
+      'name' => $term,
+      'vid' => $type,
+    ]));
+  return ($termId != NULL) ? $termId : [-1];
+}
+
+
+/**
+ * This helper calculates nonunit lessons of the provided packageCode.
+ *
+ * @param array $packageCodes
+ *   list of packages (['Coaching Lesson'] or ['Master Class'])
+ * @param string $start
+ *   Start date of enrollment.
+ * @param string $end
+ *   End date of enrollment.
+ *
+ * @return array
+ *   The term id.
+ */
+function _amt_studio_find_non_unit_Lessons($packageCodes, $start, $end)
+{
+
+  $termId_package_code = [];
+  $non_unit_package_ids = [];
+  $enrollmentIds = [];
+
+  foreach ($packageCodes as $key => $term) {
+
+    $termId = _amt_feeds_find_single_eck_id('package_code', $term);
+
+    if ($termId != -1) {
+      $termId_package_code[] = $termId;
+    }
+  }
+
+  if (!empty($termId_package_code)) {
+    $non_unit_package_ids = Drupal::service('entity.query')
+      ->get('packages')
+      ->condition('type', 'package')
+      ->condition('field_package_code', $termId_package_code, 'IN')
+      ->execute();
+  }
+
+  $non_unit_package_ids = array_keys($non_unit_package_ids);
+  $sales = 0;
+  $units = 0;
+  // Load all enrollment with category we pass to function and
+  // sale date is during this week.
+
+  if (!empty($non_unit_package_ids)) {
+
+    $enrollmentQuery = \Drupal::entityQuery('packages')
+      ->condition('type', 'enrollment')
+      ->condition('field_enrollment_package_name', $non_unit_package_ids, 'IN')
+      ->condition('field_sale_date', [$start, $end], 'BETWEEN');
+
+    $enrollmentIds = $enrollmentQuery->execute();
+
+    if (!empty($enrollmentIds)) {
+      $enrollmentEntities = \Drupal::entityTypeManager()
+        ->getStorage('packages')
+        ->loadMultiple($enrollmentIds);
+      foreach ($enrollmentEntities as $key => $enrEntity) {
+        $sales += $enrEntity->field_enrollment_total_price->getString();
+        $units += $enrEntity->field_enrollment_lesson_count->getString();
+      }
+    }
+  }
+
+  // Load all enrollment have drop date in this week and the category
+  // we pass to function and the drop date is during this week.
+  if (!empty($non_unit_package_ids)) {
+
+    $enrollmentIds = _amt_studio_load_enrollments('field_enrollment_package_name', $non_unit_package_ids, $start, $end);
+
+    if ($enrollmentIds != NULL) {
+      $enrollmentEntities = \Drupal::entityTypeManager()
+        ->getStorage('packages')
+        ->loadMultiple($enrollmentIds);
+      foreach ($enrollmentEntities as $key => $enrEntity) {
+        $lessonPrice = $enrEntity->field_enrollment_lesson_price->getString();
+        $thisDropValue = $enrEntity->field_drop->getString();
+        $sales -= $thisDropValue;
+        if ($lessonPrice > 0) {
+          $units -= $thisDropValue / $lessonPrice;
+        }
+      }
+    }
+  }
+
+  return ['sales' => $sales, 'units' => $units];
+}
+
+/**
+ * Provide list of attendee ids.
+ *
+ * @param array $enrollmentIds
+ *   The attached enrollment ids to attendee.
+ * @param array $lessonStatusIds
+ *   The status of attendees.
+ *
+ * @return array
+ *   The ids of attendess.
+ */
+function _amt_studio_load_attendees($enrollmentIds, $lessonStatusIds = false)
+{
+
+  $attendQuery = \Drupal::entityQuery('attendees')
+    ->condition('field_enrollment', $enrollmentIds, 'IN');
+
+  // if status was provided.
+  if ($lessonStatusIds) {
+    $attendQuery = $attendQuery->condition('field_status', $lessonStatusIds, 'IN');
+  }
+
+  return $attendQuery->execute();
+}
+
+/**
+ * Count number students in provided departments (Front Dep/ Back Dep).
+ *
+ * @param array $studentId
+ *   Ids of selected students.
+ *
+ * @param array $studentDeptIDs
+ *   Department IDS. Front Dep/ Back Dep
+ *
+ * @param string $start
+ *   Start date of enrollment.
+ *
+ * @param string $end
+ *   End date of enrollment.
+ *
+ * @return int
+ *   Number of student that is active.
+ */
+function _amt_studio_count_active_student_in_deps($studentId, $studentDeptIDs, $start, $end)
+{
+
+  // Check this student has any enrollment with studentBackDeptIDs category.
+  $countStudent = \Drupal::entityQuery('packages')
+    ->condition('field_student', $studentId)
+    ->condition('type', 'enrollment')
+    ->condition('field_student', $studentDeptIDs, 'IN')
+    ->condition('field_sale_date', [$start, $end], 'BETWEEN')
+    ->count()->execute();
+
+  return $countStudent;
+}
+
+/**
+ * This loads all related enrollments for provided ids, 
+ * based on field.
+ *
+ * @param string $field
+ *   any field of the enrollment like ['field_category' or 'field_student'].
+ *
+ * @param array $filterID
+ *   IDs in enrollment based on the field.
+ *
+ * @param string $start
+ *   Start date of enrollment.
+ *
+ * @param string $end
+ *   End date of enrollment.
+ *
+ * @return array
+ *   List of matched enrollments.
+ */
+function _amt_studio_load_enrollments($field, $filterID, $start, $end)
+{
+
+  $enrollmentList = Drupal::service('entity.query')
+    ->get('packages')
+    ->condition('type', 'enrollment')
+    ->condition($field, $filterID, 'IN')
+    ->condition('field_sale_date', [$start, $end], 'BETWEEN')
+    ->execute();
+
+  return $enrollmentList;
+}

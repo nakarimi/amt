@@ -1,0 +1,11 @@
+uuid: 676de1b3-4f7a-43f3-9bbb-9a603f9002f2
+langcode: en
+status: true
+dependencies:
+  module:
+    - migrate_drupal_ui
+id: config_sync.module.migrate_drupal_ui
+snapshotSet: config_sync
+extensionType: module
+extensionName: migrate_drupal_ui
+items: {  }

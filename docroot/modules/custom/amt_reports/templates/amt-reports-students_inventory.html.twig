@@ -1,0 +1,78 @@
+
+  <form method="GET">
+    <div class="studentsFilters" id="studentsFilters">
+      <div class="row">
+        <div class="form-group col-md-3 col-sm-12">
+          <label for="department">Student Type:</label>
+          <select class="form-control" name="type" id="studentDepartmentFilter">
+            <option value="active" {{ (filterData.type == 'active') ? 'selected' : '' }}>Active</option>
+            <option value="inactive" {{ (filterData.type == 'inactive') ? 'selected' : '' }}>Inactive</option>
+          </select>
+        </div>
+        <div class="form-group col-md-3 col-sm-12">
+          <label for="from">From:</label>
+          <input type="date" id="dateFilter" name="from" value="{{ filterData.from ?? '' }}" class="form-control" placeholder="From">
+        </div>
+
+        <div class="form-group col-md-3 col-sm-12">
+          <label for="to">To:</label>
+          <input type="date" id="dateFilter" name="to" value="{{ filterData.to ?? '' }}" class="form-control" placeholder="To">
+        </div>
+
+        <div class="form-group col-md-3 col-sm-12">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary form-control pull-left">Filter</button>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+
+    <table class="table" id="studentsInventory">
+      <thead>
+        <tr>
+          <th>Full Name of Client</th>
+          <th>Complete Address</th>
+          <th>Total PER Lessons Enrolled (45-Minute)</th>
+          <th>Total PER Lessons Used</th>
+          <th>No. Of Untaught PER Lessons</th>
+          <th>Misc. Serv. Type & Value</th>
+          <th>Total $ Due Studio & Budget</th>
+          <th>Date of Last Lesson Taught</th>
+        </tr>
+      </thead>
+      <tbody id="studentsListTableBody">
+        {% if students %}
+          {% for getdata in students %}
+            <tr>
+              <td>{{getdata.name}}</td>
+              <td>{{getdata.address}}</td>
+              <td>{{getdata.totalEnrolled}}</td>
+              <td>{{getdata.lessonUsed}}</td>
+              <td>{{getdata.remaining}}</td>
+              <td>{{getdata.test}}</td>
+              <td>{{getdata.test}}</td>
+              <td>{{getdata.lastLessonThaught}}</td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  
+  </div>
+
+<!-- this is for adding pagination for projection reports table -->
+{% include '@amt_reports/pagination.html.twig' with {
+    currentPage: active_page,
+    paginationPath: pager_url,
+    lastPage: total_pages,
+    showAlwaysFirstAndLast: true
+} only %}
+
+{%- if students is empty -%}
+  <div>
+    <h5>No Data</h5>
+  </div>
+{% endif %}

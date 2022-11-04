@@ -1,0 +1,23 @@
+uuid: 6561ea31-6ba7-4ea2-8f8d-197cac4253fa
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.feeds_item
+  module:
+    - feeds
+id: student_accounts.student_account.feeds_item
+field_name: feeds_item
+entity_type: student_accounts
+bundle: student_account
+label: 'Feeds item'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:feeds_feed'
+  handler_settings: {  }
+field_type: feeds_item

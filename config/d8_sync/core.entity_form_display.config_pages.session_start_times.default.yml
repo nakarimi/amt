@@ -1,0 +1,76 @@
+uuid: b2ffb9d3-ee52-4302-8975-20fa2927670b
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.session_start_times
+    - field.field.config_pages.session_start_times.field_friday
+    - field.field.config_pages.session_start_times.field_monday
+    - field.field.config_pages.session_start_times.field_saturday
+    - field.field.config_pages.session_start_times.field_sunday
+    - field.field.config_pages.session_start_times.field_thursday
+    - field.field.config_pages.session_start_times.field_tuesday
+    - field.field.config_pages.session_start_times.field_wednesday
+id: config_pages.session_start_times.default
+targetEntityType: config_pages
+bundle: session_start_times
+mode: default
+content:
+  field_friday:
+    weight: 4
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_monday:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_saturday:
+    weight: 5
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_sunday:
+    weight: 6
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_thursday:
+    weight: 3
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_tuesday:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_wednesday:
+    weight: 2
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  label: true

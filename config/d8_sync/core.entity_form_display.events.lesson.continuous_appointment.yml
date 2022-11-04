@@ -1,0 +1,100 @@
+uuid: 91ca1b72-bade-407d-8d94-9554e1162058
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.events.continuous_appointment
+    - eck.eck_type.events.lesson
+    - field.field.events.lesson.feeds_item
+    - field.field.events.lesson.field_date_and_time
+    - field.field.events.lesson.field_duration
+    - field.field.events.lesson.field_expiration_date
+    - field.field.events.lesson.field_importer
+    - field.field.events.lesson.field_instructor
+    - field.field.events.lesson.field_parent
+    - field.field.events.lesson.field_repetition_frequency
+    - field.field.events.lesson.field_repetition_units
+    - field.field.events.lesson.field_reschedule_date
+    - field.field.events.lesson.field_student
+    - field.field.events.lesson.field_type
+  module:
+    - datetime
+    - field_group
+third_party_settings:
+  field_group:
+    group_standing_appointment:
+      children:
+        - field_instructor
+        - title
+        - field_student
+        - field_type
+      parent_name: ''
+      weight: 9
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: open
+        description: ''
+        required_fields: true
+      label: 'Standing Appointment'
+      region: hidden
+    group_personal_information:
+      children: {  }
+      parent_name: ''
+      weight: 10
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: open
+        description: ''
+        required_fields: true
+      label: 'Personal Information'
+      region: hidden
+id: events.lesson.continuous_appointment
+targetEntityType: events
+bundle: lesson
+mode: continuous_appointment
+content:
+  field_date_and_time:
+    weight: 4
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_duration:
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_expiration_date:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_repetition_frequency:
+    weight: 1
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: number
+    region: content
+  field_repetition_units:
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+hidden:
+  created: true
+  feeds_item: true
+  field_importer: true
+  field_instructor: true
+  field_parent: true
+  field_reschedule_date: true
+  field_student: true
+  field_type: true
+  title: true

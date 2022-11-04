@@ -1,0 +1,11 @@
+uuid: ca12fdce-e1b5-4bc9-b7dc-7c6282cfb0ce
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_filter
+id: config_sync.module.config_filter
+snapshotSet: config_sync
+extensionType: module
+extensionName: config_filter
+items: {  }

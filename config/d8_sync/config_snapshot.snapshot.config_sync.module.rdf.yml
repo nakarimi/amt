@@ -1,0 +1,11 @@
+uuid: ae5ece92-2a0b-4106-9df4-c6a068056a21
+langcode: en
+status: true
+dependencies:
+  module:
+    - rdf
+id: config_sync.module.rdf
+snapshotSet: config_sync
+extensionType: module
+extensionName: rdf
+items: {  }

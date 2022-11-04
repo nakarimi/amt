@@ -1,0 +1,9 @@
+amt_feeds.setcolor:
+  path: '/set-terms-color'
+  defaults:
+    _controller: '\Drupal\amt_feeds\Controller\AmtFeedsController::setTermsColor'
+    _title: 'Set Terms Color'
+  requirements:
+    _permission: 'Set Color'
+  options:
+    no_cache: 'TRUE'

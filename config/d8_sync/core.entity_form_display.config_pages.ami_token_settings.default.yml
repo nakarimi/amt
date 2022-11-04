@@ -1,0 +1,67 @@
+uuid: c8b3e0f7-b0a7-4ec1-8d6b-11667ee24142
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.ami_token_settings
+    - field.field.config_pages.ami_token_settings.field_ami_address
+    - field.field.config_pages.ami_token_settings.field_client_id
+    - field.field.config_pages.ami_token_settings.field_clientecret
+    - field.field.config_pages.ami_token_settings.field_grant_type
+    - field.field.config_pages.ami_token_settings.field_password
+    - field.field.config_pages.ami_token_settings.field_user
+  module:
+    - link
+id: config_pages.ami_token_settings.default
+targetEntityType: config_pages
+bundle: ami_token_settings
+mode: default
+content:
+  field_ami_address:
+    weight: 0
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+    type: link_default
+    region: content
+  field_client_id:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_clientecret:
+    weight: 6
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_grant_type:
+    weight: 4
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_password:
+    weight: 7
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_user:
+    weight: 3
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  label: true

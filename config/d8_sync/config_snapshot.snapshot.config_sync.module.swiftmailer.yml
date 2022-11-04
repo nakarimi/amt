@@ -1,0 +1,39 @@
+uuid: 34cef3d2-48e2-4c07-acd7-0419331ebf20
+langcode: en
+status: true
+dependencies:
+  module:
+    - swiftmailer
+id: config_sync.module.swiftmailer
+snapshotSet: config_sync
+extensionType: module
+extensionName: swiftmailer
+items:
+  -
+    collection: ''
+    name: swiftmailer.message
+    data:
+      format: text/plain
+      filter_format: plain_text
+      respect_format: true
+      convert_mode: false
+      character_set: UTF-8
+  -
+    collection: ''
+    name: swiftmailer.transport
+    data:
+      transport: native
+      smtp_host: 127.0.0.1
+      smtp_port: 25
+      smtp_encryption: ''
+      smtp_credential_provider: swiftmailer
+      smtp_credentials:
+        swiftmailer:
+          username: ''
+          password: ''
+        key:
+          username: ''
+          password: ''
+      sendmail_path: /usr/sbin/sendmail
+      sendmail_mode: bs
+      spool_directory: ''

@@ -1,0 +1,155 @@
+uuid: 087dc15f-2508-4cc9-b5d1-e7d6556862c4
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.lesson
+    - field.field.events.lesson.feeds_item
+    - field.field.events.lesson.field_date_and_time
+    - field.field.events.lesson.field_duration
+    - field.field.events.lesson.field_expiration_date
+    - field.field.events.lesson.field_importer
+    - field.field.events.lesson.field_instructor
+    - field.field.events.lesson.field_parent
+    - field.field.events.lesson.field_repetition_frequency
+    - field.field.events.lesson.field_repetition_units
+    - field.field.events.lesson.field_reschedule_date
+    - field.field.events.lesson.field_student
+    - field.field.events.lesson.field_type
+  module:
+    - datetime
+    - field_group
+    - options
+third_party_settings:
+  field_group:
+    group_personal_information:
+      children:
+        - field_student
+      parent_name: ''
+      weight: 11
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: open
+        description: ''
+      label: 'Personal Information'
+      region: hidden
+    group_standing_appointment:
+      children:
+        - field_expiration_date
+        - field_repetition_frequency
+        - field_repetition_units
+        - field_parent
+      parent_name: ''
+      weight: 10
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: open
+        description: ''
+      label: 'Standing Appointment'
+      region: hidden
+id: events.lesson.default
+targetEntityType: events
+bundle: lesson
+mode: default
+content:
+  entity_print_view_pdf:
+    weight: 7
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_date_and_time:
+    weight: 4
+    label: above
+    settings:
+      timezone_override: ''
+      date_format: 'm-d-Y h:i A'
+    third_party_settings: {  }
+    type: datetime_custom
+    region: content
+  field_duration:
+    weight: 3
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_expiration_date:
+    weight: 11
+    label: above
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_instructor:
+    weight: 2
+    label: above
+    settings:
+      view_mode: full_name
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_repetition_frequency:
+    weight: 12
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+  field_repetition_units:
+    weight: 13
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_reschedule_date:
+    type: datetime_default
+    weight: 5
+    region: content
+    label: above
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+  field_student:
+    weight: 10
+    label: above
+    settings:
+      link: true
+      view_mode: default
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_type:
+    weight: 1
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  title:
+    label: hidden
+    type: string
+    weight: 0
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+hidden:
+  changed: true
+  created: true
+  entity_print_view_epub: true
+  entity_print_view_word_docx: true
+  feeds_item: true
+  field_importer: true
+  field_parent: true

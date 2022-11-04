@@ -1,0 +1,39 @@
+uuid: dbb7d427-a644-4cf5-8378-ed192216ca59
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.package
+    - field.storage.packages.field_sps_code
+    - taxonomy.vocabulary.sps_code
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: packages.package.field_sps_code
+field_name: field_sps_code
+entity_type: packages
+bundle: package
+label: 'SPS Code'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      sps_code: sps_code
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

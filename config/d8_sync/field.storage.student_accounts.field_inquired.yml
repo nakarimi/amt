@@ -1,0 +1,20 @@
+uuid: 245842e9-4c8d-460e-a357-cc87a86d073f
+langcode: en
+status: true
+dependencies:
+  module:
+    - datetime
+    - eck
+id: student_accounts.field_inquired
+field_name: field_inquired
+entity_type: student_accounts
+type: datetime
+settings:
+  datetime_type: date
+module: datetime
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

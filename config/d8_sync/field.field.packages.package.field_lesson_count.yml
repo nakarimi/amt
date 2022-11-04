@@ -1,0 +1,23 @@
+uuid: b91b1eaf-0211-4e1a-996f-abe35c267f31
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.package
+    - field.storage.packages.field_lesson_count
+id: packages.package.field_lesson_count
+field_name: field_lesson_count
+entity_type: packages
+bundle: package
+label: 'Lesson Count'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

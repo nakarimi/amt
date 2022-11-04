@@ -1,0 +1,121 @@
+uuid: f012caba-ad41-4973-9007-4875298d76f8
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.services
+    - field.field.events.services.field_date_and_time
+    - field.field.events.services.field_duration
+    - field.field.events.services.field_instructor
+    - field.field.events.services.field_notes
+    - field.field.events.services.field_student
+    - field.field.events.services.field_type
+  module:
+    - eck
+    - feeds_tamper
+third_party_settings:
+  feeds_tamper:
+    tampers: {  }
+label: Services
+id: services
+description: ''
+import_period: -1
+fetcher: upload
+fetcher_configuration:
+  allowed_extensions: 'txt csv tsv xml opml'
+  directory: 'private://feeds'
+parser: csv
+parser_configuration:
+  delimiter: ','
+  no_headers: false
+  line_limit: 100
+processor: 'entity:events'
+processor_configuration:
+  update_existing: 0
+  update_non_existent: _keep
+  expire: -1
+  owner_feed_author: false
+  owner_id: 0
+  authorize: true
+  skip_hash_check: false
+  values:
+    type: services
+custom_sources:
+  service:
+    label: service
+    value: service
+    machine_name: service
+  tcode:
+    label: tcode
+    value: tcode
+    machine_name: tcode
+  duration:
+    label: duration
+    value: duration
+    machine_name: duration
+  date_and_time:
+    label: 'date and time'
+    value: 'date and time'
+    machine_name: date_and_time
+  scode:
+    label: scode
+    value: scode
+    machine_name: scode
+  lesson:
+    label: lesson
+    value: lesson
+    machine_name: lesson
+  student:
+    label: student
+    value: student
+    machine_name: student
+  sname:
+    label: sname
+    value: sname
+    machine_name: sname
+  importer:
+    label: importer
+    value: importer
+    machine_name: importer
+mappings:
+  -
+    target: title
+    map:
+      value: sname
+    unique: {  }
+  -
+    target: field_date_and_time
+    map:
+      value: date_and_time
+    settings:
+      timezone: UTC
+  -
+    target: field_student
+    map:
+      target_id: student
+    settings:
+      reference_by: id
+      autocreate: 0
+  -
+    target: field_notes
+    map:
+      value: lesson
+  -
+    target: field_duration
+    map:
+      value: duration
+  -
+    target: field_instructor
+    map:
+      target_id: tcode
+    settings:
+      reference_by: field_legacy_id
+      feeds_item: guid
+      autocreate: 0
+  -
+    target: field_type
+    map:
+      target_id: service
+    settings:
+      reference_by: name
+      autocreate: '1'

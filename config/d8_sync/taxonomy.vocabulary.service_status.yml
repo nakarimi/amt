@@ -1,0 +1,8 @@
+uuid: 87a110d3-007c-4894-90f0-da3e9c8321ee
+langcode: en
+status: true
+dependencies: {  }
+name: 'Service Status'
+vid: service_status
+description: ''
+weight: 0

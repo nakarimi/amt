@@ -1,0 +1,8 @@
+uuid: c39b7995-4d26-4fd3-bc11-cfca7316ebd1
+langcode: en
+status: true
+dependencies: {  }
+name: 'Package Code'
+vid: package_code
+description: ''
+weight: 0

@@ -1,0 +1,45 @@
+$packageContainer : (
+    '#packages-package-form',
+    '#packages-package-edit-form'
+);
+
+$enrollmentContainer : (
+    '#packages-enrollment-form',
+    '#packages-enrollment-edit-form'
+);
+
+$allPackageFormGroup : (
+    '.field--name-field-lesson-price',
+    '.field--name-field-lesson-count',
+    '.field--name-field-total-price'
+);
+$allEnrollmentFormGroup : (
+    '.field--name-field-enrollment-lesson-price',
+    '.field--name-field-enrollment-lesson-count',
+    '.field--name-field-enrollment-total-price',
+    '.field--name-field-total-paid',
+    '.field--name-field-lesson-used',
+    '.field--name-field-lessons-paid',
+    '.field--name-field-lesson-available'
+);
+
+#{$packageContainer} {
+    #{$allPackageFormGroup}
+    {
+        label {
+            width:150px;
+        }
+    }
+}
+
+#{$enrollmentContainer} {
+    #{$allEnrollmentFormGroup} {
+        label {
+            width:150px;
+        }
+    }
+}
+
+div.col-sm-12.Student_Agreement_div {
+    padding: 0px 5px;
+}

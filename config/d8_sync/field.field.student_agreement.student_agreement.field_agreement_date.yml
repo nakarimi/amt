@@ -1,0 +1,30 @@
+uuid: 85e2601c-f06b-45ec-8467-634f31824186
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_agreement.student_agreement
+    - field.storage.student_agreement.field_agreement_date
+  module:
+    - datetime
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: student_agreement.student_agreement.field_agreement_date
+field_name: field_agreement_date
+entity_type: student_agreement
+bundle: student_agreement
+label: 'Agreement Date'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

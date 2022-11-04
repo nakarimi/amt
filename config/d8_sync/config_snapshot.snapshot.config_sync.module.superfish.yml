@@ -1,0 +1,11 @@
+uuid: 78aa792d-56be-4bf7-924f-0a427fea6661
+langcode: en
+status: true
+dependencies:
+  module:
+    - superfish
+id: config_sync.module.superfish
+snapshotSet: config_sync
+extensionType: module
+extensionName: superfish
+items: {  }

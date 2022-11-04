@@ -1,0 +1,16 @@
+uuid: bafc41bb-f21e-490d-889f-fc4015cf3127
+langcode: en
+status: true
+dependencies:
+  module:
+    - text
+id: config_sync.module.text
+snapshotSet: config_sync
+extensionType: module
+extensionName: text
+items:
+  -
+    collection: ''
+    name: text.settings
+    data:
+      default_summary_length: 600

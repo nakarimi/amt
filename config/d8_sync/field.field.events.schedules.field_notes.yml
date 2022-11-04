@@ -1,0 +1,29 @@
+uuid: 58f91fba-7b8f-4249-b089-536c8fae5b49
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.schedules
+    - field.storage.events.field_notes
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.schedules.field_notes
+field_name: field_notes
+entity_type: events
+bundle: schedules
+label: Notes
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

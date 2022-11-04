@@ -1,0 +1,22 @@
+uuid: 25c55b8d-2d5e-4ffe-a397-7a30e192dd27
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_color
+    - taxonomy.vocabulary.sps_code
+  module:
+    - color_field
+id: taxonomy_term.sps_code.field_color
+field_name: field_color
+entity_type: taxonomy_term
+bundle: sps_code
+label: Color
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  opacity: 0
+field_type: color_field_type

@@ -1,0 +1,19 @@
+uuid: ce54fb1b-8726-45c1-a085-7b80ac3fde41
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: student_accounts.field_contacts
+field_name: field_contacts
+entity_type: student_accounts
+type: entity_reference
+settings:
+  target_type: contacts
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

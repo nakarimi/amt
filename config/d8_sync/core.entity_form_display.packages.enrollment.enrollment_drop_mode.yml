@@ -1,0 +1,76 @@
+uuid: ec19f7c6-1a58-4076-8b50-7f0e78d4c67f
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.packages.enrollment_drop_mode
+    - eck.eck_type.packages.enrollment
+    - field.field.packages.enrollment.feeds_item
+    - field.field.packages.enrollment.field_category
+    - field.field.packages.enrollment.field_drop
+    - field.field.packages.enrollment.field_dropped_date
+    - field.field.packages.enrollment.field_enrollment_lesson_count
+    - field.field.packages.enrollment.field_enrollment_lesson_price
+    - field.field.packages.enrollment.field_enrollment_package_name
+    - field.field.packages.enrollment.field_enrollment_status
+    - field.field.packages.enrollment.field_enrollment_total_price
+    - field.field.packages.enrollment.field_executive
+    - field.field.packages.enrollment.field_instructor
+    - field.field.packages.enrollment.field_interval_unit
+    - field.field.packages.enrollment.field_junior_executive
+    - field.field.packages.enrollment.field_legacy_id
+    - field.field.packages.enrollment.field_lesson_available
+    - field.field.packages.enrollment.field_lesson_used
+    - field.field.packages.enrollment.field_lessons_paid
+    - field.field.packages.enrollment.field_next_scheduled_payment
+    - field.field.packages.enrollment.field_payment_amount
+    - field.field.packages.enrollment.field_payment_interval
+    - field.field.packages.enrollment.field_sale_date
+    - field.field.packages.enrollment.field_student
+    - field.field.packages.enrollment.field_total_paid
+    - field.field.packages.enrollment.field_visibility
+  module:
+    - datetime
+id: packages.enrollment.enrollment_drop_mode
+targetEntityType: packages
+bundle: enrollment
+mode: enrollment_drop_mode
+content:
+  field_drop:
+    type: number
+    weight: 1
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_dropped_date:
+    type: datetime_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  created: true
+  feeds_item: true
+  field_category: true
+  field_enrollment_lesson_count: true
+  field_enrollment_lesson_price: true
+  field_enrollment_package_name: true
+  field_enrollment_status: true
+  field_enrollment_total_price: true
+  field_executive: true
+  field_instructor: true
+  field_interval_unit: true
+  field_junior_executive: true
+  field_legacy_id: true
+  field_lesson_available: true
+  field_lesson_used: true
+  field_lessons_paid: true
+  field_next_scheduled_payment: true
+  field_payment_amount: true
+  field_payment_interval: true
+  field_sale_date: true
+  field_student: true
+  field_total_paid: true
+  field_visibility: true
+  title: true

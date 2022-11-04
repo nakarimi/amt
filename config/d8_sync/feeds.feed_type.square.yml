@@ -1,0 +1,100 @@
+uuid: d3e78b34-e27b-4015-8b19-ac97e955a504
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.payments.payment
+    - field.field.payments.payment.field_customer_name
+    - field.field.payments.payment.field_date_and_time
+    - field.field.payments.payment.field_gross_tuition
+    - field.field.payments.payment.field_payment_id
+  module:
+    - eck
+label: Square
+id: square
+description: 'To import payment base on Square data'
+import_period: -1
+fetcher: upload
+fetcher_configuration:
+  allowed_extensions: 'txt csv tsv xml opml'
+  directory: 'private://feeds'
+parser: csv
+parser_configuration:
+  delimiter: ','
+  no_headers: false
+  line_limit: 100
+processor: 'entity:payments'
+processor_configuration:
+  update_existing: 0
+  update_non_existent: _keep
+  expire: -1
+  owner_feed_author: false
+  owner_id: 0
+  authorize: true
+  skip_hash_check: false
+  values:
+    type: payment
+custom_sources:
+  payment_id:
+    label: 'Payment ID'
+    value: 'Payment ID'
+    machine_name: payment_id
+  date_and_time:
+    label: 'Date and Time'
+    value: 'Date and Time'
+    machine_name: date_and_time
+  gross_tuition:
+    label: 'Gross Tuition'
+    value: 'Gross Tuition'
+    machine_name: gross_tuition
+  customer_name:
+    label: 'Customer Name'
+    value: 'Customer Name'
+    machine_name: customer_name
+  title:
+    label: title
+    value: title
+    machine_name: title
+  _title_:
+    label: title
+    value: title
+    machine_name: _title_
+  _title:
+    label: _title_
+    value: _title_
+    machine_name: _title
+  gross_sales:
+    label: 'Gross Sales'
+    value: 'Gross Sales'
+    machine_name: gross_sales
+  date:
+    label: Date
+    value: Date
+    machine_name: date
+mappings:
+  -
+    target: field_payment_id
+    map:
+      value: payment_id
+    unique:
+      value: '1'
+  -
+    target: field_date_and_time
+    map:
+      value: date_and_time
+    settings:
+      timezone: UTC
+  -
+    target: field_gross_tuition
+    map:
+      value: gross_sales
+  -
+    target: field_customer_name
+    map:
+      value: customer_name
+    unique: {  }
+  -
+    target: title
+    map:
+      value: payment_id
+    unique: {  }

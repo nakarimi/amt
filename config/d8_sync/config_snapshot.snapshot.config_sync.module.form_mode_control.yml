@@ -1,0 +1,11 @@
+uuid: 3df8f35c-7575-4014-989a-b0bc844c5ce6
+langcode: en
+status: true
+dependencies:
+  module:
+    - form_mode_control
+id: config_sync.module.form_mode_control
+snapshotSet: config_sync
+extensionType: module
+extensionName: form_mode_control
+items: {  }

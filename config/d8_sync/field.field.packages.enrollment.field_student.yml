@@ -1,0 +1,38 @@
+uuid: 826292d1-8d2d-472c-8241-61939c5bfe41
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.packages.field_student
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: packages.enrollment.field_student
+field_name: field_student
+entity_type: packages
+bundle: enrollment
+label: Student
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:student_accounts'
+  handler_settings:
+    target_bundles:
+      student_account: student_account
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

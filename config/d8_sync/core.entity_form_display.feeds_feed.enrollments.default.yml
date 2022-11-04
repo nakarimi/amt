@@ -1,0 +1,22 @@
+uuid: 4548a167-424f-480e-8cdc-0742a9d1f548
+langcode: en
+status: true
+dependencies:
+  config:
+    - feeds.feed_type.enrollments
+id: feeds_feed.enrollments.default
+targetEntityType: feeds_feed
+bundle: enrollments
+mode: default
+content:
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  uid: true

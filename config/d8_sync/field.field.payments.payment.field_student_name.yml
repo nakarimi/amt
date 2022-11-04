@@ -1,0 +1,38 @@
+uuid: 1f831202-b4f6-48f2-b8a2-ff48f92f29bc
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.payments.payment
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.payments.field_student_name
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: payments.payment.field_student_name
+field_name: field_student_name
+entity_type: payments
+bundle: payment
+label: 'Student Name'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:student_accounts'
+  handler_settings:
+    target_bundles:
+      student_account: student_account
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

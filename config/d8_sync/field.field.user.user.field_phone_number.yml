@@ -1,0 +1,30 @@
+uuid: d7044808-b2de-4605-a6da-7725b7e09da5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_phone_number
+  module:
+    - disable_field
+    - telephone
+    - user
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: user.user.field_phone_number
+field_name: field_phone_number
+entity_type: user
+bundle: user
+label: 'Phone Number'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: telephone

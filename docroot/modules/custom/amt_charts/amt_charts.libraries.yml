@@ -1,0 +1,10 @@
+amt_scripts:
+  version: 1.x
+  css:
+    theme:
+      assets/css/studio_director_dashboard.css: {}
+  js:
+    https://www.gstatic.com/charts/loader.js: { type: external, minified: true }
+    assets/js/amt_charts_display.js: {}
+  dependencies:
+    - core/jquery

@@ -1,0 +1,33 @@
+uuid: 6255eee6-5645-48a3-8739-fe07154594c8
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.schedules
+    - field.storage.events.field_parent
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.schedules.field_parent
+field_name: field_parent
+entity_type: events
+bundle: schedules
+label: Parent
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

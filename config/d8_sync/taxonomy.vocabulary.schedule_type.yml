@@ -1,0 +1,8 @@
+uuid: 92165742-5fca-4267-9a9d-7b08defc3591
+langcode: en
+status: true
+dependencies: {  }
+name: 'Schedule Type'
+vid: schedule_type
+description: ''
+weight: 0

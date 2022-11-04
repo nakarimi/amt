@@ -1,0 +1,21 @@
+<div class="conflict-table">
+{% if eventID %}
+  <div class="row view-tables">
+    <div class="pull-right hidden-print">
+      {% if source == 'day-view' %}
+        <a href="/day-view/?date={{ date }}" class="btn btn-bg btn-success"> Procced </a>
+      {% else %}
+        <a href="/events/{{ eventID }}" class="btn btn-bg btn-success"> Procced </a>
+      {% endif %}
+      <a href="/events/{{ eventID }}/edit" class="btn btn-bg btn-danger"> Edit </a>
+      <a onclick="window.print();" class="btn btn-bg btn-warning"> print </a>
+    </div>
+  </div>
+ {% endif %}
+
+  {% if data_table %}
+    <div class="row view-tables">
+      {{ data_table }}
+    </div>
+  {% endif %}
+</div>

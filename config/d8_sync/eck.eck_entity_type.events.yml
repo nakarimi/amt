@@ -1,0 +1,10 @@
+uuid: 23061b76-fcd2-40dc-94f8-62e7ee5656a8
+langcode: en
+status: true
+dependencies: {  }
+id: events
+label: Events
+created: true
+changed: true
+uid: false
+title: true

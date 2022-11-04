@@ -1,0 +1,214 @@
+.fc-event
+  .fc-bg
+    z-index: 1
+    background: none !important
+    opacity: 0.25
+
+.path-day-view
+  [value="- Select Instructor -"]
+    display: block !important
+
+thead.sticky
+  padding: 0 15px
+  position: fixed
+  left: 0px
+  display: table
+  background: #fff
+  z-index: 500
+
+thead.sticky
+  div.fc-row.fc-widget-header
+    margin: 0 15px
+
+#copy-or-paste
+  position: fixed
+  bottom: 10px
+  width: 300px
+  left: calc(50% - 150px)
+  z-index: 99
+  display: none
+  padding: 10px
+  text-align: left
+  list-style: none
+  background-color: #fff
+  background-clip: padding-box
+  border: 1px solid rgba(0, 0, 0, 0.15)
+  border-radius: 4px
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175)
+
+h4#header
+  text-align: center
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2)
+
+#cancel-operation
+  margin-top: 5px
+  float: right
+
+#copy-or-paste
+  #operation
+    text-transform: capitalize
+
+#copy-or-paste
+  #content
+    .class
+      *
+        text-align: center
+
+.dayview_col
+  > .instructors_list
+    > option
+      display: initial !important
+
+.path-day-view
+  .fc-right
+    padding: 0 10px
+    position: relative
+    top: -10px
+
+#update_multiple_status_dropdown_btn
+  margin-right: 5px
+
+#multiple_status_update_select_all
+  margin-bottom: 0px
+  margin-top: 0px
+
+#multiple_status_update_select_all
+  > label
+    font-weight: 700
+
+.update_multiple_status_event_title
+  > div
+    text-align: left !important
+
+div#drupal-modal .student-accounts-form
+  .field--name-field-attending-lessons, .field--name-field-gender
+    .fieldset-wrapper
+      > div
+        display: flex
+
+        .form-type-radio
+          width: 25%
+          margin-top: 0px
+
+          label
+            font-weight: 700
+
+  .field--name-field-address
+    .form-item-field-contacts-form-inline-entity-form-field-address-0-address-organization,
+    .form-item-field-contacts-form-inline-entity-form-entities-0-form-field-address-0-address-organization,
+    .js-form-item-field-contacts-form-inline-entity-form-field-address-0-address-address-line2,
+    .form-item-field-contacts-form-inline-entity-form-entities-0-form-field-address-0-address-address-line2,
+    .form-item-schedule-event
+      display: none
+
+  .form-item-schedule-event,
+  .field--name-field-inquiry-studen,
+  .field--name-field-student-department,
+  .field--name-field-inquired
+    display: none
+
+  .field--name-field-notification-preference
+    .fieldset-wrapper
+      > div
+        display: flex
+
+        .form-type-checkbox
+          width: 30%
+          margin-top: 0px
+
+          label
+            font-weight: 700
+
+        > :last-child
+          display: none
+
+  table.ief-entity-table
+    tr .ief-entity-operations
+      button:nth-child(2)
+        color: #fff
+        background-color: #5cb85c
+        border-color: #4cae4c
+
+    tr:last-child .ief-form
+      .field--name-field-notification-preference,
+      .field--name-field-cell-phone,
+      .field--name-field-email,
+      .field--name-field-address,
+      .field--name-field-attending-lessons
+        display: none
+
+      .ief-entity-submit
+        color: #fff
+        background-color: #5cb85c
+        border-color: #4cae4c
+
+  .panel-body .table-responsive + div .btn-success
+    color: #333
+    background-color: #fff
+    border-color: #ccc
+
+.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset
+  float: none
+
+.events-services-form .form-item-multiple-event
+  display: none
+
+.path-day-view div.form-item-schedule-lesson
+  display: none
+
+.modal-footer .col-sm-4
+  .btn
+    width: 100%
+
+  .btn-gray
+    background-color: darkgray
+    border-color: darkgray
+    color: white
+
+  .btn-gray-dark
+    background-color: gray
+    border-color: gray
+    color: white
+
+.c-btn.enrollment
+  background-color: cornflowerblue
+  border-color: cornflowerblue
+
+.ui-widget.ui-widget-content
+  z-index: 9999 !important
+
+.glyphicon-refresh.spin
+  -webkit-animation-name: spin
+  -moz-animation-name: spin
+  -ms-animation-name: spin
+  animation-name: spin
+
+.summary-counts 
+  span, 
+  sup
+    &:hover
+      cursor: pointer
+      font-weight: bold
+      font-style: italic
+  b
+    padding: 0 5px
+
+select#attendeesStatus option:disabled 
+    background: #a19f9f87
+
+@mixin inline-animation($duration)
+  $name: spin
+  @keyframes #{$name}
+    @content
+  animation-name: $name
+  animation-duration: $duration
+  animation-iteration-count: infinite
+  animation-timing-function: linear
+
+
+.spin
+  @include inline-animation(1.5s)
+    from
+      transform: rotate(0deg)
+    to
+      transform: rotate(360deg)

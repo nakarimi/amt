@@ -1,0 +1,28 @@
+amt_filters:
+  version: 1.x
+  js:
+    assets/js/student_dashboard.js: {}
+  dependencies:
+    - core/jquery
+amt_datatable:
+  version: 1.x
+  css:
+    theme:
+      https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap.min.css: { type: external, minified: true }
+  js:
+    https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js: { type: external, minified: true }
+    https://cdn.datatables.net/1.10.18/js/dataTables.bootstrap.min.js: { type: external, minified: true }
+  dependencies:
+    - core/jquery
+
+amt_events_print:
+  version: 1.x
+  css:
+    theme:
+      assets/css/student_events_print.css: {}
+  js:
+amt_scripts:
+  version: 1.x
+  css:
+    theme:
+      assets/css/student_dashboard_style.css: {}

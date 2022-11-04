@@ -1,0 +1,21 @@
+uuid: cdc0f194-625c-40ab-af85-3837f15cd0f6
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: payments.field_customer_name
+field_name: field_customer_name
+entity_type: payments
+type: string
+settings:
+  max_length: 255
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

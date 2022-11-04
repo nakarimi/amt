@@ -1,0 +1,31 @@
+// Default variables.
+@import "default-variables";
+
+// Bootstrap Framework.
+@import '../bootstrap/assets/stylesheets/bootstrap';
+
+// Custom style for pakcage.
+@import 'custom/_entities.scss';
+
+// Custom style for Dayview.
+@import 'custom/_dayview.scss';
+
+// Custom style for User accounts page.
+@import 'custom/usersAccountPage.scss';
+
+// Custom style for all the exposed filters.
+@import 'custom/exposedFilters.scss';
+
+// Custom style for Enrollment forms.
+@import 'custom/packageEnrollmentFormsStyles.scss';
+
+// Custom style for the custom Autocompletes (choosing Student Accounts).
+@import 'custom/autoCompleteStyles.scss';
+
+// Making the pages full width (reports and Day-view pages).
+@import 'custom/fullWithPages.scss';
+@media print {
+  .path-amt-reports a[href]:after {
+    content: none !important;
+  }
+}

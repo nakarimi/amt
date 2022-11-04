@@ -1,0 +1,7 @@
+amt_copypaste:
+  path: '/amt_copypaste' 
+  defaults: 
+    _controller: '\Drupal\amt_copypaste\Controller\AmtCopyPasteController::CopyPasteReplicateThisEvent' 
+    _title: 'Handles the copy/paste/replication of the selected event in Dayview'
+  requirements:
+    _permission: 'Day View Page'

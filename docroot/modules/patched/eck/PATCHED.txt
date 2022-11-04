@@ -1,0 +1,5 @@
+Autor: Shoaib Matin - 2019-04-17
+
+Patch File: eck-Add-support-to-eck-for-auto_entitylabel-2905426-12-D8.patch
+Auto Entity Lable is not Showing up on ECK Entities Issue solution is to Provide a hook for contrib modules that want to implement automatic labels. https://www.drupal.org/project/eck/issues/2905426
+

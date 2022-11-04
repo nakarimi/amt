@@ -1,0 +1,11 @@
+uuid: 0ce1bb3e-0eee-408c-9f91-472a00f25018
+langcode: en
+status: true
+dependencies:
+  module:
+    - dynamic_page_cache
+id: config_sync.module.dynamic_page_cache
+snapshotSet: config_sync
+extensionType: module
+extensionName: dynamic_page_cache
+items: {  }

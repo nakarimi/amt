@@ -1,0 +1,18 @@
+uuid: 9a4ef8e7-9f2d-4bc8-b91d-9d2b288a44f4
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: student_accounts.field_inquiry_studen
+field_name: field_inquiry_studen
+entity_type: student_accounts
+type: boolean
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

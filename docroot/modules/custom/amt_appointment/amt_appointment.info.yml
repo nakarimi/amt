@@ -1,0 +1,12 @@
+name: AMT Appointment
+description: Appointment management for AMT
+package: Custom
+type: module
+version: 1.0
+core: 8.x
+
+dependencies:
+  - eck
+  - drupal:toolbar # see amt_appointment_toolbar_alter
+  #- form_mode_manager
+  - amt_general

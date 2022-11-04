@@ -1,0 +1,39 @@
+$dashboard: ".path-dashboard";
+$studentDashboard: ".path-student-dashboard";
+$studentsList: ".path-students-list";
+$studioBusiness: ".path-studio-business-summary";
+$royaltReport: ".path-royalty-report";
+$staffPerformance: ".path-ami-staff-performance";
+$projectionReport: ".path-projections-report";
+$inquiryReport: ".path-inquiry";
+$enrollmentsList: ".path-enrollment";
+$appointmentsList: ".path-lessons-list";
+$packagesList: ".path-packages-list";
+$paymentsList: ".path-payment-reports";
+$chatSuccessRate: ".path-chat-success-rate";
+$dayView: ".path-day-view";
+$weekView: ".path-week-view";
+$studentInventroy: ".path-students-inventory";
+
+#{$dashboard},
+#{$studentDashboard},
+#{$studentsList},
+#{$studioBusiness},
+#{$royaltReport},
+#{$staffPerformance},
+#{$projectionReport},
+#{$inquiryReport},
+#{$enrollmentsList},
+#{$appointmentsList},
+#{$packagesList},
+#{$paymentsList},
+#{$chatSuccessRate},
+#{$dayView},
+#{$weekView},
+#{$studentInventroy} {
+  [role="main"] {
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 100%;
+  }
+}

@@ -1,0 +1,20 @@
+uuid: b12c63ba-18f9-4e62-b971-30a28de63d24
+langcode: en
+status: true
+dependencies:
+  module:
+    - datetime
+    - eck
+id: packages.field_dropped_date
+field_name: field_dropped_date
+entity_type: packages
+type: datetime
+settings:
+  datetime_type: date
+module: datetime
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

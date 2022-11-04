@@ -1,0 +1,21 @@
+uuid: a7642847-c9c1-4ccc-a6d5-d9a1ad4d4191
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.day_view_settings
+    - field.storage.config_pages.field_slot_label_format
+id: config_pages.day_view_settings.field_slot_label_format
+field_name: field_slot_label_format
+entity_type: config_pages
+bundle: day_view_settings
+label: 'Slot Label Format'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 'H:mm'
+default_value_callback: ''
+settings: {  }
+field_type: string

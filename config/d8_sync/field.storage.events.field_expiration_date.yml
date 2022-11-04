@@ -1,0 +1,20 @@
+uuid: 55195743-2010-45df-ada2-e353f174f4d0
+langcode: en
+status: true
+dependencies:
+  module:
+    - datetime
+    - eck
+id: events.field_expiration_date
+field_name: field_expiration_date
+entity_type: events
+type: datetime
+settings:
+  datetime_type: date
+module: datetime
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

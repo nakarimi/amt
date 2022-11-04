@@ -1,0 +1,11 @@
+uuid: 13edb26a-e749-4e5b-836d-0484e0991cda
+langcode: en
+status: true
+dependencies:
+  module:
+    - auto_entitylabel
+id: config_sync.module.auto_entitylabel
+snapshotSet: config_sync
+extensionType: module
+extensionName: auto_entitylabel
+items: {  }

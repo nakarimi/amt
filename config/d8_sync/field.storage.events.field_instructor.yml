@@ -1,0 +1,20 @@
+uuid: 78b23610-9e19-4564-828d-eb43d6988c65
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - user
+id: events.field_instructor
+field_name: field_instructor
+entity_type: events
+type: entity_reference
+settings:
+  target_type: user
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

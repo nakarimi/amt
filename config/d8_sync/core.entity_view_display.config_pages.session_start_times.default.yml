@@ -1,0 +1,75 @@
+uuid: 956dc342-0473-4fab-aeff-b4a9c39ca094
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.session_start_times
+    - field.field.config_pages.session_start_times.field_friday
+    - field.field.config_pages.session_start_times.field_monday
+    - field.field.config_pages.session_start_times.field_saturday
+    - field.field.config_pages.session_start_times.field_sunday
+    - field.field.config_pages.session_start_times.field_thursday
+    - field.field.config_pages.session_start_times.field_tuesday
+    - field.field.config_pages.session_start_times.field_wednesday
+id: config_pages.session_start_times.default
+targetEntityType: config_pages
+bundle: session_start_times
+mode: default
+content:
+  field_friday:
+    weight: 4
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_monday:
+    weight: 0
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_saturday:
+    weight: 5
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_sunday:
+    weight: 6
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_thursday:
+    weight: 3
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_tuesday:
+    weight: 1
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_wednesday:
+    weight: 2
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden: {  }

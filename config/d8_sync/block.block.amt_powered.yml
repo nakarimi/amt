@@ -1,0 +1,22 @@
+uuid: 395b3ab2-8f50-4eca-8412-76003a582745
+langcode: en
+status: false
+dependencies:
+  module:
+    - system
+  theme:
+    - amt
+_core:
+  default_config_hash: iggZSiUKz4mYP1YPJ8SsUfFu79HIgOTt6IDy3Up59aM
+id: amt_powered
+theme: amt
+region: footer
+weight: -10
+provider: null
+plugin: system_powered_by_block
+settings:
+  id: system_powered_by_block
+  label: 'Powered by Drupal'
+  provider: system
+  label_display: '0'
+visibility: {  }

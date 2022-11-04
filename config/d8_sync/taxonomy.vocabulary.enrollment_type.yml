@@ -1,0 +1,8 @@
+uuid: 00bca110-ec31-4bc6-a338-bc7bb962698c
+langcode: en
+status: true
+dependencies: {  }
+name: 'Enrollment Type'
+vid: enrollment_type
+description: ''
+weight: 0

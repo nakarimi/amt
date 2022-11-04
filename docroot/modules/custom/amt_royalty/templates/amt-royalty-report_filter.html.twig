@@ -1,0 +1,23 @@
+<form class="views-exposed-form bef-exposed-form" data-drupal-selector="views-exposed-form-royalty-report-ami" action="/royalty-report" method="get" id="views-exposed-form-royalty-report-ami" accept-charset="UTF-8">
+	<div class="form--inline form-inline clearfix">
+		<div class="form-item form-group">
+			<label for="edit-field-student-target-id" class="control-label">Student Name</label>
+		    <div class="select-wrapper">
+				<input data-drupal-selector="edit-field-student-target-id" class="form-text form-control" type="text" id="edit-field-student-target-id" name="field_student_target_id" value="{{ selectedData.field_student_target_id }}" size="30" maxlength="128" style="background-repeat: no-repeat; background-attachment: scroll; background-size: 16px 18px; background-position: 98% 50%;">			
+			</div>
+		</div>
+		<div class="form-item form-group">
+			<label for="edit-field-enrollment-package-name-target-id" class="control-label">Sale Package</label>
+		    <div class="select-wrapper">
+				<input data-drupal-selector="edit-field-enrollment-package-name-target-id" class="form-text form-control" type="text" id="edit-field-enrollment-package-name-target-id" name="field_enrollment_package_name_target_id" value="{{ selectedData.field_enrollment_package_name_target_id }}" size="30" maxlength="128">
+			</div>
+		</div>
+		<div class="form-item form-group">
+			<label for="edit-field-date-and-time-value" class="control-label">Date Paid</label>
+		    <div class="select-wrapper">		
+				<input data-drupal-selector="edit-field-date-and-time-value" class="form-text form-control" type="date" id="edit-field-date-and-time-value" name="field_date_and_time_value" value="{{ selectedData.field_date_and_time_value }}" size="30" maxlength="128">
+			</div>
+		</div>
+		{% include "ami_public_fields_filter.html.twig" %}
+	</div>
+</form>

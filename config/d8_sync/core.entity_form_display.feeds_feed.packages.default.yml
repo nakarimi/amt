@@ -1,0 +1,22 @@
+uuid: bc57f2b9-c25f-4245-8971-28a270b243b5
+langcode: en
+status: true
+dependencies:
+  config:
+    - feeds.feed_type.packages
+id: feeds_feed.packages.default
+targetEntityType: feeds_feed
+bundle: packages
+mode: default
+content:
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  uid: true

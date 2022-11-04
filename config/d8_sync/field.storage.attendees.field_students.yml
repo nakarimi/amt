@@ -1,0 +1,19 @@
+uuid: e6ed6d3e-d26f-4d34-89b9-9b50b9c5eb80
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: attendees.field_students
+field_name: field_students
+entity_type: attendees
+type: entity_reference
+settings:
+  target_type: contacts
+module: core
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

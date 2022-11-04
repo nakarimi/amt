@@ -1,0 +1,30 @@
+uuid: 315ae4d5-bcaa-448d-a864-036c2257dc4f
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.schedules
+    - field.storage.events.field_date_and_time
+  module:
+    - datetime
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.schedules.field_date_and_time
+field_name: field_date_and_time
+entity_type: events
+bundle: schedules
+label: 'Date and Time'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

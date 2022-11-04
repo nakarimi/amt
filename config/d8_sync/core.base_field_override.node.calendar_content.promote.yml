@@ -1,0 +1,22 @@
+uuid: 1b4659a0-8bad-4f63-bc26-57b7fd56c8ab
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.calendar_content
+id: node.calendar_content.promote
+field_name: promote
+entity_type: node
+bundle: calendar_content
+label: 'Promoted to front page'
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

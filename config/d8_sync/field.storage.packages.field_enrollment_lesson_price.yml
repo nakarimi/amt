@@ -1,0 +1,20 @@
+uuid: 4f948fc8-11b6-4479-b76c-a6cb115a2a40
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: packages.field_enrollment_lesson_price
+field_name: field_enrollment_lesson_price
+entity_type: packages
+type: decimal
+settings:
+  precision: 10
+  scale: 2
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

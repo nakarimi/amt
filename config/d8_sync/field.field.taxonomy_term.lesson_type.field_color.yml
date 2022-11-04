@@ -1,0 +1,22 @@
+uuid: 2221b24c-e6a6-4d18-bf71-b246f15ab586
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_color
+    - taxonomy.vocabulary.lesson_type
+  module:
+    - color_field
+id: taxonomy_term.lesson_type.field_color
+field_name: field_color
+entity_type: taxonomy_term
+bundle: lesson_type
+label: Color
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  opacity: 0
+field_type: color_field_type

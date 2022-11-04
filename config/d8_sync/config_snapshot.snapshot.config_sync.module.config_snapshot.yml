@@ -1,0 +1,9 @@
+uuid: a8fc1455-bce5-4b04-aa25-9d4566b37435
+langcode: en
+status: true
+dependencies: {  }
+id: config_sync.module.config_snapshot
+snapshotSet: config_sync
+extensionType: module
+extensionName: config_snapshot
+items: {  }

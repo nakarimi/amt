@@ -1,0 +1,20 @@
+uuid: d43d3add-b12c-4d90-92c6-b18a07c0a739
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - feeds
+id: payments.feeds_item
+field_name: feeds_item
+entity_type: payments
+type: feeds_item
+settings:
+  target_type: feeds_feed
+module: feeds
+locked: false
+cardinality: 1
+translatable: false
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

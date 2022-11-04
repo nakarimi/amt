@@ -1,0 +1,16 @@
+uuid: b9ce6511-9ebb-44a4-8edc-262872eb959b
+langcode: en
+status: true
+dependencies: {  }
+id: ami_token_settings
+label: 'AMI Token Settings'
+context:
+  show_warning: true
+  group:
+    language: false
+  fallback:
+    language: ''
+menu:
+  path: /admin/config/ami-token-settings
+  weight: 0
+  description: 'AMI Token Settings'

@@ -1,0 +1,14 @@
+uuid: b60dd033-bead-408a-8fec-9394ee9cb8f0
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.studio_manager
+  module:
+    - user
+id: user_add_role_action.studio_manager
+label: 'Add the Studio Manager role to the selected user(s)'
+type: user
+plugin: user_add_role_action
+configuration:
+  rid: studio_manager

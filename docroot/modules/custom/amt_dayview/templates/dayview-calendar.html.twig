@@ -1,0 +1,217 @@
+{% include "@amt_dayview/dayview-calendar_filter.html.twig" %}
+<br>
+<div id="copy-or-paste">
+	<h4 id="header">Selected Event</h4>
+	<div id="content"></div>
+	<div id="footer">
+		<button id="cancel-operation" class="btn btn-sm btn-primary">Cancel</button>
+	</div>
+</div>
+<div id="calendar"></div>
+
+<div class="modal calendar" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<ul class="nav nav-tabs" id="tabContent">
+					<li id="appointmentDetailsTab" class="active">
+						<a id="appointmentDetailsLink" href="#appointmentDetails" data-toggle="tab">Appointment Details</a>
+					</li>
+					<li id="statusListTab">
+						<a id="editStatusLink" href="#editStatus" data-toggle="tab">Edit Status</a>
+					</li>
+				</ul>
+
+			</div>
+			<div class="modal-body" style=" max-height: 70vh; overflow-y: scroll; ">
+				<div class="tab-content">
+					<div class="tab-pane active" id="appointmentDetails">
+						<div id="dayview-popup" class="row"></div>
+					</div>
+
+					<div class="tab-pane" id="editStatus">
+						<ul id="studentStatusList" style="margin-top:0px; list-style: none; padding-left: 0px;"></ul>
+					</div>
+
+					<div class="tab-pane" id="deleteStatus">
+						<div id="deleteMessage" class="row">
+							<div style="margin-left: 15px; margin-right: 15px;">
+								<h3>Do you really want to delete this event?</h3>
+								<small class="text-danger">This process cannot be undone.</small>
+								<button class="btn btn-danger delete_event_modal">
+									Yes, delete appointment
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="modal-footer" id="modal-footer">
+				<button type="button" class="popup-close btn btn-default hidden" data-dismiss="modal">Close</button>
+				<div class="btn-group" role="group" id="studentDashboardsDropdownButton">
+					<button type="button" class="btn btn-info dropdown-toggle couple-stu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						Student Dashboard
+						<span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" id="dahboardsDropMenu" style="margin-top:0px"></ul>
+					<a class="single-stu link" target="_blank">
+						<button type="button" class="btn btn-info dropdown-toggle single-stu">
+							Student Dashboard
+						</button>
+					</a>
+				</div>
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+{% if pageType == 'day' %}
+<!-- Modal for Updating Multiple appointments statuses -->
+<div class="modal" tabindex="-1" role="dialog" id="update_multiple_status">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Updating Multiple
+					<span id="appointment_type_identifier"></span>' statuses</h3>
+			</div>
+			<div class="modal-body">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>
+								<div class="checkbox" id="multiple_status_update_select_all">
+									<label>
+										<input type="checkbox" id="multiple_status_update_select_all_checkbox">
+										select All
+									</label>
+								</div>
+							</th>
+							<th>Title</th>
+							<th>Instructor</th>
+							<th>Time</th>
+							<th id="multiple_status_update_status_column">Status</th>
+						</tr>
+					</thead>
+					<tbody id="update_multiple_status_table_body"></tbody>
+				</table>
+			</div>
+			<div class="modal-footer" id="modal-footer">
+
+				<div class="col-md-8">
+					<select class="form-control" id="lessons_status_selectbox">
+						{% if lesson_status_list %}
+							{% for key,val in lesson_status_list %}
+								<option value="{{val.id}}" {% if val.name == "Pending Status" %} selected {% endif %} >{{val.name}}</option>
+							{% endfor %}
+						{% endif %}
+					</select>
+					<select class="form-control" id="services_status_selectbox">
+						{% if service_status_list %}
+							{% for key,val in service_status_list %}
+								<option value="{{val.id}}" {% if val.name == "Pending Status" %} selected {% endif %} >{{val.name}}</option>
+							{% endfor %}
+						{% endif %}
+					</select>
+				</div>
+
+				<div class="col-md-4">
+					<button class="btn btn-success" id="update_multiple_status_submit_btn">Update All</button>
+				</div>
+
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+<!-- End of modal for Updating Multiple appointments statuses -->
+{% endif %}
+<!-- Modal for Updating Multiple appointments statuses -->
+<div class="modal" tabindex="-1" role="dialog" id="update_multiple_status_result_modal">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Status Update Result
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</h3>
+				
+			</div>
+			<div class="modal-body">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>Event Title</th>
+							<th>Reason</th>
+						</tr>
+					</thead>
+					<tbody id="update_multiple_status_result_body"></tbody>
+				</table>
+			</div>
+
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+<!-- End of modal for Updating Multiple appointments statuses -->
+
+
+<!-- Modal for Cancelling or Rescheduling events -->
+<div class="modal" tabindex="-1" role="dialog" id="crs_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">×</span>
+				</button>
+				<h4>What date would you like to Reschedule to?</h4>
+			</div>
+			<div class="modal-body">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>Date</th>
+							<th>Time</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								<input
+									type="date"
+									class="form-control"
+									id="rs_date"
+									name="rs_date"
+									size="12">
+							</td>
+							<td>
+								<input
+									type="time"
+									class="form-control"
+									id="rs_time"
+									name="rs_time"
+									size="12">
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<div><small>Leave the fields empty if you want to cancel.</small></div>
+				<div id="rs_errors" style="color:red;"></div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-success" id="crs_save_btn">Save</button>
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+<!-- End of modal for Cancelling or Rescheduling events -->

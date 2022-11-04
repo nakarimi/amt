@@ -1,0 +1,33 @@
+uuid: d658b548-39c9-415b-a12d-1264a8a1793a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_hide
+    - taxonomy.vocabulary.enrollment_type
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: taxonomy_term.enrollment_type.field_hide
+field_name: field_hide
+entity_type: taxonomy_term
+bundle: enrollment_type
+label: Hide
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

@@ -1,0 +1,181 @@
+uuid: a24f17fd-ee90-44c0-8b7d-71f6ce71150b
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.day_view_settings
+    - field.field.config_pages.day_view_settings.field_all_day_slot
+    - field.field.config_pages.day_view_settings.field_default_view
+    - field.field.config_pages.day_view_settings.field_display_event_time
+    - field.field.config_pages.day_view_settings.field_duration_time_slot
+    - field.field.config_pages.day_view_settings.field_group_by_date_and_resource
+    - field.field.config_pages.day_view_settings.field_group_by_resource
+    - field.field.config_pages.day_view_settings.field_header_center
+    - field.field.config_pages.day_view_settings.field_header_left
+    - field.field.config_pages.day_view_settings.field_header_right
+    - field.field.config_pages.day_view_settings.field_instructor_container
+    - field.field.config_pages.day_view_settings.field_instructor_placement
+    - field.field.config_pages.day_view_settings.field_instructor_trigger
+    - field.field.config_pages.day_view_settings.field_refetch_resource_ajax
+    - field.field.config_pages.day_view_settings.field_slot_label_format
+    - field.field.config_pages.day_view_settings.field_slot_label_interval
+    - field.field.config_pages.day_view_settings.field_studio_working_hours
+    - field.field.config_pages.day_view_settings.field_time_zone
+    - field.field.config_pages.day_view_settings.field_tooltip_container
+    - field.field.config_pages.day_view_settings.field_tooltip_placement
+    - field.field.config_pages.day_view_settings.field_tooltip_trigger
+  module:
+    - office_hours
+id: config_pages.day_view_settings.default
+targetEntityType: config_pages
+bundle: day_view_settings
+mode: default
+content:
+  field_all_day_slot:
+    weight: 7
+    settings: {  }
+    third_party_settings: {  }
+    type: options_buttons
+    region: content
+  field_default_view:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_display_event_time:
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+    type: options_buttons
+    region: content
+  field_duration_time_slot:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_group_by_date_and_resource:
+    weight: 8
+    settings: {  }
+    third_party_settings: {  }
+    type: options_buttons
+    region: content
+  field_group_by_resource:
+    weight: 6
+    settings: {  }
+    third_party_settings: {  }
+    type: options_buttons
+    region: content
+  field_header_center:
+    weight: 10
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_header_left:
+    weight: 9
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_header_right:
+    weight: 11
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_instructor_container:
+    weight: 15
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_instructor_placement:
+    weight: 16
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_instructor_trigger:
+    weight: 17
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_refetch_resource_ajax:
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    type: options_buttons
+    region: content
+  field_slot_label_format:
+    weight: 5
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_slot_label_interval:
+    weight: 4
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_studio_working_hours:
+    weight: 12
+    settings: {  }
+    third_party_settings: {  }
+    type: office_hours_default
+    region: content
+  field_time_zone:
+    weight: 21
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_tooltip_container:
+    weight: 18
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_tooltip_placement:
+    weight: 19
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_tooltip_trigger:
+    weight: 20
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  label: true

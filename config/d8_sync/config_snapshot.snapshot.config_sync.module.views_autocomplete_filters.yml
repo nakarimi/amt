@@ -1,0 +1,11 @@
+uuid: 35d4639d-19c0-4ab1-9cba-74323d5a2aac
+langcode: en
+status: true
+dependencies:
+  module:
+    - views_autocomplete_filters
+id: config_sync.module.views_autocomplete_filters
+snapshotSet: config_sync
+extensionType: module
+extensionName: views_autocomplete_filters
+items: {  }

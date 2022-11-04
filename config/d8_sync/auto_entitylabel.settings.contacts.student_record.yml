@@ -1,0 +1,7 @@
+status: 1
+pattern: '[contacts:field_first_name] [contacts:field_last_name]'
+php: false
+escape: false
+dependencies:
+  config:
+    - eck.eck_type.contacts.student_record

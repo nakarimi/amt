@@ -1,0 +1,9 @@
+amt_studio.page:
+  path: '/studio-business-summary'
+  defaults:
+    _controller: '\Drupal\amt_studio\Controller\AmtStudioController::basePageCallback'
+    _title: 'Studio Business Summary Report'
+  requirements:
+    _permission: 'Studio Business Summary Page'
+  options:
+    no_cache: 'TRUE'

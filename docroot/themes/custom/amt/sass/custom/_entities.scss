@@ -1,0 +1,180 @@
+.path-packages,.path-contacts,.path-payments, .path-attendees, .path-events, .path-student-accounts {
+  .region-content {
+    .field--type-decimal ,.field--type-integer {
+      label {
+        width:150px;
+      }
+    }
+    div > div.field {
+      width: 50%;
+      float: left;
+      padding: 5px;
+      .field--label{
+      	font-weight: bold;
+      }
+      .field--item h2{
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.428571429;
+        color: #333333;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  }
+}
+
+.path-packages .region-content div > div.field + div.panel.form-wrapper,
+.path-contacts .region-content div > div.field + div.panel.form-wrapper,
+.path-payments .region-content div > div.field + div.panel.form-wrapper,
+.path-attendees .region-content div > div.field + div.panel.form-wrapper,
+.path-events .region-content div > div.field + div.panel.form-wrapper,
+.path-student-accounts .region-content div > div.field + div.panel.form-wrapper{
+  display: flow-root;
+  width: 100%;
+}
+//colors
+$white: #ffffff;
+table.success-rate tbody tr.odd {
+  background-color: $white !important;
+}
+$color_gray_nurse_approx: #eaeaea;
+div {
+  &.form-item-field-type-target-id + div.form-item-field-date-and-time-value-min {
+    background-color: $color_gray_nurse_approx;
+    border-bottom: 3px solid $white;
+    + div.form-item-field-date-and-time-value-max {
+      background-color: $color_gray_nurse_approx;
+      border-bottom: 3px solid $white;
+    }
+  }
+  &.form-item-field-date-and-time-value-max + div.form-item-field-expiration-date-value-min {
+    background-color: $color_gray_nurse_approx;
+  }
+  &.form-item-field-expiration-date-value-min + div.form-item-field-expiration-date-value-max {
+    background-color: $color_gray_nurse_approx;
+  }
+}
+$gray: grey;
+#resetfiltersuccssrateBtn {
+  background-color: $gray;
+  border-color: $gray;
+}
+button#edit-submit {
+  + {
+    button#edit-preview {
+      display: none;
+    }
+  }
+}
+@media screen and (max-width: 500px) {
+  .fc-axis {
+    width: 30px;
+    span {
+      font-size: 10px;
+    }
+  }
+  .fc-resource-cell {
+    div {
+      font-size: 11px !important;
+      text-align: center;
+      overflow: auto;
+    }
+  }
+  .checkbox {
+    label {
+      font-size: 12px !important;
+    }
+  }
+}
+
+
+$childForInstructor : '.field--item .field--name-field-first-name, .field--item .field--name-field-last-name';
+$instructorSelector : '.field--name-field-instructor >, .field--name-field-teacher >, .field--name-field-inquiry-taker >, .field--name-field-executive >, .field--name-field-junior-executive >';
+
+#{$instructorSelector} {
+  .field--item > article:hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
+#{$instructorSelector} {
+  #{$childForInstructor} {
+    display: inline;
+  }
+}
+
+
+#{$instructorSelector} {
+  #{$childForInstructor} {
+    :hover {
+      text-decoration: none;
+      color: #337ab7 !important;
+    }
+  }
+}
+
+#{$instructorSelector} {
+  #{$childForInstructor} {
+    :focus {
+      text-decoration: none;
+      color: #337ab7 !important;
+    }
+  }
+}
+#{$instructorSelector} {
+  #{$childForInstructor} {
+    :visited {
+      text-decoration: none;
+      color: #337ab7 !important;
+    }
+  }
+}
+
+#{$instructorSelector} {
+  #{$childForInstructor} {
+    :active {
+      text-decoration: none;
+      color: #337ab7 !important;
+    }
+  }
+  .nav > li {
+    z-index: 1000;
+  }
+}
+
+.instructor-reordering {
+  .tabledrag-changed-warning, 
+  .alert-warning,
+  .form-actions,
+  span.tabledrag-changed
+   {
+      display: none !important;
+  }
+}
+
+form#packages-enrollment-enrollment-drop-mode-form {
+  padding: 15px 5px;
+
+  label {
+    display: block;
+  }
+
+  input {
+    min-width: 200px;
+  }
+}
+
+#filtersTitle {
+  cursor: pointer;
+  font-size: 25px;
+  
+  .collapseBtn{
+    margin: 5px;
+
+    img{
+      width: 25px;
+    }
+  }
+}

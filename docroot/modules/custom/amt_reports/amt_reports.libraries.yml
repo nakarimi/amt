@@ -1,0 +1,52 @@
+amt_filters:
+  version: 1.x
+  css:
+    theme:
+      assets/css/bootstrap-multiselect.min.css: {}
+      assets/css/student-list.css: {}
+
+  js:
+    assets/js/bootstrap-multiselect.min.js: {}
+    assets/js/service_type_autocomplete.js: {}
+  dependencies:
+    - core/jquery
+
+amt_report_script:
+  version: 1.x
+  js:
+    assets/js/amt_show_date_on_reports.js: {}
+  dependencies:
+    - core/jquery
+     
+amt_students_filters:
+  version: 1.x
+  css:
+    theme:
+      assets/css/printStyle.css: {attributes: { media:print } }
+  js:
+    assets/js/amt_students_filters_autocomplete.js: {}
+  dependencies:
+    - core/jquery
+
+amt_conflict_printstyle:
+  version: 1.x
+  css:
+    theme:
+      assets/css/conflictedtime.css: {attributes: { media:print } }
+  dependencies:
+    - core/jquery
+
+amt_mass_student_department_update:
+  version: 1.x
+  js:
+    assets/js/mass_student_department_udpate.js: {}
+  dependencies:
+    - core/jquery
+
+amt_student_inventory_report:
+  version: 1.x
+  js:
+    https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js: { type: external, minified: true }
+    https://cdn.datatables.net/1.10.18/js/dataTables.bootstrap.min.js: { type: external, minified: true }
+  dependencies:
+    - core/jquery

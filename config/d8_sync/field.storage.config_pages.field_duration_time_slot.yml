@@ -1,0 +1,42 @@
+uuid: a75dc972-3078-4943-a5cd-0346a318e834
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+    - options
+id: config_pages.field_duration_time_slot
+field_name: field_duration_time_slot
+entity_type: config_pages
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: '00:15:00'
+      label: '00:15:00'
+    -
+      value: '00:20:00'
+      label: '00:20:00'
+    -
+      value: '00:25:00'
+      label: '00:25:00'
+    -
+      value: '00:30:00'
+      label: '00:30:00'
+    -
+      value: '00:35:00'
+      label: '00:35:00'
+    -
+      value: '00:40:00'
+      label: '00:40:00'
+    -
+      value: '00:45:00'
+      label: '00:45:00'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

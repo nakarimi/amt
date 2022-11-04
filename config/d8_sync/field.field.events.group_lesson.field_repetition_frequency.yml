@@ -1,0 +1,23 @@
+uuid: f4e1a693-54b7-499d-84d7-9bc9cd866dd3
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.group_lesson
+    - field.storage.events.field_repetition_frequency
+id: events.group_lesson.field_repetition_frequency
+field_name: field_repetition_frequency
+entity_type: events
+bundle: group_lesson
+label: 'Repetition Frequency'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

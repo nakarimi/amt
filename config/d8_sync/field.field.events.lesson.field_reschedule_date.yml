@@ -1,0 +1,30 @@
+uuid: fb10fc52-aef1-449f-9383-98737d7d1706
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.lesson
+    - field.storage.events.field_reschedule_date
+  module:
+    - datetime
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.lesson.field_reschedule_date
+field_name: field_reschedule_date
+entity_type: events
+bundle: lesson
+label: 'Reschedule Date'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

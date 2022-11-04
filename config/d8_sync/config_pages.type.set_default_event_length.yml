@@ -1,0 +1,16 @@
+uuid: 9d0fccb2-be15-430b-bff4-dcdbd43dbfdd
+langcode: en
+status: true
+dependencies: {  }
+id: set_default_event_length
+label: 'Set Default Event Length'
+context:
+  show_warning: true
+  group:
+    language: false
+  fallback:
+    language: ''
+menu:
+  path: ''
+  weight: 0
+  description: ''

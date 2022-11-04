@@ -1,0 +1,35 @@
+uuid: a7386c9f-f390-4355-b8f1-3055c4679649
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.group_lesson
+    - field.storage.events.field_type
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.group_lesson.field_type
+field_name: field_type
+entity_type: events
+bundle: group_lesson
+label: 'Lesson Type'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: views
+  handler_settings:
+    view:
+      view_name: active_group_lesson_type
+      display_name: entity_reference_2
+      arguments: {  }
+field_type: entity_reference

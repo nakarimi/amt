@@ -1,0 +1,10 @@
+uuid: a6f18d7b-4e33-4399-8044-6bf1db87daa4
+langcode: en
+status: true
+dependencies:
+  module:
+    - user
+id: user.instructor
+label: Instructor
+targetEntityType: user
+cache: true

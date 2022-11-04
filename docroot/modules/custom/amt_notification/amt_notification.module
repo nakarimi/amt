@@ -1,0 +1,331 @@
+<?php
+
+/**
+ * @file
+ * Provides notification functionality and alterations for AMT site.
+ */
+
+use Twilio\Rest\Client;
+use Drupal\Core\Render\Markup;
+
+/**
+ * Implements hook_cron().
+ *
+ * AMT notifications to sending to each student that has lesson.
+ */
+function amt_notification_cron() {
+  // Invoke the event for notification.
+  _amt_notification_students_sms();
+  _amt_notification_students_email();
+
+  // Notify me in the log messages:
+  \Drupal::logger('AMT Notifications')->info('Notifications sent at ' . date("Y-m-d H:i:s"));
+}
+
+/**
+ * Custom Function Sends an SMS Text to a Number which is using Twilio Services.
+ *
+ * @param string $to
+ *   Phone Number that the SMS text will be sent to.
+ * @param string $message
+ *   Text of the Message.
+ */
+function _amt_notification_send_sms(string $to, string $message) {
+  $config = \Drupal::config('amt_notification.adminsettings');
+  $accountSid = $config->get('usid');
+  $authToken = $config->get('token');
+  $twilioNumber = $config->get('tnumb');
+  // Check that Credentials added to system.
+  if (!empty($accountSid) && !empty($authToken) && !empty($twilioNumber)) {
+    $twilio = new Client($accountSid, $authToken);
+    try {
+      $twilio->messages->create(
+        $to,
+          [
+            "body" => $message,
+            "from" => $twilioNumber,
+            // On US phone numbers, you could send an image as well!.
+          ]
+       );
+      drupal_set_message('Message sent to ' . $to, 'success');
+      return ('Message sent to ' . $to);
+    }
+    catch (Exception $e) {
+      // Get the error message of Exception.
+      drupal_set_message($e->getMessage(), 'error');
+    }
+  }
+  else {
+    $message = Markup::create('Credentials are required! <a href="/admin/config/amt_notification/twilio">Twilio Setting</a>');
+    drupal_set_message($message, 'error');
+  }
+}
+
+/**
+ * To load all student and sent multiple messages once.
+ */
+function _amt_notification_students_sms() {
+  $studentsData = _amt_notification_students_data();
+  foreach ($studentsData as $key => $student) {
+    // Check if user has no number then sms will not send.
+    if ($student->phone == NULL) {
+      $message = '( Failed! ) ' . $student->studentfirstname . ' ' . $student->studentlastname . ', has not valid phone number! (' . json_encode($student) . ')';
+    }
+    else {
+      // Get the time from lesson date.
+      $dateTime = date_create($student->date);
+      // Creating the actual message using the data.
+      $message = 'Dear ' . $student->studentfirstname . ' ' . $student->studentlastname . ', you have an upcoming lesson with ' . $student->instructorfirstname . ' ' . $student->instructorlastname . ' tomorrow, ' . date_format($dateTime, "M d") . ' at ' . date_format($dateTime, "h:i A");
+      _amt_notification_send_sms($student->phone, $message);
+    }
+    \Drupal::logger('AMT SMS Notification')->info($message);
+  }
+}
+
+/**
+ * Fetches all students list that today has lesson.
+ *
+ * This function is going load the list of all
+ * students based on the parameter passed to it.
+ * In this function we have used db_select which is much more
+ * flexible then entity query to extract our desired result.
+ * We have also created two db_select queries two extract student
+ * data both based on lesson and group lesson.
+ */
+function _amt_notification_students_data($type = NULL) {
+  $connection = \Drupal::database();
+  // The first db select that loadeds data based on group lesson.
+  $queryGroupLesson = db_select('contacts_field_data', 'p');
+  // Joining field email with contacts.
+  $queryGroupLesson->leftjoin('contacts__field_email', 'e', 'e.entity_id = p.id');
+  $queryGroupLesson->leftjoin('contacts__field_first_name', 'fn', 'fn.entity_id = p.id');
+  $queryGroupLesson->leftjoin('contacts__field_last_name', 'ln', 'ln.entity_id = p.id');
+  $queryGroupLesson->leftjoin('contacts__field_cell_phone', 'cp', 'cp.entity_id = p.id');
+  $queryGroupLesson->leftjoin('contacts__field_notification_preference', 'snp', 'snp.entity_id = p.id');
+  // Joining field students of attendees with contacts.
+  $queryGroupLesson->leftjoin('attendees__field_students', 'a', 'a.field_students_target_id = p.id');
+  // Joining enrollment field of attendees.
+  $queryGroupLesson->leftjoin('attendees__field_enrollment', 'en', 'en.entity_id = a.entity_id');
+  // Joining field student of events.
+  $queryGroupLesson->leftjoin('events__field_student', 's', 's.field_student_target_id = a.entity_id');
+  // Joining field date and time of events.
+  $queryGroupLesson->leftjoin('events__field_date_and_time', 'd', 'd.entity_id = s.entity_id');
+  // Joining field instructor of enrollment.
+  $queryGroupLesson->leftjoin('events__field_instructor', 'inn', 'inn.entity_id = s.entity_id');
+  // Joining field duration.
+  $queryGroupLesson->leftjoin('events__field_duration', 'du', 'du.entity_id = s.entity_id');
+  // Joining field field category of the enrollment.
+  $queryGroupLesson->leftjoin('packages__field_category', 'cat', 'cat.entity_id = en.field_enrollment_target_id');
+  $queryGroupLesson->leftjoin('taxonomy_term_field_data', 'dep', 'dep.tid = cat.field_category_target_id');
+  // Joining user field data table to get the name of the instructor.
+  $queryGroupLesson->leftjoin('users_field_data', 'inst', 'inst.uid = inn.field_instructor_target_id');
+  $queryGroupLesson->leftjoin('user__field_last_name', 'uln', 'uln.entity_id = inn.field_instructor_target_id');
+  $queryGroupLesson->leftjoin('user__field_first_name', 'ufn', 'ufn.entity_id = inn.field_instructor_target_id');
+
+  // The first db select that loadeds data based on lesson.
+  $queryLesson = db_select('contacts_field_data', 'p');
+  // Joining field email with contacts.
+  $queryLesson->leftjoin('contacts__field_email', 'e', 'e.entity_id = p.id');
+  $queryLesson->leftjoin('contacts__field_first_name', 'fn', 'fn.entity_id = p.id');
+  $queryLesson->leftjoin('contacts__field_last_name', 'ln', 'ln.entity_id = p.id');
+  $queryLesson->leftjoin('contacts__field_cell_phone', 'cp', 'cp.entity_id = p.id');
+  $queryLesson->leftjoin('contacts__field_notification_preference', 'snp', 'snp.entity_id = p.id');
+  // // Joining field students of attendees with contacts.
+  $queryLesson->leftjoin('attendees__field_students', 'a', 'a.field_students_target_id = p.id');
+  // Joining enrollment field of attendees.
+  $queryLesson->leftjoin('attendees__field_enrollment', 'en', 'en.entity_id = a.entity_id');
+  // Joining field student of events.
+  $queryLesson->leftjoin('events__field_students', 's', 's.field_students_target_id = a.entity_id');
+  // Joining field date and time of events.
+  $queryLesson->leftjoin('events__field_date_and_time', 'd', 'd.entity_id = s.entity_id');
+  // Joining field instructor of enrollment.
+  $queryLesson->leftjoin('events__field_instructor', 'inn', 'inn.entity_id = s.entity_id');
+  // Joining field duration.
+  $queryLesson->leftjoin('events__field_duration', 'du', 'du.entity_id = s.entity_id');
+  // Joining field field category of the enrollment.
+  $queryLesson->leftjoin('packages__field_category', 'cat', 'cat.entity_id = en.field_enrollment_target_id');
+  $queryLesson->leftjoin('taxonomy_term_field_data', 'dep', 'dep.tid = cat.field_category_target_id');
+  // Joining user field data table to get the name of the instructor.
+  $queryLesson->leftjoin('users_field_data', 'inst', 'inst.uid = inn.field_instructor_target_id');
+  $queryLesson->leftjoin('user__field_last_name', 'uln', 'uln.entity_id = inn.field_instructor_target_id');
+  $queryLesson->leftjoin('user__field_first_name', 'ufn', 'ufn.entity_id = inn.field_instructor_target_id');
+
+  // Renaming the fields to be easily accessed in view.
+  $queryGroupLesson->addField('p', 'id', 'sid');
+  $queryGroupLesson->addField('fn', 'field_first_name_value', 'studentfirstname');
+  $queryGroupLesson->addField('ln', 'field_last_name_value', 'studentlastname');
+  $queryGroupLesson->addField('d', 'field_date_and_time_value', 'date');
+  $queryGroupLesson->addField('uln', 'field_last_name_value', 'instructorlastname');
+  $queryGroupLesson->addField('ufn', 'field_first_name_value', 'instructorfirstname');
+  $queryGroupLesson->addField('e', 'field_email_value', 'email');
+  $queryGroupLesson->addField('cp', 'field_cell_phone_value', 'phone');
+  $queryGroupLesson->addField('snp', 'field_notification_preference_value', 'method');
+  $queryGroupLesson->addField('du', 'field_duration_value', 'duration');
+  // Renaming the fields to be easily accessed in view.
+  $queryLesson->addField('p', 'id', 'sid');
+  $queryLesson->addField('fn', 'field_first_name_value', 'studentfirstname');
+  $queryLesson->addField('ln', 'field_last_name_value', 'studentlastname');
+  $queryLesson->addField('d', 'field_date_and_time_value', 'date');
+  $queryLesson->addField('uln', 'field_last_name_value', 'instructorlastname');
+  $queryLesson->addField('ufn', 'field_first_name_value', 'instructorfirstname');
+  $queryLesson->addField('e', 'field_email_value', 'email');
+  $queryLesson->addField('cp', 'field_cell_phone_value', 'phone');
+  $queryLesson->addField('snp', 'field_notification_preference_value', 'method');
+  $queryLesson->addField('du', 'field_duration_value', 'duration');
+
+  // Combining the two above queries.
+  $queryFinal = $connection->select($queryGroupLesson->union($queryLesson));
+  // Choosing the fields for this query.
+  $queryFinal->fields(NULL, [
+    'sid',
+    'date',
+    'studentfirstname',
+    'studentlastname',
+    'instructorfirstname',
+    'instructorlastname',
+    'email',
+    'phone',
+    'method',
+    'duration',
+  ]);
+  $today = date('Y-m-d');
+  $tomorrow = date('Y-m-d', strtotime($today . ' +1 day'));
+  $queryFinal->condition('date', [$tomorrow . 'T00:00:00', $tomorrow . 'T23:59:59'], 'BETWEEN');
+
+  if ($type == 'email') {
+    // Load just Students that have Email or BOTH notification preference.
+    $queryFinal->condition('method', 'SMS', '<>');
+  }
+  else {
+    // Load just Students that have SMS or BOTH notification preference.
+    $queryFinal->condition('method', 'Email', '<>');
+  }
+
+  // If the list is for active students.
+  $studentsList = $queryFinal->execute()->fetchAll();
+  // Returning the query back.
+  return $studentsList;
+}
+
+/**
+ * Implements hook_mail().
+ *
+ * This is going to map the email data and fire it.
+ */
+function amt_notification_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'email_template':
+      $message['format'] = 'text/html';
+      $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed; delsp=yes';
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = $params['subject'] ?? t('Arthur Murray Time');
+      $message['body'][] = $params['message'];
+      break;
+  }
+}
+
+/**
+ * Custom function for sending email based on custom defined template.
+ *
+ * @param array $emails
+ *   Receives the body of the email.
+ */
+function _amt_notification_send_email(array $emails) {
+
+  $mailManager = \Drupal::service('plugin.manager.mail');
+  $module = 'amt_notification';
+  $key = 'email_template';
+  $to = $emails['email'];
+  $html = $emails['body'];
+  // Provide the markup for swift-mailer.
+  $params['message'] = Markup::create($html);
+  if (isset($emails['subject'])) {
+    $params['subject'] = $emails['subject'];
+  }
+
+  $langcode = \Drupal::currentUser()->getPreferredLangcode();
+  $send = TRUE;
+  // Send the email.
+  $result = $mailManager->mail($module, $key, $to, $langcode, $params, NULL, $send);
+
+  if ($result['result'] != TRUE) {
+    $message = t('There was a problem sending your email notification to @email.', ['@email' => $to]);
+    drupal_set_message($message, 'error');
+    \Drupal::logger('mail-log')->error($message);
+    return;
+  }
+  // Run when the email is not set successfully sent.
+  $message = t('The email was successfully sent to @email', ['@email' => $to]);
+  drupal_set_message($message);
+  \Drupal::logger('mail-log')->notice($message);
+}
+
+/**
+ * To load all student and sent email confirmation.
+ */
+function _amt_notification_students_email() {
+  $studentsData = _amt_notification_students_data('email');
+  foreach ($studentsData as $key => $student) {
+    // Check if user has no number then sms will not send.
+    if ($student->email == NULL) {
+      $message = $student->studentfirstname . ' ' . $student->studentlastname . ', has not valid email! (' . json_encode($student) . ')';
+    }
+    else {
+      try {
+        // Get the time from lesson date.
+        $dateTime = date_create($student->date);
+        $from = date_format($dateTime, 'H:i A');
+        $secs = strtotime($student->duration) - strtotime("00:00:00");
+        $to = date("H:i A", strtotime($from) + $secs);
+
+        // Prepare the messsage content.
+        $message = 'Dear <b>' . $student->studentfirstname . ' ' . $student->studentlastname . '</b>, <br><br> This is a reminder for your appointment with <b>' . $student->instructorfirstname . ' ' . $student->instructorlastname . '</b> on <b>' . date_format($dateTime, 'M j') . '</b> from <b>' . $from . '</b> to <b>' . $to . '</b>. If you have any questions, or need to update your appointment, please call the proper location listed below. <br><br> <b>Santa Rosa: </b>1-707-800-4085 <br><b>Napa: </b>1-707-200-4345<br><br>We look forward to seeing you soon!';
+
+        // Structure the params for email function.
+        $dataEmail = [
+          'email' => $student->email,
+          'body' => $message,
+        ];
+        // Call email function.
+        _amt_notification_send_email($dataEmail);
+
+        drupal_set_message('Email sent to ' . $student->email, 'success');
+        \Drupal::logger('AMT Email Notification')->info($message);
+      }
+
+      catch (Exception $e) {
+        // Get the error message of Exception.
+        drupal_set_message($e->getMessage(), 'error');
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_create().
+ *
+ * Adds newly joined students to notifications queue
+ * to send them thank you emails.
+ */
+function amt_notification_student_accounts_create($entity) {
+  $students = $entity->field_contacts->referencedEntities();
+  foreach($students as $student) {
+    $lesson_reminders = $student->field_notification_preference->getString();
+
+    // Each queue item is a single notification that will be proccessed
+    // by 'notifications' queue worker.
+    $queue_item = [
+      'first_name' => $student->field_first_name->value,
+      'last_name' => $student->field_last_name->value,
+      'email_address' => $student->field_email->value,
+      'phone_number' => $student->field_cell_phone->value,
+      'notify_by' => $lesson_reminders,
+      'notif_type' => 'thank_you',
+    ];
+
+    // @see amt_notification\src\Plugin\QueueWorker\NotificationsQueue.php
+    // to see how it processes the items.
+    $queue = \Drupal::queue('notifications');
+    $queue->createItem($queue_item);
+  }
+}

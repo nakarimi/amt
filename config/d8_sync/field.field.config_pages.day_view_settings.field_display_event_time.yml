@@ -1,0 +1,23 @@
+uuid: 41300170-5b39-44d2-ba3d-b9f408909ae7
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.day_view_settings
+    - field.storage.config_pages.field_display_event_time
+id: config_pages.day_view_settings.field_display_event_time
+field_name: field_display_event_time
+entity_type: config_pages
+bundle: day_view_settings
+label: 'Display Event Time'
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

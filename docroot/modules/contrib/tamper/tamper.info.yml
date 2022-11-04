@@ -1,0 +1,10 @@
+name: Tamper
+description: Generic plugin to modify data.
+type: module
+# core: 8.x
+
+# Information added by Drupal.org packaging script on 2019-07-20
+version: '8.x-1.0-alpha1'
+core: '8.x'
+project: 'tamper'
+datestamp: 1563627488

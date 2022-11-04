@@ -1,0 +1,207 @@
+uuid: f1f7daf9-c488-41cf-8e8f-b5e47a34355a
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.field.packages.enrollment.field_category
+    - field.field.packages.enrollment.field_enrollment_lesson_count
+    - field.field.packages.enrollment.field_enrollment_package_name
+    - field.field.packages.enrollment.field_enrollment_total_price
+    - field.field.packages.enrollment.field_executive
+    - field.field.packages.enrollment.field_legacy_id
+    - field.field.packages.enrollment.field_sale_date
+    - field.field.packages.enrollment.field_student
+  module:
+    - eck
+    - feeds_tamper
+third_party_settings:
+  feeds_tamper:
+    tampers:
+      0e0ba292-a9fa-44f7-b2c2-7181697bf1fb:
+        plugin: strtotime
+        source: saledate
+        weight: 0
+        uuid: 0e0ba292-a9fa-44f7-b2c2-7181697bf1fb
+label: Enrollments
+id: enrollments
+description: ''
+import_period: -1
+fetcher: upload
+fetcher_configuration:
+  allowed_extensions: 'txt csv tsv xml opml'
+  directory: 'private://feeds'
+parser: csv
+parser_configuration:
+  delimiter: ','
+  no_headers: false
+  line_limit: 100
+processor: 'entity:packages'
+processor_configuration:
+  update_existing: 2
+  update_non_existent: _keep
+  expire: -1
+  owner_feed_author: false
+  owner_id: 0
+  authorize: true
+  skip_hash_check: false
+  values:
+    type: enrollment
+custom_sources:
+  category:
+    label: Category
+    value: Category
+    machine_name: category
+  executive:
+    label: Executive
+    value: Executive
+    machine_name: executive
+  instructor:
+    label: Instructor
+    value: Instructor
+    machine_name: instructor
+  interval_unit:
+    label: 'Interval Unit'
+    value: 'Interval Unit'
+    machine_name: interval_unit
+  junior_executive:
+    label: 'Junior Executive'
+    value: 'Junior Executive'
+    machine_name: junior_executive
+  legacy_id:
+    label: 'Legacy ID'
+    value: 'Legacy ID'
+    machine_name: legacy_id
+  lesson_count:
+    label: 'Lesson Count'
+    value: 'Lesson Count'
+    machine_name: lesson_count
+  lesson_price:
+    label: 'Lesson Price'
+    value: 'Lesson Price'
+    machine_name: lesson_price
+  name:
+    label: Name
+    value: Name
+    machine_name: name
+  package_name:
+    label: 'Package Name'
+    value: 'Package Name'
+    machine_name: package_name
+  payment_interval:
+    label: 'Payment interval'
+    value: 'Payment interval'
+    machine_name: payment_interval
+  sale_date:
+    label: 'Sale Date'
+    value: 'Sale Date'
+    machine_name: sale_date
+  student:
+    label: Student
+    value: Student
+    machine_name: student
+  title:
+    label: title
+    value: title
+    machine_name: title
+  total_price:
+    label: 'Total Price'
+    value: 'Total Price'
+    machine_name: total_price
+  '':
+    label: ''
+    value: ''
+    machine_name: ''
+  scode:
+    label: scode
+    value: scode
+    machine_name: scode
+  docid:
+    label: docid
+    value: docid
+    machine_name: docid
+  saledate:
+    label: saledate
+    value: saledate
+    machine_name: saledate
+  packcode:
+    label: packcode
+    value: packcode
+    machine_name: packcode
+  pri1:
+    label: pri1
+    value: pri1
+    machine_name: pri1
+  salevalue:
+    label: salevalue
+    value: salevalue
+    machine_name: salevalue
+  closer:
+    label: closer
+    value: closer
+    machine_name: closer
+  _title:
+    label: title
+    value: title
+    machine_name: _title
+  _title_:
+    label: _title_
+    value: _title_
+    machine_name: _title_
+mappings:
+  -
+    target: field_student
+    map:
+      target_id: scode
+    settings:
+      reference_by: field_legacy_id
+      feeds_item: guid
+      autocreate: 0
+  -
+    target: field_legacy_id
+    map:
+      value: docid
+    unique:
+      value: '1'
+  -
+    target: field_sale_date
+    map:
+      value: saledate
+    settings:
+      timezone: __SITE__
+  -
+    target: field_enrollment_package_name
+    map:
+      target_id: packcode
+    settings:
+      reference_by: field_abbreviation
+      feeds_item: guid
+      autocreate: 0
+  -
+    target: field_enrollment_lesson_count
+    map:
+      value: pri1
+  -
+    target: field_enrollment_total_price
+    map:
+      value: salevalue
+  -
+    target: field_executive
+    map:
+      target_id: closer
+    settings:
+      reference_by: field_legacy_id
+      feeds_item: guid
+      autocreate: 0
+  -
+    target: title
+    map:
+      value: _title_
+    unique: {  }
+  -
+    target: field_category
+    map:
+      target_id: category
+    settings:
+      reference_by: name
+      autocreate: '1'

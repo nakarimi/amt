@@ -1,0 +1,32 @@
+uuid: 97cc4ed2-de1b-406e-aa71-be6afc8d46f3
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.schedule_type.field_color
+    - taxonomy.vocabulary.schedule_type
+  module:
+    - color_field
+    - text
+id: taxonomy_term.schedule_type.default
+targetEntityType: taxonomy_term
+bundle: schedule_type
+mode: default
+content:
+  description:
+    label: hidden
+    type: text_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_color:
+    weight: 1
+    label: above
+    settings:
+      format: hex
+      opacity: '1'
+    third_party_settings: {  }
+    type: color_field_formatter_text
+    region: content
+hidden: {  }

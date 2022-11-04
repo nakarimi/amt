@@ -1,0 +1,123 @@
+uuid: 751e9ba1-a505-448c-b598-19c26124de16
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.contacts.student_record
+    - field.field.contacts.student_record.field_address
+    - field.field.contacts.student_record.field_attending_lessons
+    - field.field.contacts.student_record.field_cell_phone
+    - field.field.contacts.student_record.field_email
+    - field.field.contacts.student_record.field_first_name
+    - field.field.contacts.student_record.field_gender
+    - field.field.contacts.student_record.field_home_phone
+    - field.field.contacts.student_record.field_last_name
+    - field.field.contacts.student_record.field_notification_preference
+    - field.field.contacts.student_record.field_student_image
+  module:
+    - address
+    - image
+    - options
+    - telephone
+id: contacts.student_record.default
+targetEntityType: contacts
+bundle: student_record
+mode: default
+content:
+  entity_print_view_pdf:
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_address:
+    weight: 9
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: address_default
+    region: content
+  field_attending_lessons:
+    weight: 13
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_cell_phone:
+    weight: 5
+    label: above
+    settings:
+      title: ''
+    third_party_settings: {  }
+    type: telephone_link
+    region: content
+  field_email:
+    weight: 3
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_first_name:
+    weight: 1
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_gender:
+    weight: 7
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+    region: content
+  field_home_phone:
+    weight: 4
+    label: above
+    settings:
+      title: ''
+    third_party_settings: {  }
+    type: telephone_link
+    region: content
+  field_last_name:
+    weight: 2
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_notification_preference:
+    weight: 6
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_student_image:
+    weight: 8
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+    region: content
+  title:
+    label: hidden
+    type: string
+    weight: 0
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+hidden:
+  created: true
+  entity_print_view_epub: true
+  entity_print_view_word_docx: true
+  uid: true

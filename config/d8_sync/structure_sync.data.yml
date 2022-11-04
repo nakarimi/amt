@@ -1,0 +1,3394 @@
+taxonomies:
+  enrollment_type:
+    -
+      vid: enrollment_type
+      tid: '69'
+      langcode: en
+      name: 'Bonus/Comp Lesson'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 5f6bfd28-4b4a-4b69-ab1d-6ebfb1f372c3
+      field_hide: {  }
+    -
+      vid: enrollment_type
+      tid: '1395'
+      langcode: en
+      name: DE
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 3ce7bb7d-6438-425b-b631-f56cd0f16d47
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: enrollment_type
+      tid: '1373'
+      langcode: en
+      name: Deafult
+      description__value: "<p>This lesson type is only used by feed process. This is essentially similar with Uncategorized but it will be counted in the balance.</p>\r\n"
+      description__format: basic_html
+      weight: '0'
+      parent: '0'
+      uuid: eeb1ef19-f2ed-4323-8cbe-289f91b89d09
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: enrollment_type
+      tid: '543'
+      langcode: en
+      name: DOR
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: a6e2c573-5900-4a69-85bd-13680ee23ff9
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: enrollment_type
+      tid: '51'
+      langcode: en
+      name: Extension
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: f3fdb3b7-b12e-4785-8511-e6659cb9b2eb
+      field_hide: {  }
+    -
+      vid: enrollment_type
+      tid: '5'
+      langcode: en
+      name: Miscellaneous
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 533afd91-68ae-42f6-ad40-218c39713f4a
+      field_hide: {  }
+    -
+      vid: enrollment_type
+      tid: '66'
+      langcode: en
+      name: Non-Unit
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: bf48e2b6-05d0-437a-bb1b-bcab9cfa74e1
+      field_hide: {  }
+    -
+      vid: enrollment_type
+      tid: '50'
+      langcode: en
+      name: Original
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: a0a67703-837b-4716-b485-c1c4d9391ed0
+      field_hide: {  }
+    -
+      vid: enrollment_type
+      tid: '546'
+      langcode: en
+      name: 'Party Time'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: cae230bc-91f1-4ab9-b3eb-e48b2b57099e
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: enrollment_type
+      tid: '49'
+      langcode: en
+      name: Pre-Original
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: c1c71fff-a58a-4dad-816e-56802c9be9cb
+      field_hide: {  }
+    -
+      vid: enrollment_type
+      tid: '65'
+      langcode: en
+      name: Renewals
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 1334e35d-5332-459e-94a2-49ccab211ee6
+      field_hide: {  }
+    -
+      vid: enrollment_type
+      tid: '542'
+      langcode: en
+      name: 'Showcase/Medal Ball'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 333ef7d4-61ef-4607-96f9-9ad04be4590b
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: enrollment_type
+      tid: '67'
+      langcode: en
+      name: Sundry
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: d85c7023-660f-4e3e-95f9-7ffc78bce3d8
+      field_hide: {  }
+    -
+      vid: enrollment_type
+      tid: '68'
+      langcode: en
+      name: 'Transfer In'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 84ab97b9-a4f9-4459-b9cc-a52cfc63fd92
+      field_hide: {  }
+    -
+      vid: enrollment_type
+      tid: '70'
+      langcode: en
+      name: Uncategorized
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: f400c969-f1b5-4974-8545-197131aeee14
+      field_hide: {  }
+  group_lesson_types:
+    -
+      vid: group_lesson_types
+      tid: '1370'
+      langcode: en
+      name: Group
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: c844298d-71ea-49ba-983e-b03b7240ee02
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#3D9970'
+          opacity: '0'
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: group_lesson_types
+      tid: '1372'
+      langcode: en
+      name: 'Non Unit Group'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 0243bac0-4222-4686-9afa-cc0a23124ea2
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#000000'
+          opacity: '0'
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: group_lesson_types
+      tid: '1371'
+      langcode: en
+      name: 'Practice Party'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: b31a0fb4-9b01-46b1-9ca7-c03cfa988ad9
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#09DB67'
+          opacity: '0'
+      field_hide:
+        -
+          value: '0'
+  lesson_status:
+    -
+      vid: lesson_status
+      tid: '63'
+      langcode: en
+      name: Cancelled
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 5213de98-430f-4cf8-ad87-6e2581ac7cb9
+      field_color:
+        -
+          color: '#AAAAAA'
+          opacity: null
+    -
+      vid: lesson_status
+      tid: '61'
+      langcode: en
+      name: 'No Showed Not Charged'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 833eea1c-c7da-4f13-bc71-f3e8ee977cc7
+      field_color:
+        -
+          color: '#AAAAAA'
+          opacity: null
+    -
+      vid: lesson_status
+      tid: '60'
+      langcode: en
+      name: 'No Showed, Charged'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: d3e045c8-a85e-4814-816e-f8e09bb7b6d4
+      field_color:
+        -
+          color: '#AAAAAA'
+          opacity: null
+    -
+      vid: lesson_status
+      tid: '64'
+      langcode: en
+      name: 'Pending Status'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: a5256b46-39fe-4ae1-92f9-904311a46cb1
+      field_color:
+        -
+          color: '#FF4136'
+          opacity: null
+    -
+      vid: lesson_status
+      tid: '62'
+      langcode: en
+      name: Rescheduled
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: b2f7136b-3fd0-49a8-8be4-2898c9504066
+      field_color:
+        -
+          color: '#AAAAAA'
+          opacity: null
+    -
+      vid: lesson_status
+      tid: '59'
+      langcode: en
+      name: Showed
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 8ef1bc07-4960-476a-a1f1-b253da2c604d
+      field_color:
+        -
+          color: '#FCC761'
+          opacity: null
+  lesson_type:
+    -
+      vid: lesson_type
+      tid: '616'
+      langcode: en
+      name: 'Assist Lesson'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 41fa5501-f798-4793-b02f-823fdb31510e
+      field_abbreviation:
+        -
+          value: ASPRI
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '600'
+      langcode: en
+      name: 'Back Department Lesson (BD)'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 5f8f7f8f-3502-49bf-905d-d8db40887c23
+      field_abbreviation:
+        -
+          value: BPRI
+      field_color:
+        -
+          color: '#368BC1'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: lesson_type
+      tid: '602'
+      langcode: en
+      name: BDYLSN
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: bb463afc-e602-4171-97b2-6814e2646cdf
+      field_abbreviation:
+        -
+          value: BDYLSN
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '555'
+      langcode: en
+      name: 'Bonus/Comp Lesson'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 1035db0c-11e2-4d44-bf34-8c8f4951cf7c
+      field_abbreviation:
+        -
+          value: CMPL
+      field_color:
+        -
+          color: '#FFDC00'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: lesson_type
+      tid: '553'
+      langcode: en
+      name: BPRI
+      description__value: null
+      description__format: null
+      weight: '1'
+      parent: '600'
+      uuid: 0f0bc2fc-4075-418b-a58d-b7df0a9ae3a5
+      field_abbreviation:
+        -
+          value: BPRI
+      field_color:
+        -
+          color: '#368BC1'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '561'
+      langcode: en
+      name: 'Buddy Lesson'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: d2f238e3-ae02-4566-9ed2-bfe3d6f54f2c
+      field_abbreviation:
+        -
+          value: BDYLSN
+      field_color:
+        -
+          color: '#FF851B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '615'
+      langcode: en
+      name: CALL
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 92b53a64-8c53-4ecc-b78f-c17f886f2c8d
+      field_abbreviation:
+        -
+          value: CALL
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '620'
+      langcode: en
+      name: CHAT
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: b3d85da2-60b0-4f85-9f95-b7a210212b8b
+      field_abbreviation:
+        -
+          value: CHAT
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '601'
+      langcode: en
+      name: COACH
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: fe39f1fa-cab8-45cf-baa3-9c1c340e54ee
+      field_abbreviation:
+        -
+          value: COACH
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '559'
+      langcode: en
+      name: 'Coach Lesson (C)'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: aa9aeffc-ce07-41b3-a1f5-4c79ba253289
+      field_abbreviation:
+        -
+          value: COACH
+      field_color:
+        -
+          color: '#09DB67'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '614'
+      langcode: en
+      name: Coaching
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: c0c8837d-a138-44a0-8e15-47031d8855ca
+      field_abbreviation:
+        -
+          value: Coaching
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '599'
+      langcode: en
+      name: 'Coaching Lesson'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 161df912-c4c1-4c18-9c6e-c822b9e75a8b
+      field_abbreviation:
+        -
+          value: Coaching
+      field_color:
+        -
+          color: '#09DB67'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '560'
+      langcode: en
+      name: 'Dance Evaluation (DE)'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 5b5ab0c8-cc21-46b8-806d-1b04a77e7aeb
+      field_abbreviation:
+        -
+          value: DE
+      field_color:
+        -
+          color: '#39CCCC'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: lesson_type
+      tid: '622'
+      langcode: en
+      name: DOR
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: bf6d4c55-5336-4c36-aa11-eca462030436
+      field_abbreviation:
+        -
+          value: DOR
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '623'
+      langcode: en
+      name: Drive
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: e1b30f14-1b54-45f7-bad7-d960109312aa
+      field_abbreviation:
+        -
+          value: Drive
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '618'
+      langcode: en
+      name: EM
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 6effd140-3f96-4d84-8e7d-8bc07091e1be
+      field_abbreviation:
+        -
+          value: EM
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '621'
+      langcode: en
+      name: EXT
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 3c6a891c-ed03-4cf9-96cf-48ae1f85262d
+      field_abbreviation:
+        -
+          value: EXT
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '612'
+      langcode: en
+      name: FESTPRI
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: d03b5176-edcb-444e-9d27-ebc40d042255
+      field_abbreviation:
+        -
+          value: FESTPRI
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '548'
+      langcode: en
+      name: 'Front Department Lesson (FD)'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 93319df5-be47-4c5f-8e7a-6368b7df22d6
+      field_abbreviation:
+        -
+          value: FPRI
+      field_color:
+        -
+          color: '#F589A4'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: lesson_type
+      tid: '625'
+      langcode: en
+      name: GAP
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 6239c054-ca5a-4ddb-ae16-379ad5fd1a25
+      field_abbreviation:
+        -
+          value: GAP
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '644'
+      langcode: en
+      name: 'Gift Certificate'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: d45d49c7-d938-46d4-a00c-5fbfa8056bc0
+      field_abbreviation:
+        -
+          value: 'Gift Certificate'
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '617'
+      langcode: en
+      name: GRAD
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: fc45e474-c37a-41cf-a7f7-d4e4b06f9b8d
+      field_abbreviation:
+        -
+          value: EXT
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '564'
+      langcode: en
+      name: Group
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 8dcb3d50-dbc1-40d7-a4bb-79b9e851e6c5
+      field_abbreviation:
+        -
+          value: GRP
+      field_color:
+        -
+          color: '#3D9970'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '607'
+      langcode: en
+      name: Hold
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: f9c1a01f-b27a-442d-85cf-60df2b016b32
+      field_abbreviation:
+        -
+          value: Hold
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '626'
+      langcode: en
+      name: 'Lesson pkg'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 2f705be2-0b66-4b70-952c-fcb07551b7d8
+      field_abbreviation:
+        -
+          value: 'Lesson pkg'
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '609'
+      langcode: en
+      name: LSNPKG
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: b61a5a81-cdce-497c-ba6d-bfd37ad3e8a4
+      field_abbreviation:
+        -
+          value: LSNPKG
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '556'
+      langcode: en
+      name: 'Master Class'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: c843d8ff-4ecb-47bb-8b96-24a23fed9593
+      field_abbreviation:
+        -
+          value: MCLS
+      field_color:
+        -
+          color: '#ADD8E6'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '624'
+      langcode: en
+      name: MBCHT
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 9b07315c-6b5b-415c-a517-639e1374c6e5
+      field_abbreviation:
+        -
+          value: MBCHT
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '551'
+      langcode: en
+      name: 'Middle Dept Lesson'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 8f962608-52fb-4323-beb0-9ef0a4a8589c
+      field_abbreviation:
+        -
+          value: 'Middle Dept Lesson'
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '563'
+      langcode: en
+      name: 'Not Found!'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: ba4ad518-e169-4f49-b192-72d0d418564a
+      field_abbreviation:
+        -
+          value: 'Not Found!'
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '627'
+      langcode: en
+      name: ORI
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 43bb15e5-7d36-4424-9a30-0cd53e168bf4
+      field_abbreviation:
+        -
+          value: ORI
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '606'
+      langcode: en
+      name: 'Party Session'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 8fedd491-b2af-487e-a395-6f9eb3cffa21
+      field_abbreviation:
+        -
+          value: 'Party Session'
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '557'
+      langcode: en
+      name: 'Practice Party'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 54ac8c92-8e9f-451a-bf87-65ed9064c0cd
+      field_abbreviation:
+        -
+          value: PARTY
+      field_color:
+        -
+          color: '#3D9970'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '1393'
+      langcode: en
+      name: 'Pre Original'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 586d5834-4f3c-46ce-97d0-0f971bad4a8d
+      field_abbreviation:
+        -
+          value: 'Pre Original '
+      field_color:
+        -
+          color: '#39CCCC'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: lesson_type
+      tid: '608'
+      langcode: en
+      name: PRG
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 8cf589d2-276f-46c6-b9c4-573bf2b305df
+      field_abbreviation:
+        -
+          value: PRG
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '613'
+      langcode: en
+      name: PRI
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 8115811c-ef00-4dac-a3dc-93c216cf30c4
+      field_abbreviation:
+        -
+          value: PRI
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '605'
+      langcode: en
+      name: REN
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: e9afb5c9-bfab-4459-ba91-a2fe0f5b4938
+      field_abbreviation:
+        -
+          value: REN
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '604'
+      langcode: en
+      name: SHOW
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: d82e718e-8817-4a29-8f28-9ba021d1f4f7
+      field_abbreviation:
+        -
+          value: SHOW
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '619'
+      langcode: en
+      name: SOLO
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 627a1ead-6e2f-42c7-bea9-7aea79c946d2
+      field_abbreviation:
+        -
+          value: SOLO
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '611'
+      langcode: en
+      name: SPNSR
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 0b4d5424-4636-433e-b689-3e14b2547c52
+      field_abbreviation:
+        -
+          value: SPNSR
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '603'
+      langcode: en
+      name: ST-CMP
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 3c0d047f-3dc1-4baf-93cf-8bb861220c71
+      field_abbreviation:
+        -
+          value: ST-CMP
+      field_color: {  }
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '642'
+      langcode: en
+      name: 'Transfer In'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 9651329e-2975-4a79-8d9c-3dde0a016c13
+      field_abbreviation:
+        -
+          value: 'Transfer In'
+      field_color:
+        -
+          color: '#ED4983'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: lesson_type
+      tid: '643'
+      langcode: en
+      name: 'Transfer Out'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 09a7ffee-f8ea-4886-8805-0bd544240bbf
+      field_abbreviation:
+        -
+          value: 'Transfer Out'
+      field_color:
+        -
+          color: '#ED4983'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: lesson_type
+      tid: '610'
+      langcode: en
+      name: Tuition
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: e421bb1d-f031-486a-87a2-ec7d32e2ddca
+      field_abbreviation:
+        -
+          value: Tuition
+      field_color:
+        -
+          color: '#F012BE'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: lesson_type
+      tid: '562'
+      langcode: en
+      name: 'Wedding Lesson'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 60a7ecf1-4be0-442f-98d8-3df507477abb
+      field_abbreviation:
+        -
+          value: WED
+      field_color:
+        -
+          color: '#B10DC9'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+  package_code:
+    -
+      vid: package_code
+      tid: '660'
+      langcode: en
+      name: 'Coaching Lesson'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 319de95c-3eb6-47d8-a0a4-594a6f065386
+      field_ami_id: {  }
+      field_hide:
+        -
+          value: '1'
+      field_package_label:
+        -
+          value: 'Coaching Lesson'
+    -
+      vid: package_code
+      tid: '1401'
+      langcode: en
+      name: Cruise/Trip
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 516f07da-c1b8-45ab-a2be-9ac65fe4820d
+      field_ami_id: {  }
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: Cruise/Trip
+    -
+      vid: package_code
+      tid: '659'
+      langcode: en
+      name: 'Master Class'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 985e52ee-1a3c-4a81-839c-30c6a6a5ffb0
+      field_ami_id: {  }
+      field_hide:
+        -
+          value: '1'
+      field_package_label:
+        -
+          value: 'Master Class'
+    -
+      vid: package_code
+      tid: '1399'
+      langcode: en
+      name: 'Master Class/Dance Camp'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: f029693d-633f-4470-8221-db1f50a63801
+      field_ami_id: {  }
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'Master Class/Dance Camp'
+    -
+      vid: package_code
+      tid: '160'
+      langcode: en
+      name: 'MISC_01 - Area 10 DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 1a54bdc1-67e8-4854-8275-e36306c7dfc9
+      field_ami_id:
+        -
+          value: MISC_01
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_01 - Area 10 DOR'
+    -
+      vid: package_code
+      tid: '161'
+      langcode: en
+      name: 'MISC_02 - Area 6 DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 9c6d4556-b9ba-4674-a6cb-cbe7de785b78
+      field_ami_id:
+        -
+          value: MISC_02
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_02 - Area 6 DOR'
+    -
+      vid: package_code
+      tid: '162'
+      langcode: en
+      name: 'MISC_03 - Area 1 DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 210b8e3a-8d67-4162-b7ab-9c83ff98a345
+      field_ami_id:
+        -
+          value: MISC_03
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_03 - Area 1 DOR'
+    -
+      vid: package_code
+      tid: '165'
+      langcode: en
+      name: 'MISC_06 - Area 8 DOR - Ciao Amore DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 2814bcad-e395-469d-b06c-d50617c457dc
+      field_ami_id:
+        -
+          value: MISC_06
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_06 - Area 8 DOR - Ciao Amore DOR'
+    -
+      vid: package_code
+      tid: '166'
+      langcode: en
+      name: 'MISC_07 - Showcase (Combined)'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: d525024b-1e58-4b42-b724-2603ca0adf43
+      field_ami_id:
+        -
+          value: MISC_07
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_07 - Showcase (Combined)'
+    -
+      vid: package_code
+      tid: '167'
+      langcode: en
+      name: 'MISC_08 - Embassy Ball'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: cf648720-a561-437c-a8d1-436ccaa41f67
+      field_ami_id:
+        -
+          value: MISC_08
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_08 - Embassy Ball'
+    -
+      vid: package_code
+      tid: '170'
+      langcode: en
+      name: 'MISC_11 - HulaRama DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: a07a7634-abbe-41ca-b20e-9ff9c2318a7c
+      field_ami_id:
+        -
+          value: MISC_11
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_11 - HulaRama DOR'
+    -
+      vid: package_code
+      tid: '172'
+      langcode: en
+      name: 'MISC_13 - Area 4 DOR - Northstar DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: c9dbd4c1-6c8b-4ea1-9226-2b728c83ed12
+      field_ami_id:
+        -
+          value: MISC_13
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_13 - Area 4 DOR - Northstar DOR'
+    -
+      vid: package_code
+      tid: '173'
+      langcode: en
+      name: 'MISC_14 - Party Time/NonUnit'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 8ca3c3d6-03b2-45ec-9c91-52ef18967778
+      field_ami_id:
+        -
+          value: MISC_14
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_14 - Party Time/NonUnit'
+    -
+      vid: package_code
+      tid: '174'
+      langcode: en
+      name: 'MISC_15 - AMI Superama'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: e3370afa-8e21-405f-808d-a0bc73b7a702
+      field_ami_id:
+        -
+          value: MISC_15
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_15 - AMI Superama'
+    -
+      vid: package_code
+      tid: '175'
+      langcode: en
+      name: 'MISC_16 - Area 7 DOR - Unique DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 36c75b1d-694d-46b6-a7a6-b2c7745bb087
+      field_ami_id:
+        -
+          value: MISC_16
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_16 - Area 7 DOR - Unique DOR'
+    -
+      vid: package_code
+      tid: '1402'
+      langcode: en
+      name: 'MISC_17 - Area 2 DOR - Holiday Ball'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: e4bc7de9-de49-4278-a303-8dfb56e3beed
+      field_ami_id:
+        -
+          value: MISC_17
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_17 - Area 2 DOR - Holiday Ball'
+    -
+      vid: package_code
+      tid: '177'
+      langcode: en
+      name: 'MISC_18 - AMI World DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 828b81fe-4714-4be1-999c-bc4a0f688666
+      field_ami_id:
+        -
+          value: MISC_18
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_18 - AMI World DOR'
+    -
+      vid: package_code
+      tid: '180'
+      langcode: en
+      name: 'MISC_20 - San Francisco DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: bca81e44-7d0e-4af9-94e3-c2217a71bd19
+      field_ami_id:
+        -
+          value: MISC_20
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_20 - San Francisco DOR'
+    -
+      vid: package_code
+      tid: '181'
+      langcode: en
+      name: 'MISC_21 - Banff DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: ea919787-f140-494c-8950-7bc48ac20471
+      field_ami_id:
+        -
+          value: MISC_21
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_21 - Banff DOR'
+    -
+      vid: package_code
+      tid: '182'
+      langcode: en
+      name: 'MISC_22 - Portland DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: cd4b1b99-62ad-42eb-93d8-63fbc0c6cea6
+      field_ami_id:
+        -
+          value: MISC_22
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_22 - Portland DOR'
+    -
+      vid: package_code
+      tid: '183'
+      langcode: en
+      name: 'MISC_23 - Medal Ball'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 0d3de030-30e6-472a-9757-248b99f45876
+      field_ami_id:
+        -
+          value: MISC_23
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_23 - Medal Ball'
+    -
+      vid: package_code
+      tid: '188'
+      langcode: en
+      name: 'MISC_29 - Showcase (Independent)'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 5e7b084e-c0e7-4039-8180-2fe852688325
+      field_ami_id:
+        -
+          value: MISC_29
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_29 - Showcase (Independent)'
+    -
+      vid: package_code
+      tid: '190'
+      langcode: en
+      name: 'MISC_31 - Area 5 DOR - Texas DOR'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 6ebd07a6-d641-4e8d-955e-65f71340cbb6
+      field_ami_id:
+        -
+          value: MISC_31
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_31 - Area 5 DOR - Texas DOR'
+    -
+      vid: package_code
+      tid: '191'
+      langcode: en
+      name: 'MISC_32 - Blackpool Dance Festival'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: af9776e2-afdb-46bf-9d42-7efda6b8d9b6
+      field_ami_id:
+        -
+          value: MISC_32
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_32 - Blackpool Dance Festival'
+    -
+      vid: package_code
+      tid: '193'
+      langcode: en
+      name: 'MISC_34 - Area 3 DOR - FlamingoRama'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 2fe04c0e-19c0-400a-9949-831753e57015
+      field_ami_id:
+        -
+          value: MISC_34
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_34 - Area 3 DOR - FlamingoRama'
+    -
+      vid: package_code
+      tid: '636'
+      langcode: en
+      name: 'MISC_36 - Virtual Dance Challenge'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: c5c49ddd-64a4-4f81-b18c-b3063d42cef8
+      field_ami_id:
+        -
+          value: MISC_36
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_36 - Virtual Dance Challenge'
+    -
+      vid: package_code
+      tid: '637'
+      langcode: en
+      name: 'MISC_37 - Beach-O-Rama'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 7e650e99-c445-46c2-a298-14b81f417836
+      field_ami_id:
+        -
+          value: MISC_37
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'MISC_37 - Beach-O-Rama'
+    -
+      vid: package_code
+      tid: '1397'
+      langcode: en
+      name: 'Non Unit Coaching Lessons'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: fcc981f8-1d83-40a1-9acc-048801f7aebc
+      field_ami_id: {  }
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'Non Unit Coaching Lessons'
+    -
+      vid: package_code
+      tid: '1398'
+      langcode: en
+      name: 'Non Unit Group Class'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 2dfc2482-2922-485e-8616-dfe3d75641a2
+      field_ami_id: {  }
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'Non Unit Group Class'
+    -
+      vid: package_code
+      tid: '1396'
+      langcode: en
+      name: 'Non Unit Private Lessons'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 919f0aaf-8fbb-46b6-8834-607049d48f98
+      field_ami_id: {  }
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'Non Unit Private Lessons'
+    -
+      vid: package_code
+      tid: '1400'
+      langcode: en
+      name: 'Showcase (Individual Studio)'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 62c0cf6b-de5e-4e00-bcaa-eabdb10503b0
+      field_ami_id: {  }
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'Showcase (Individual Studio)'
+    -
+      vid: package_code
+      tid: '196'
+      langcode: en
+      name: 'SUN_01 - Accessories'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: f99b0b8b-6017-437a-89a1-4ee60067b5c3
+      field_ami_id:
+        -
+          value: SUN_01
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'SUN_01 - Accessories'
+    -
+      vid: package_code
+      tid: '197'
+      langcode: en
+      name: 'SUN_02 - Clothing'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 6c78fcbe-0947-4581-ad0e-4e62aedb1bc2
+      field_ami_id:
+        -
+          value: SUN_02
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'SUN_02 - Clothing'
+    -
+      vid: package_code
+      tid: '198'
+      langcode: en
+      name: 'SUN_03 - Shoes'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 035a5114-cf54-4cc2-9502-de21d432e49b
+      field_ami_id:
+        -
+          value: SUN_03
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'SUN_03 - Shoes'
+    -
+      vid: package_code
+      tid: '199'
+      langcode: en
+      name: 'SUN_04 - Books/CD/Videos'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: ff0ea38b-32cc-421e-b776-0db3725aea0c
+      field_ami_id:
+        -
+          value: SUN_04
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'SUN_04 - Books/CD/Videos'
+    -
+      vid: package_code
+      tid: '200'
+      langcode: en
+      name: 'SUN_05 - Charity Event'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 3baf7f15-4458-4ab7-92f7-48fc434624a6
+      field_ami_id:
+        -
+          value: SUN_05
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'SUN_05 - Charity Event'
+    -
+      vid: package_code
+      tid: '201'
+      langcode: en
+      name: 'SUN_06 - Teaching Time Exchange'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: ce9dfc8d-daa0-4ecb-b87d-799034731c50
+      field_ami_id:
+        -
+          value: SUN_06
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'SUN_06 - Teaching Time Exchange'
+    -
+      vid: package_code
+      tid: '203'
+      langcode: en
+      name: 'SUN_08 - Misc Scholarships'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: b87dfc9e-15bd-453e-958c-9cb112be2709
+      field_ami_id:
+        -
+          value: SUN_08
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'SUN_08 - Misc Scholarships'
+    -
+      vid: package_code
+      tid: '195'
+      langcode: en
+      name: 'SUN_09 - Studio Rental (Off Hours)'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: a6241820-84b5-4e65-9355-9025883519be
+      field_ami_id:
+        -
+          value: SUN_09
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'SUN_09 - Studio Rental (Off Hours)'
+    -
+      vid: package_code
+      tid: '635'
+      langcode: en
+      name: 'SUN_10 - AMI New Guest Promo'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 5cb11e14-566e-4450-beec-b0d0fc767cb5
+      field_ami_id:
+        -
+          value: SUN_10
+      field_hide:
+        -
+          value: '0'
+      field_package_label:
+        -
+          value: 'SUN_10 - AMI New Guest Promo'
+  payment_type:
+    -
+      vid: payment_type
+      tid: '664'
+      langcode: en
+      name: AMEX
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 4ffb6b87-b3b0-407d-886d-97cb692fe573
+    -
+      vid: payment_type
+      tid: '71'
+      langcode: en
+      name: 'Cash Payment'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 252426af-fec2-4ab7-836a-0ca9094f124f
+    -
+      vid: payment_type
+      tid: '661'
+      langcode: en
+      name: Check
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: faaac4b2-ad22-4898-89b4-354f8d40062f
+    -
+      vid: payment_type
+      tid: '665'
+      langcode: en
+      name: Discover
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 02f15624-dfb6-4695-940d-93081150c060
+    -
+      vid: payment_type
+      tid: '4'
+      langcode: en
+      name: 'Imported From Square'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 95183d96-fa70-413e-b965-95cdbafc37cd
+    -
+      vid: payment_type
+      tid: '663'
+      langcode: en
+      name: MasterCard
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: ba7b95aa-d26c-4a2f-81f0-6dacdce5b68a
+    -
+      vid: payment_type
+      tid: '662'
+      langcode: en
+      name: Visa
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 2d26135d-0d2d-445f-8352-36edad22451a
+  schedule_type:
+    -
+      vid: schedule_type
+      tid: '1374'
+      langcode: en
+      name: Break
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 3fc13388-fef0-478c-8c8a-eb9e2b2f2a8c
+      field_color:
+        -
+          color: '#AD5C84'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1375'
+      langcode: en
+      name: Calls
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 0ec07aa5-33c3-4408-856b-424220f98138
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1389'
+      langcode: en
+      name: 'Certification Prep'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 2d3a58a7-ff31-43ed-b89b-2db54b91cdbf
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1387'
+      langcode: en
+      name: Choreography
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: e58c822a-956f-4448-8b39-a81a980254a6
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1388'
+      langcode: en
+      name: 'Class Prep'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 19212d21-943a-4e32-bc2e-d247a3b9d4e0
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1376'
+      langcode: en
+      name: 'Dance Session'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: d1d0c3e1-106e-4f58-9e5f-08299c470bc2
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1377'
+      langcode: en
+      name: Desk
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 9cd06437-ec66-4189-a75c-12e55b03a558
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1378'
+      langcode: en
+      name: 'Meal Break'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: d5b8c6a9-5a65-4994-9579-a2fd7f2e431c
+      field_color:
+        -
+          color: '#AD5C84'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1379'
+      langcode: en
+      name: Meeting
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 13248e75-a5ec-482a-8264-dabec47e8c43
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1390'
+      langcode: en
+      name: 'One on One'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: f3a31eaf-8d4b-42d2-bbcf-dec9d99ea99f
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1380'
+      langcode: en
+      name: 'Out by Time off Request'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 91cb4d0c-d7a0-4192-a9e4-a0eb26a2c0da
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1381'
+      langcode: en
+      name: 'Out Sick'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 32c96512-f21f-4fd1-b4aa-8720bb21f185
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1391'
+      langcode: en
+      name: 'Outside Event'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 3a428c2b-a31c-4217-a802-65b9b3a8061d
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1382'
+      langcode: en
+      name: 'Regularly Schedule Out'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 82f85a16-6a7f-4b1c-91ba-bee30f16fda6
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1392'
+      langcode: en
+      name: Schedule
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 2d206dd6-b1c0-48d9-80cc-3217b17e6a4a
+      field_color:
+        -
+          color: '#09DB67'
+          opacity: null
+    -
+      vid: schedule_type
+      tid: '1383'
+      langcode: en
+      name: 'Training Class'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 61ed932c-17fd-4d8c-a651-f919d566fdc6
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+  service_status:
+    -
+      vid: service_status
+      tid: '110'
+      langcode: en
+      name: Cancelled
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 5e12529f-797d-414f-9dbb-1a7a1bd1918f
+      field_color:
+        -
+          color: '#AAAAAA'
+          opacity: null
+    -
+      vid: service_status
+      tid: '112'
+      langcode: en
+      name: Incomplete
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 1c1fb286-943b-439a-be18-fd3b79722c3a
+      field_color:
+        -
+          color: '#FFDC00'
+          opacity: null
+    -
+      vid: service_status
+      tid: '107'
+      langcode: en
+      name: 'No Sale'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 1616cfa6-9463-4a98-ad56-12bd72ecca73
+      field_color:
+        -
+          color: '#FF4136'
+          opacity: null
+    -
+      vid: service_status
+      tid: '109'
+      langcode: en
+      name: 'No Showed'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 6af9f3e2-81c9-45f7-90a8-131dbd556c35
+      field_color:
+        -
+          color: '#AAAAAA'
+          opacity: null
+    -
+      vid: service_status
+      tid: '113'
+      langcode: en
+      name: 'Pending Status'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: f304be97-4bf3-4a95-a537-5ea39a9fe437
+      field_color:
+        -
+          color: '#AAAAAA'
+          opacity: null
+    -
+      vid: service_status
+      tid: '111'
+      langcode: en
+      name: Rescheduled
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 9e80e980-5fd9-428b-a07c-3f33a41749f8
+      field_color:
+        -
+          color: '#AAAAAA'
+          opacity: null
+    -
+      vid: service_status
+      tid: '106'
+      langcode: en
+      name: Sale
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 4a670bda-c631-4c4c-accd-b4a826cd9eec
+      field_color:
+        -
+          color: '#2ECC40'
+          opacity: null
+    -
+      vid: service_status
+      tid: '108'
+      langcode: en
+      name: 'Think it Over'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 77cf7b99-b40f-4ddb-9fa2-ede29c8e9d27
+      field_color:
+        -
+          color: '#FF851B'
+          opacity: null
+  service_type:
+    -
+      vid: service_type
+      tid: '583'
+      langcode: en
+      name: 'Assist Lesson'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 65ac4401-756c-4646-b174-444a9e4a2843
+      field_abbreviation:
+        -
+          value: 'Assist Lesson'
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '588'
+      langcode: en
+      name: 'Benefit Sheet'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: c8a9a683-9e91-4916-a895-e38b5684a589
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#5826ED'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '575'
+      langcode: en
+      name: Break
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: b76c5eb4-9ab8-4c04-92d3-d6a595fce01b
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#AD5C84'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '628'
+      langcode: en
+      name: CALL
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 886f60ec-a963-42ec-a9bc-34626e1340d7
+      field_abbreviation:
+        -
+          value: CALL
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '655'
+      langcode: en
+      name: 'Certification Prep'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 85fb645c-cc97-455d-93ff-ae501faedbed
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '574'
+      langcode: en
+      name: Chat
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 309f5e69-6b53-49f2-b2a5-535fd8066cd5
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#E374F2'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '629'
+      langcode: en
+      name: CHAT
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 2c540797-6d19-4e16-902e-5c038cfe94f5
+      field_abbreviation:
+        -
+          value: CHAT
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '653'
+      langcode: en
+      name: Choreography
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: d9e3777e-7540-4c47-906e-0458e40dc9f9
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '654'
+      langcode: en
+      name: 'Class Prep'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 8c95fc2b-4015-4ca4-bea3-a3f706a26f5e
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '597'
+      langcode: en
+      name: 'Coaching Lesson (C)'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: ad62570b-0e76-4a31-a09b-d9497eba105b
+      field_abbreviation:
+        -
+          value: 'Coach Lesson (C)'
+      field_color:
+        -
+          color: '#09DB67'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '568'
+      langcode: en
+      name: 'Dance Demo'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: f3c718f4-010d-4e7e-99ed-a5ef34625735
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#3D9970'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '585'
+      langcode: en
+      name: 'Dance O Rama Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 00a4a6d4-68e1-4d98-a6f9-d0f8bbaa2c53
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#E374F2'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '573'
+      langcode: en
+      name: 'Dance Session'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: a8c4d6a9-8d7f-4f5e-a9db-421f62135e17
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '580'
+      langcode: en
+      name: Desk
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 997f7755-3822-45a0-959c-2ca386d88b16
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '595'
+      langcode: en
+      name: 'Dream Sheet'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: e44273a3-85c6-4832-8d98-3d38bcd4cae3
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#5826ED'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '631'
+      langcode: en
+      name: EM
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: b8c573ce-9aa7-4348-9836-87b928e05b27
+      field_abbreviation:
+        -
+          value: EM
+      field_color:
+        -
+          color: '#000000'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '651'
+      langcode: en
+      name: 'Event Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: da36b8a9-e99a-427b-9624-0eb03f71f273
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#E374F2'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '577'
+      langcode: en
+      name: 'Extension Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: ec545c69-6826-4108-ae7a-105b74724006
+      field_abbreviation:
+        -
+          value: EXT
+      field_color:
+        -
+          color: '#5826ED'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '630'
+      langcode: en
+      name: GRAD
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 5d73d292-33c5-4f8b-a1c3-7be775fe4b78
+      field_abbreviation:
+        -
+          value: GRAD
+      field_color:
+        -
+          color: '#F9A602'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '596'
+      langcode: en
+      name: 'Grad Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: b9dea71c-441a-4a6b-b06d-33ff35a92897
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#F9A602'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '566'
+      langcode: en
+      name: Graduation/Checkout
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 52737846-57f3-4b84-9116-2f46b91b3c47
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#F9A602'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '648'
+      langcode: en
+      name: Group
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: c543db8c-684c-4952-b8df-29733b4956c1
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#3D9970'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '647'
+      langcode: en
+      name: 'In-House Coaching Lesson'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: bc74e15f-1194-4b93-95f1-da801ac4c1a5
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#579E77'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '591'
+      langcode: en
+      name: 'Internal Use'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 2840fd1c-6001-44c8-8149-e9fa89666597
+      field_abbreviation:
+        -
+          value: ' Lesson pkg'
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '593'
+      langcode: en
+      name: 'Lesson Package Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: eb21c32f-14f3-4fa0-af36-3cd9603f6853
+      field_abbreviation:
+        -
+          value: ' Lesson pkg'
+      field_color:
+        -
+          color: '#4BAFD6'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '652'
+      langcode: en
+      name: 'Lesson Visit'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 489d3433-7c05-4d87-873a-46069410b559
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#4BAFD6'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '650'
+      langcode: en
+      name: 'Master Class/Dance Camp'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 7904b50f-b7a3-4e92-853c-4e2e537ef88a
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#06C25B'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '571'
+      langcode: en
+      name: 'Meal Break'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: ee1d25ad-1484-4c42-bd88-59e09b862174
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#AD5C84'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '632'
+      langcode: en
+      name: 'Medal Ball Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 4957b1aa-1af2-46d6-9da3-7c5edd5fad9f
+      field_abbreviation:
+        -
+          value: MBCHT
+      field_color:
+        -
+          color: '#F9A602'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '572'
+      langcode: en
+      name: Meeting
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: befd29a4-28ff-4026-89be-78fe22313c09
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '579'
+      langcode: en
+      name: Misc
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 27af498d-75f2-4159-a448-dc0cd8fe1815
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#000000'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '565'
+      langcode: en
+      name: 'Not Found!'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: ec5d6811-62b3-4c68-a133-05eab87092b9
+      field_abbreviation:
+        -
+          value: sd
+      field_color:
+        -
+          color: '#000000'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '598'
+      langcode: en
+      name: 'One on One'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 3a6a13ce-c9c0-4df6-92a5-e89f81b87aca
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '567'
+      langcode: en
+      name: 'Original Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: dc4698f9-98c3-424c-9c98-b68e16ac3ae0
+      field_abbreviation:
+        -
+          value: ORI
+      field_color:
+        -
+          color: '#5826ED'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '570'
+      langcode: en
+      name: 'Out by Time off Request'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 77c17638-1ae3-4fde-9c41-aad3ac57ccaf
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '590'
+      langcode: en
+      name: 'Out Sick'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 73858563-283e-44b4-8093-0370a1b830f1
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '587'
+      langcode: en
+      name: 'Outside Event'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 97db397a-104b-472d-9840-964ba172e257
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '649'
+      langcode: en
+      name: Party
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: d2a55d5f-32a2-4da8-946b-eb00bf3c4355
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#3D9970'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '656'
+      langcode: en
+      name: 'Pre Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: e198c147-a3fb-4181-ba90-e631c092f14e
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#0074D9'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '638'
+      langcode: en
+      name: PreChat
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: a4440fce-8fd6-4406-ba48-a277f412fd92
+      field_abbreviation:
+        -
+          value: PreChat
+      field_color:
+        -
+          color: '#0074D9'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '586'
+      langcode: en
+      name: 'Progress Check'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: f4568cbc-caa2-49dc-8adf-ac05819a73be
+      field_abbreviation:
+        -
+          value: PRG
+      field_color:
+        -
+          color: '#F9A602'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '576'
+      langcode: en
+      name: 'Read Me'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: cf3d0877-3889-44e1-bda7-f508ea12b770
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '569'
+      langcode: en
+      name: 'Regularly Schedule Out'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: e97d0fe2-133b-4976-b3b8-a8eda8bb501e
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '589'
+      langcode: en
+      name: 'Renewal Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: c2bc7dce-7e58-45ae-a299-b7878c34bb3f
+      field_abbreviation:
+        -
+          value: REN
+      field_color:
+        -
+          color: '#6ECCAB'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '578'
+      langcode: en
+      name: Schedule
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 75a3ad43-69d8-4b5d-b4b5-3e855bcb6ab8
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#09DB67'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '592'
+      langcode: en
+      name: 'Service Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 0b47135f-55ca-4ee5-b5b9-8c639da7136e
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#B10DC9'
+          opacity: null
+      field_hide: {  }
+    -
+      vid: service_type
+      tid: '584'
+      langcode: en
+      name: 'Service Visit'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: f464dc33-244d-4f92-a38e-5791c701c2ab
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#B10DC9'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '594'
+      langcode: en
+      name: 'Showcase Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: f72b64ef-aa45-4a9d-a994-a7c06938564f
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#E374F2'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '633'
+      langcode: en
+      name: 'Solo Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 86c9e14f-4ece-4212-a5bb-a64e09a7cef9
+      field_abbreviation:
+        -
+          value: SOLO
+      field_color:
+        -
+          color: '#E374F2'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '634'
+      langcode: en
+      name: 'Sponsor Chat'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 638b634f-252c-484b-b61a-b3e2b8b774e3
+      field_abbreviation:
+        -
+          value: SPNSR
+      field_color:
+        -
+          color: '#9E1ECC'
+          opacity: null
+      field_hide:
+        -
+          value: '0'
+    -
+      vid: service_type
+      tid: '581'
+      langcode: en
+      name: 'Training Class'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: dcf615a6-3dc1-4b53-a31d-0b4ddad27650
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#85144B'
+          opacity: null
+      field_hide:
+        -
+          value: '1'
+    -
+      vid: service_type
+      tid: '582'
+      langcode: en
+      name: Tuition
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 612e4e08-62e2-4f35-af85-685fc2fc3dcf
+      field_abbreviation: {  }
+      field_color:
+        -
+          color: '#F012BE'
+          opacity: null
+      field_hide: {  }
+  sps_code:
+    -
+      vid: sps_code
+      tid: '1394'
+      langcode: en
+      name: DE
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: ae780f6a-02b1-4463-b589-7a4db911bd8e
+      field_color: {  }
+    -
+      vid: sps_code
+      tid: '550'
+      langcode: en
+      name: EXT
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: e4e14921-748b-4117-b68c-ab7459064fa5
+      field_color: {  }
+    -
+      vid: sps_code
+      tid: '554'
+      langcode: en
+      name: MISC
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 2cbdb24c-b627-4b9c-a1c8-aede14c0f61a
+      field_color: {  }
+    -
+      vid: sps_code
+      tid: '657'
+      langcode: en
+      name: 'Non Unit'
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 01890fef-0bda-4000-9c10-4751173473ad
+      field_color: {  }
+    -
+      vid: sps_code
+      tid: '549'
+      langcode: en
+      name: ORI
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 4d2b1f58-50c6-4c88-9b23-80b0e3164ef4
+      field_color: {  }
+    -
+      vid: sps_code
+      tid: '547'
+      langcode: en
+      name: PORI
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 07909641-6818-41a1-9fcb-d115fb0fcc88
+      field_color: {  }
+    -
+      vid: sps_code
+      tid: '552'
+      langcode: en
+      name: REN
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 083315c2-ddb7-45c2-9a95-8e80ad652c0a
+      field_color: {  }
+    -
+      vid: sps_code
+      tid: '558'
+      langcode: en
+      name: SUNDRY
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: b8fd1bec-c3aa-4d0f-9d93-82f5e8372013
+      field_color: {  }
+  student_department:
+    -
+      vid: student_department
+      tid: '77'
+      langcode: en
+      name: 'Back Dept'
+      description__value: "<p>Students who are a [Renewals] Enrollment.</p>\r\n"
+      description__format: basic_html
+      weight: '3'
+      parent: '0'
+      uuid: 63f92b72-c4ae-48e5-841b-70b894b662f8
+    -
+      vid: student_department
+      tid: '75'
+      langcode: en
+      name: 'Front Dept'
+      description__value: "<p>Students who are on a [Gift,Pre-Original,Original] Enrollment.</p>\r\n"
+      description__format: basic_html
+      weight: '1'
+      parent: '0'
+      uuid: 235e7257-7d50-486f-a388-f4ee049087c4
+    -
+      vid: student_department
+      tid: '76'
+      langcode: en
+      name: 'Middle Dept'
+      description__value: "<p>Students who are on an Extension Enrollment.</p>\r\n"
+      description__format: basic_html
+      weight: '2'
+      parent: '0'
+      uuid: 6be52613-6643-4681-a652-fdd8b3ce47e7
+  tags: {  }
+  teacher_category:
+    -
+      vid: teacher_category
+      tid: '78'
+      langcode: en
+      name: Primary
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 1a6aac2b-6d4f-421d-83a7-879a408a9593
+    -
+      vid: teacher_category
+      tid: '3'
+      langcode: en
+      name: Secondary
+      description__value: null
+      description__format: null
+      weight: '0'
+      parent: '0'
+      uuid: 25458d75-cba2-4df3-bbf5-fa5ad0b40058

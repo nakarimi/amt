@@ -1,0 +1,10 @@
+uuid: fff8e4fe-a12d-433b-802b-2547c860169a
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: events.continuous_appointment
+label: Standing-appointment
+targetEntityType: events
+cache: true

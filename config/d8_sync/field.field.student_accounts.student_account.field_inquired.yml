@@ -1,0 +1,33 @@
+uuid: 60adbe83-471d-4421-9288-78d7ffd45c73
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.field_inquired
+  module:
+    - datetime
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: student_accounts.student_account.field_inquired
+field_name: field_inquired
+entity_type: student_accounts
+bundle: student_account
+label: 'Date and Time Requested'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    default_date_type: now
+    default_date: now
+default_value_callback: ''
+settings: {  }
+field_type: datetime

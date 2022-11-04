@@ -1,0 +1,8 @@
+amt_appointment.edit_continuous:
+  path: '/events/{events}/edit/continuous'
+  defaults:
+    _controller: '\Drupal\amt_appointment\Controller\EntityFormController::buildEditForm'
+    _title: 'Edit Future Appointments'
+  requirements:
+    _custom_access: '\Drupal\amt_appointment\Controller\EntityFormController::accessEditContinuous'
+    _permission: 'Appointments Edit Continuous'

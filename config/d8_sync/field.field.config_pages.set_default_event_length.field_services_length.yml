@@ -1,0 +1,32 @@
+uuid: 84dea562-246c-4519-87e0-3b00f9fae04b
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.set_default_event_length
+    - field.storage.config_pages.field_services_length
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.set_default_event_length.field_services_length
+field_name: field_services_length
+entity_type: config_pages
+bundle: set_default_event_length
+label: 'Services Length'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 15
+default_value_callback: ''
+settings: {  }
+field_type: list_integer

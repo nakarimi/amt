@@ -1,0 +1,29 @@
+uuid: 14fe2e9c-bda1-4418-b2e0-d36e9392950b
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.day_view_settings
+    - field.storage.config_pages.field_tooltip_container
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.day_view_settings.field_tooltip_container
+field_name: field_tooltip_container
+entity_type: config_pages
+bundle: day_view_settings
+label: 'Event Tooltip Container'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

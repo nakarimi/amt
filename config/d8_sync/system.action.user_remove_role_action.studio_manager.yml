@@ -1,0 +1,14 @@
+uuid: f1474d53-b994-4679-aeb4-b93b18f1aa9a
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.studio_manager
+  module:
+    - user
+id: user_remove_role_action.studio_manager
+label: 'Remove the Studio Manager role from the selected user(s)'
+type: user
+plugin: user_remove_role_action
+configuration:
+  rid: studio_manager

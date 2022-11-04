@@ -1,0 +1,6 @@
+name: AMT Report
+description: Report generate, staff profarmance, studio business.
+package: Custom
+type: module
+version: 1.0
+core: 8.x

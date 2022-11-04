@@ -1,0 +1,12 @@
+/* "User/*" page styles  */
+[data-quickedit-entity-id^="user"] .field--label {
+    font-weight: bolder;
+    margin-top: 10px;
+  }
+  [data-quickedit-entity-id^="user"] td {
+    font-weight: normal;
+  }
+.field--name-field-student-image .field--item > .img-responsive {
+	width: 50px !important;
+}
+  /* "User/*" page styles  */

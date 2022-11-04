@@ -1,0 +1,11 @@
+uuid: bccf5f6d-7616-4899-b164-40fdf0098444
+langcode: en
+status: true
+dependencies:
+  module:
+    - conditional_fields
+id: config_sync.module.conditional_fields
+snapshotSet: config_sync
+extensionType: module
+extensionName: conditional_fields
+items: {  }

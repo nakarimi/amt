@@ -1,0 +1,33 @@
+diff --git a/eck.module b/eck.module
+index 64769f6..5321e0b 100644
+--- a/eck.module
++++ b/eck.module
+@@ -277,6 +277,28 @@ function template_preprocess_eck_entity(&$variables) {
+ }
+ 
+ /**
++ * Implements hook_entity_type_alter().
++ */
++function eck_entity_type_alter(array &$entity_types) {
++  foreach ($entity_types as $entity_type) {
++    if ($entity_type->getProvider() == 'eck' && !is_null($entity_type->getBundleOf())) {
++      $entity_type->setLinkTemplate('auto-label', $entity_type->getLinkTemplate('edit-form') . "/auto-label");
++    }
++  }
++}
++
++/**
++ * Implements hook_form_FORM_ID_alter().
++ */
++function eck_form_auto_entitylabel_settings_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
++  $path = \Drupal::request()->getpathInfo();
++  $arg = explode('/', $path);
++  if (!empty($arg[3]) && (string) $arg[3] === 'eck' && !empty($arg[5])) {
++    $form['auto_entitylabel']['token_help']['#token_types'][] = $arg[5];
++  }
++}
++
++/**
+  * Implements hook_form_FORM_ID_alter().
+  *
+  * Alters the theme form to use the admin theme on eck editing.

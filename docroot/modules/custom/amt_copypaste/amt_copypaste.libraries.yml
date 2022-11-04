@@ -1,0 +1,6 @@
+logout-handler:
+  version: 1.x
+  js:
+    assets/js/logout.js: {}
+  dependencies:
+    - core/jquery

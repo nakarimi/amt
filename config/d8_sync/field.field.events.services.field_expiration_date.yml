@@ -1,0 +1,30 @@
+uuid: f8c9bff3-2b05-4ec2-877c-5d0c949a9f7b
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.services
+    - field.storage.events.field_expiration_date
+  module:
+    - datetime
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.services.field_expiration_date
+field_name: field_expiration_date
+entity_type: events
+bundle: services
+label: 'Expiration Date'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

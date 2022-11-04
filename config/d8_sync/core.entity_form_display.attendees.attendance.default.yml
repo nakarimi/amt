@@ -1,0 +1,67 @@
+uuid: 543b3489-81d6-457c-8f70-0b606ff962a9
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.attendees.attendance
+    - field.field.attendees.attendance.field_description
+    - field.field.attendees.attendance.field_enrollment
+    - field.field.attendees.attendance.field_status
+    - field.field.attendees.attendance.field_student_account
+    - field.field.attendees.attendance.field_students
+id: attendees.attendance.default
+targetEntityType: attendees
+bundle: attendance
+mode: default
+content:
+  field_description:
+    weight: 4
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textarea
+    region: content
+  field_enrollment:
+    weight: 3
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_status:
+    weight: 5
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_student_account:
+    weight: 1
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete_tags
+    region: content
+  field_students:
+    weight: 2
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete_tags
+    region: content
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true

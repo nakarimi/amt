@@ -1,0 +1,55 @@
+/* override styles when printing */
+@media print {
+  #student-inquiry-info,
+.event-list-filter,
+.enrollmentsListContainer,
+th:after,
+#LessonsListTable_length,
+#LessonsListTable_info,
+#filtersTitle,
+.tableCellHideOnPrint,
+.region.region-header,
+.dataTables_paginate,
+.region-footer,
+#studentsLessonsDataInCirlcles,
+.view-student-future-lessons,
+#noFutureAppointments,
+.view-header {
+    display: none !important;
+  }
+
+  .lessonsList > h3, #student-basic-info > h3 {
+    text-align: center;
+    font-weight: bold;
+  }
+
+  @page {
+    size: A4;
+    margin: 5mm;
+  }
+  /* Hides the ajax loading spinner while printing */
+  #spinner-amt {
+    display: none !important;
+  }
+
+  td, th {
+    width: fit-content !important;
+  }
+
+  .views-field-edit-events {
+    display: none;
+  }
+
+  .print-heading {
+    font-size: 22px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 30px;
+  }
+
+  th {
+    font-weight: bold;
+  }
+}
+
+/*# sourceMappingURL=student_events_print.css.map */

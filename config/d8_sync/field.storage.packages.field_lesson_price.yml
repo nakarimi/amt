@@ -1,0 +1,20 @@
+uuid: b4dcfff6-a6ad-4c69-9b72-4e2625fe92cb
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: packages.field_lesson_price
+field_name: field_lesson_price
+entity_type: packages
+type: decimal
+settings:
+  precision: 10
+  scale: 2
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,10 @@
+uuid: 9009cd58-3162-41b3-910d-4cce53612b7d
+langcode: en
+status: true
+dependencies:
+  module:
+    - user
+id: user.studio_director
+label: 'Studio Director'
+targetEntityType: user
+cache: true

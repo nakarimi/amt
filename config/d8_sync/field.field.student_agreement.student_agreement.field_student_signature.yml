@@ -1,0 +1,47 @@
+uuid: 699f5853-0f6d-4171-a9e1-6e498d634bcc
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_agreement.student_agreement
+    - field.storage.student_agreement.field_student_signature
+  module:
+    - disable_field
+    - image
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: student_agreement.student_agreement.field_student_signature
+field_name: field_student_signature
+entity_type: student_agreement
+bundle: student_agreement
+label: 'Student Signature'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  file_directory: '[date:custom:Y]-[date:custom:m]'
+  file_extensions: 'png gif jpg jpeg'
+  max_filesize: ''
+  max_resolution: ''
+  min_resolution: ''
+  alt_field: true
+  alt_field_required: true
+  title_field: false
+  title_field_required: false
+  default_image:
+    uuid: ''
+    alt: 'Student Signature'
+    title: 'Student Signature'
+    width: null
+    height: null
+  handler: 'default:file'
+  handler_settings: {  }
+field_type: image

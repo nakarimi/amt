@@ -1,0 +1,221 @@
+.fc-event .fc-bg {
+  z-index: 1;
+  background: none !important;
+  opacity: 0.25;
+}
+
+.path-day-view [value="- Select Instructor -"] {
+  display: block !important;
+}
+
+thead.sticky {
+  padding: 0 15px;
+  position: fixed;
+  left: 0px;
+  display: table;
+  background: #fff;
+  z-index: 500;
+}
+
+thead.sticky div.fc-row.fc-widget-header {
+  margin: 0 15px;
+}
+
+#copy-or-paste {
+  position: fixed;
+  bottom: 10px;
+  width: 300px;
+  left: calc(50% - 150px);
+  z-index: 99;
+  display: none;
+  padding: 10px;
+  text-align: left;
+  list-style: none;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+}
+
+h4#header {
+  text-align: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#cancel-operation {
+  margin-top: 5px;
+  float: right;
+}
+
+#copy-or-paste #operation {
+  text-transform: capitalize;
+}
+
+#copy-or-paste #content .class * {
+  text-align: center;
+}
+
+.dayview_col > .instructors_list > option {
+  display: initial !important;
+}
+
+.path-day-view .fc-right {
+  padding: 0 10px;
+  position: relative;
+  top: -10px;
+}
+
+#update_multiple_status_dropdown_btn {
+  margin-right: 5px;
+}
+
+#multiple_status_update_select_all {
+  margin-bottom: 0px;
+  margin-top: 0px;
+}
+
+#multiple_status_update_select_all > label {
+  font-weight: 700;
+}
+
+.update_multiple_status_event_title > div {
+  text-align: left !important;
+}
+
+div#drupal-modal .student-accounts-form .field--name-field-attending-lessons .fieldset-wrapper > div, div#drupal-modal .student-accounts-form .field--name-field-gender .fieldset-wrapper > div {
+  display: flex;
+}
+div#drupal-modal .student-accounts-form .field--name-field-attending-lessons .fieldset-wrapper > div .form-type-radio, div#drupal-modal .student-accounts-form .field--name-field-gender .fieldset-wrapper > div .form-type-radio {
+  width: 25%;
+  margin-top: 0px;
+}
+div#drupal-modal .student-accounts-form .field--name-field-attending-lessons .fieldset-wrapper > div .form-type-radio label, div#drupal-modal .student-accounts-form .field--name-field-gender .fieldset-wrapper > div .form-type-radio label {
+  font-weight: 700;
+}
+div#drupal-modal .student-accounts-form .field--name-field-address .form-item-field-contacts-form-inline-entity-form-field-address-0-address-organization,
+div#drupal-modal .student-accounts-form .field--name-field-address .form-item-field-contacts-form-inline-entity-form-entities-0-form-field-address-0-address-organization,
+div#drupal-modal .student-accounts-form .field--name-field-address .js-form-item-field-contacts-form-inline-entity-form-field-address-0-address-address-line2,
+div#drupal-modal .student-accounts-form .field--name-field-address .form-item-field-contacts-form-inline-entity-form-entities-0-form-field-address-0-address-address-line2,
+div#drupal-modal .student-accounts-form .field--name-field-address .form-item-schedule-event {
+  display: none;
+}
+div#drupal-modal .student-accounts-form .form-item-schedule-event,
+div#drupal-modal .student-accounts-form .field--name-field-inquiry-studen,
+div#drupal-modal .student-accounts-form .field--name-field-student-department,
+div#drupal-modal .student-accounts-form .field--name-field-inquired {
+  display: none;
+}
+div#drupal-modal .student-accounts-form .field--name-field-notification-preference .fieldset-wrapper > div {
+  display: flex;
+}
+div#drupal-modal .student-accounts-form .field--name-field-notification-preference .fieldset-wrapper > div .form-type-checkbox {
+  width: 30%;
+  margin-top: 0px;
+}
+div#drupal-modal .student-accounts-form .field--name-field-notification-preference .fieldset-wrapper > div .form-type-checkbox label {
+  font-weight: 700;
+}
+div#drupal-modal .student-accounts-form .field--name-field-notification-preference .fieldset-wrapper > div > :last-child {
+  display: none;
+}
+div#drupal-modal .student-accounts-form table.ief-entity-table tr .ief-entity-operations button:nth-child(2) {
+  color: #fff;
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+}
+div#drupal-modal .student-accounts-form table.ief-entity-table tr:last-child .ief-form .field--name-field-notification-preference,
+div#drupal-modal .student-accounts-form table.ief-entity-table tr:last-child .ief-form .field--name-field-cell-phone,
+div#drupal-modal .student-accounts-form table.ief-entity-table tr:last-child .ief-form .field--name-field-email,
+div#drupal-modal .student-accounts-form table.ief-entity-table tr:last-child .ief-form .field--name-field-address,
+div#drupal-modal .student-accounts-form table.ief-entity-table tr:last-child .ief-form .field--name-field-attending-lessons {
+  display: none;
+}
+div#drupal-modal .student-accounts-form table.ief-entity-table tr:last-child .ief-form .ief-entity-submit {
+  color: #fff;
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+}
+div#drupal-modal .student-accounts-form .panel-body .table-responsive + div .btn-success {
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+}
+
+.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
+  float: none;
+}
+
+.events-services-form .form-item-multiple-event {
+  display: none;
+}
+
+.path-day-view div.form-item-schedule-lesson {
+  display: none;
+}
+
+.modal-footer .col-sm-4 .btn {
+  width: 100%;
+}
+.modal-footer .col-sm-4 .btn-gray {
+  background-color: darkgray;
+  border-color: darkgray;
+  color: white;
+}
+.modal-footer .col-sm-4 .btn-gray-dark {
+  background-color: gray;
+  border-color: gray;
+  color: white;
+}
+
+.c-btn.enrollment {
+  background-color: cornflowerblue;
+  border-color: cornflowerblue;
+}
+
+.ui-widget.ui-widget-content {
+  z-index: 9999 !important;
+}
+
+.glyphicon-refresh.spin {
+  -webkit-animation-name: spin;
+  -moz-animation-name: spin;
+  -ms-animation-name: spin;
+  animation-name: spin;
+}
+
+.summary-counts span:hover,
+.summary-counts sup:hover {
+  cursor: pointer;
+  font-weight: bold;
+  font-style: italic;
+}
+.summary-counts b {
+  padding: 0 5px;
+}
+
+select#attendeesStatus option:disabled {
+  background: #a19f9f87;
+}
+
+.spin {
+  animation-name: spin;
+  animation-duration: 1.5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/*# sourceMappingURL=amt_dayview.css.map */
+.modal-dialog{
+  position: absolute;
+  top: 20%;
+  transform: translate(0, -20%);
+}

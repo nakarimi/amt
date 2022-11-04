@@ -1,0 +1,58 @@
+$mainFiltersContainer:   '[data-drupal-selector^="views-exposed-form"]';
+$royaltyReportContainer:   '.path-royalty-report';
+$studioBusinessContainer:   '[data-drupal-selector^="views-exposed-form-studio-business-summary"]';
+$staffPerformanceContainer:   '.path-ami-staff-performance';
+
+#{$mainFiltersContainer} .form-group {
+    width: 50%;
+    padding: 2px 5px;
+    float: left;
+  }
+  
+  #{$mainFiltersContainer} .form-group .input-group-addon {
+    display: none;
+  }
+  
+  #{$mainFiltersContainer} .form-group input,
+  #{$mainFiltersContainer} .select-wrapper select,
+  #{$mainFiltersContainer} #edit-actions,
+  #{$mainFiltersContainer} select {
+    width: 100%;
+  }
+  
+  #{$mainFiltersContainer} #edit-actions {
+    padding-top: 10px;
+  }
+  #{$mainFiltersContainer} select {
+    height: 34px;
+  }
+
+  #{$mainFiltersContainer} .input-group,
+  #{$mainFiltersContainer} .form-group input,
+  #{$mainFiltersContainer} .select-wrapper select {
+      display:block;
+  }
+
+  // Adding some spacing between the message and the buttons.
+  #{$royaltyReportContainer } .show-empty-message , #{$staffPerformanceContainer} .show-empty-message {
+    margin-top: 15px;
+  }
+
+  // The Filter button on the students list.
+  .filterStudentsButton {
+    margin-right: 5px;
+  }
+
+  tfoot {
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  // hide the view filter for collapse
+  .view-filters .views-exposed-form {
+    display: none;
+  }
+
+  .path-lessons-list .view-filters .views-exposed-form {
+    display: block;
+  }

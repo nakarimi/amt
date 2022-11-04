@@ -1,0 +1,38 @@
+uuid: 4cb38e35-2c8e-40d5-a7f2-8ebf1a021520
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.attendees.attendance
+    - eck.eck_type.events.group_lesson
+    - field.storage.events.field_students
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.group_lesson.field_students
+field_name: field_students
+entity_type: events
+bundle: group_lesson
+label: Students
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:attendees'
+  handler_settings:
+    target_bundles:
+      attendance: attendance
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

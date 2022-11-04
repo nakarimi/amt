@@ -1,0 +1,166 @@
+uuid: e954ac2e-ffab-41c8-843c-b18a299c25e7
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.field.student_accounts.student_account.feeds_item
+    - field.field.student_accounts.student_account.field_booked_on
+    - field.field.student_accounts.student_account.field_contacts
+    - field.field.student_accounts.student_account.field_dances_type
+    - field.field.student_accounts.student_account.field_inquired
+    - field.field.student_accounts.student_account.field_inquiry_method
+    - field.field.student_accounts.student_account.field_inquiry_studen
+    - field.field.student_accounts.student_account.field_inquiry_taker
+    - field.field.student_accounts.student_account.field_legacy_id
+    - field.field.student_accounts.student_account.field_lesson_available
+    - field.field.student_accounts.student_account.field_low_lesson_threshold
+    - field.field.student_accounts.student_account.field_notes
+    - field.field.student_accounts.student_account.field_showed
+    - field.field.student_accounts.student_account.field_student_department
+    - field.field.student_accounts.student_account.field_teacher
+  module:
+    - datetime
+    - options
+id: student_accounts.student_account.default
+targetEntityType: student_accounts
+bundle: student_account
+mode: default
+content:
+  entity_print_view_pdf:
+    weight: 13
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_booked_on:
+    weight: 8
+    label: above
+    settings:
+      timezone_override: ''
+      date_format: m-d-Y
+    third_party_settings: {  }
+    type: datetime_custom
+    region: content
+  field_contacts:
+    weight: 1
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_dances_type:
+    weight: 15
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_inquired:
+    weight: 7
+    label: above
+    settings:
+      timezone_override: ''
+      date_format: m-d-Y
+    third_party_settings: {  }
+    type: datetime_custom
+    region: content
+  field_inquiry_method:
+    weight: 5
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_inquiry_studen:
+    weight: 4
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+    region: content
+  field_inquiry_taker:
+    weight: 6
+    label: above
+    settings:
+      view_mode: full_name
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  field_legacy_id:
+    weight: 2
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_lesson_available:
+    weight: 11
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+  field_low_lesson_threshold:
+    weight: 12
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+  field_notes:
+    weight: 10
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_showed:
+    weight: 9
+    label: above
+    settings:
+      timezone_override: ''
+      date_format: m-d-Y
+    third_party_settings: {  }
+    type: datetime_custom
+    region: content
+  field_student_department:
+    weight: 14
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_teacher:
+    weight: 3
+    label: above
+    settings:
+      view_mode: full_name
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_entity_view
+    region: content
+  title:
+    label: hidden
+    type: string
+    weight: 0
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+hidden:
+  created: true
+  entity_print_view_epub: true
+  entity_print_view_word_docx: true
+  feeds_item: true
+  uid: true

@@ -1,0 +1,27 @@
+uuid: f540dc6f-22e9-4b46-a98d-316a986df4a4
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+    - office_hours
+id: config_pages.field_studio_working_hours
+field_name: field_studio_working_hours
+entity_type: config_pages
+type: office_hours
+settings:
+  cardinality_per_day: 1
+  time_format: H
+  element_type: office_hours_datelist
+  increment: 15
+  comment: false
+  valhrs: false
+  limit_start: ''
+  limit_end: ''
+module: office_hours
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

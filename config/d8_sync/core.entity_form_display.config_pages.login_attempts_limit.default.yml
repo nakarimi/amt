@@ -1,0 +1,21 @@
+uuid: e409d1cb-726e-41a8-850d-21c99df855f7
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.login_attempts_limit
+    - field.field.config_pages.login_attempts_limit.field_login_attempts
+id: config_pages.login_attempts_limit.default
+targetEntityType: config_pages
+bundle: login_attempts_limit
+mode: default
+content:
+  field_login_attempts:
+    weight: 0
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: number
+    region: content
+hidden:
+  label: true

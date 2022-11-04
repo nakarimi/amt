@@ -1,0 +1,7 @@
+files
+files/*
+tmp
+settings/settings.local*
+settings.php
+private
+*/settings.local.php

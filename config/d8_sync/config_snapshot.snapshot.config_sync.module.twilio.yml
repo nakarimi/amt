@@ -1,0 +1,11 @@
+uuid: e8bc6a2c-eb68-41bb-b812-b57a17837b91
+langcode: en
+status: true
+dependencies:
+  module:
+    - twilio
+id: config_sync.module.twilio
+snapshotSet: config_sync
+extensionType: module
+extensionName: twilio
+items: {  }

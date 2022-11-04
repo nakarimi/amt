@@ -1,0 +1,33 @@
+uuid: 8a40bbcb-02a4-4f58-aa71-3456ed9e5a89
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.field_visibility
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: packages.enrollment.field_visibility
+field_name: field_visibility
+entity_type: packages
+bundle: enrollment
+label: Hide
+description: 'This field is used to hide or show an enrollment.'
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

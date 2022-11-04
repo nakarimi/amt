@@ -1,0 +1,71 @@
+uuid: cd9de4f2-7a4d-46dd-bbe1-bf75dd7d274a
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.events.continuous_appointment
+    - eck.eck_type.events.services
+    - field.field.events.services.feeds_item
+    - field.field.events.services.field_date_and_time
+    - field.field.events.services.field_duration
+    - field.field.events.services.field_executive
+    - field.field.events.services.field_expiration_date
+    - field.field.events.services.field_importer
+    - field.field.events.services.field_instructor
+    - field.field.events.services.field_notes
+    - field.field.events.services.field_parent
+    - field.field.events.services.field_repetition_frequency
+    - field.field.events.services.field_repetition_units
+    - field.field.events.services.field_status
+    - field.field.events.services.field_student
+    - field.field.events.services.field_type
+  module:
+    - datetime
+id: events.services.continuous_appointment
+targetEntityType: events
+bundle: services
+mode: continuous_appointment
+content:
+  field_date_and_time:
+    weight: 13
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_duration:
+    weight: 12
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_expiration_date:
+    weight: 9
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_repetition_frequency:
+    weight: 10
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: number
+    region: content
+  field_repetition_units:
+    weight: 11
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+hidden:
+  created: true
+  feeds_item: true
+  field_executive: true
+  field_importer: true
+  field_instructor: true
+  field_notes: true
+  field_parent: true
+  field_status: true
+  field_student: true
+  field_type: true
+  title: true

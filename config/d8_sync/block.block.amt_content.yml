@@ -1,0 +1,22 @@
+uuid: 5525ab9e-f876-4c90-94b2-df33e3f65702
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - amt
+_core:
+  default_config_hash: fNNLN48MSGSLiqwIFywCuxH2Dk_IxDbaP0kYhg_IPrg
+id: amt_content
+theme: amt
+region: content
+weight: 0
+provider: null
+plugin: system_main_block
+settings:
+  id: system_main_block
+  label: 'Main page content'
+  provider: system
+  label_display: '0'
+visibility: {  }

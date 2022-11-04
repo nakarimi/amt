@@ -1,0 +1,11 @@
+uuid: da734e6c-9f30-4d77-82f5-aa6a0b8aeb5f
+langcode: en
+status: true
+dependencies:
+  module:
+    - migrate_tools
+id: config_sync.module.migrate_tools
+snapshotSet: config_sync
+extensionType: module
+extensionName: migrate_tools
+items: {  }

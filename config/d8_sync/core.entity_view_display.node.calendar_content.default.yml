@@ -1,0 +1,39 @@
+uuid: 08c1d11c-bcc8-497a-b276-50c4aa7fbd97
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.calendar_content.body
+    - field.field.node.calendar_content.field_commencing_date
+    - node.type.calendar_content
+  module:
+    - datetime
+    - text
+    - user
+id: node.calendar_content.default
+targetEntityType: node
+bundle: calendar_content
+mode: default
+content:
+  body:
+    label: hidden
+    type: text_default
+    weight: 101
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  field_commencing_date:
+    weight: 102
+    label: above
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden: {  }

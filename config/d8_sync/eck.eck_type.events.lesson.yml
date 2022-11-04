@@ -1,0 +1,9 @@
+uuid: 16d0d5f4-717c-4145-af81-2ed18e44cfbe
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_entity_type.events
+name: Lesson
+type: lesson
+description: ''

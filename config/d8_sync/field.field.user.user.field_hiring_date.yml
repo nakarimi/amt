@@ -1,0 +1,30 @@
+uuid: 2a407a14-26ce-425a-afaf-5e7a712dc78b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_hiring_date
+  module:
+    - datetime
+    - disable_field
+    - user
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: user.user.field_hiring_date
+field_name: field_hiring_date
+entity_type: user
+bundle: user
+label: 'Hiring Date'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

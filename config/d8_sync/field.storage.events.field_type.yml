@@ -1,0 +1,20 @@
+uuid: c8563d29-e7dc-41fb-a0bd-a65f1911c974
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - taxonomy
+id: events.field_type
+field_name: field_type
+entity_type: events
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

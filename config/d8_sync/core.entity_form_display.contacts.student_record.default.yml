@@ -1,0 +1,103 @@
+uuid: 36a0b8ed-9253-4610-a8c7-55491e965b4c
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.contacts.student_record
+    - field.field.contacts.student_record.field_address
+    - field.field.contacts.student_record.field_attending_lessons
+    - field.field.contacts.student_record.field_cell_phone
+    - field.field.contacts.student_record.field_email
+    - field.field.contacts.student_record.field_first_name
+    - field.field.contacts.student_record.field_gender
+    - field.field.contacts.student_record.field_home_phone
+    - field.field.contacts.student_record.field_last_name
+    - field.field.contacts.student_record.field_notification_preference
+    - field.field.contacts.student_record.field_student_image
+    - image.style.thumbnail
+  module:
+    - address
+    - image
+    - telephone
+id: contacts.student_record.default
+targetEntityType: contacts
+bundle: student_record
+mode: default
+content:
+  field_address:
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+    type: address_default
+    region: content
+  field_attending_lessons:
+    weight: 11
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_cell_phone:
+    weight: 6
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: telephone_default
+    region: content
+  field_email:
+    weight: 4
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: email_default
+    region: content
+  field_first_name:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_home_phone:
+    weight: 5
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: telephone_default
+    region: content
+  field_last_name:
+    weight: 2
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_notification_preference:
+    weight: 7
+    settings: {  }
+    third_party_settings: {  }
+    type: options_buttons
+    region: content
+  field_student_image:
+    weight: 9
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+    type: image_image
+    region: content
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  feeds_item: true
+  field_gender: true
+  uid: true

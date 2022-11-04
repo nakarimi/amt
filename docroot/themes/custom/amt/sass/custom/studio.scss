@@ -1,0 +1,75 @@
+.widget {
+  border: 1px solid black;
+  margin-top: 30px;
+  padding: 5px;
+  h3 {
+    text-align: center;
+  }
+}
+#contact {
+  div {
+    border: 12px solid #68BC94;
+    width: 120px;
+    height: 120px;
+    position: relative;
+    border-radius: 50%;
+    padding-top: 20px;
+    font-size: 36px;
+    margin: 0 auto;
+    font-family: "Bahnschrift";
+  }
+  p {
+    font-size: 20px;
+    font-weight: bold;
+    font-family: "Bahnschrift";
+  }
+  span {
+    font-family: "Bahnschrift";
+  }
+}
+#booked {
+  div {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    border-radius: 50%;
+    padding-top: 20px;
+    font-size: 36px;
+    margin: 0 auto;
+    font-family: "Bahnschrift";
+    border: 12px solid #0077B7;
+  }
+  p {
+    font-size: 20px;
+    font-weight: bold;
+    font-family: "Bahnschrift";
+  }
+  span {
+    font-family: "Bahnschrift";
+  }
+}
+#showed {
+  div {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    border-radius: 50%;
+    padding-top: 20px;
+    font-size: 36px;
+    margin: 0 auto;
+    font-family: "Bahnschrift";
+    border: 12px solid #E5E5E5;
+  }
+  p {
+    font-size: 20px;
+    font-weight: bold;
+    font-family: "Bahnschrift";
+  }
+  span {
+    font-family: "Bahnschrift";
+  }
+}
+nav ul.tabs--primary {
+  position: relative;
+  z-index: 1;
+}

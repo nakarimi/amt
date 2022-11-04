@@ -1,0 +1,7 @@
+status: 1
+pattern: '[payments:field_payment_id]'
+php: false
+escape: false
+dependencies:
+  config:
+    - eck.eck_type.payments.payment

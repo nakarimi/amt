@@ -1,0 +1,10 @@
+/* Background color for roles in the user dashboard page table */
+.roles_in_userdashboard {
+  padding: 3px 5px;
+  color: white;
+  background: gray; }
+
+body [role="main"] {
+  padding-left: 15px;
+  padding-right: 15px;
+  width: 100%; }

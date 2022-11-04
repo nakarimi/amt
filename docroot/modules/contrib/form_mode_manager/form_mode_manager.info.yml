@@ -1,0 +1,14 @@
+name: Form Mode Manager
+description: 'Allow use of form mode in all entities'
+type: module
+# core: 8.x
+configure: form_mode_manager.admin_settings
+dependencies:
+  - field
+  - field_ui
+
+# Information added by Drupal.org packaging script on 2017-12-22
+version: '8.x-1.3'
+core: '8.x'
+project: 'form_mode_manager'
+datestamp: 1513953582

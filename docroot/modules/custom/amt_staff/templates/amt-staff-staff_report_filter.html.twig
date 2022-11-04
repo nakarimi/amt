@@ -1,0 +1,11 @@
+<form class="views-exposed-form" data-drupal-selector="views-exposed-form-ami-staff-performance-page-1" action="/ami-staff-performance" method="get" id="views-exposed-form-ami-staff-performance-page-1" accept-charset="UTF-8" data-drupal-form-fields="edit-field-ami-id-value,edit-year,edit-week,edit-submit-ami-staff-performance,edit-api-submit">
+  <div class="form--inline form-inline clearfix">
+    <div class="form-item form-group">
+      <label for="edit-field-ami-id-value" class="control-label">Staff Name</label>
+      <div class="select-wrapper">
+        <input data-drupal-selector="edit-field-ami-id-value" class="form-text form-control" type="text" id="edit-field-ami-id-value" placeholder="Full Name" name="staff_name" value="{{ selectedData.staff_name }}" size="30" maxlength="128">  
+      </div>
+    </div>
+    {% include "ami_public_fields_filter.html.twig" %}
+  </div>
+</form>

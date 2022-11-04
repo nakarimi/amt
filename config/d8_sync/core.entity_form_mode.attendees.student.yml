@@ -1,0 +1,10 @@
+uuid: d84087b6-6870-48e9-a442-ef7b0d245d62
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: attendees.student
+label: Student
+targetEntityType: attendees
+cache: true

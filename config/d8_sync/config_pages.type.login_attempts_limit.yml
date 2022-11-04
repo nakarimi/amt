@@ -1,0 +1,16 @@
+uuid: f417f2fd-5bcd-4dd9-8bf0-6210bd18078d
+langcode: en
+status: true
+dependencies: {  }
+id: login_attempts_limit
+label: 'Login Attempts Limit'
+context:
+  show_warning: true
+  group:
+    language: false
+  fallback:
+    language: ''
+menu:
+  path: '/admin/config/Login Attempts Limit'
+  weight: 0
+  description: ''

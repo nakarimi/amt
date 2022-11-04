@@ -1,0 +1,7 @@
+status: 1
+pattern: '[packages:field_package_name]'
+php: false
+escape: false
+dependencies:
+  config:
+    - eck.eck_type.packages.package

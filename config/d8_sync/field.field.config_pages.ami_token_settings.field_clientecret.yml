@@ -1,0 +1,29 @@
+uuid: bfc32b65-7b8a-4e96-ac5e-2ce3aced997b
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.ami_token_settings
+    - field.storage.config_pages.field_clientecret
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.ami_token_settings.field_clientecret
+field_name: field_clientecret
+entity_type: config_pages
+bundle: ami_token_settings
+label: 'Client Secret'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

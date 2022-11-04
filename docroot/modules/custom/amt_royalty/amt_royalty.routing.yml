@@ -1,0 +1,17 @@
+amt_royalty.autocomplete:
+  path: '/amt_royalty/autocomplete'
+  defaults:
+    _controller: '\Drupal\amt_royalty\Controller\AmtRoyaltyController::ajaxLoadAutoComplete'
+    _title: 'Load the the filter data over ajax call'
+  requirements:
+    _permission: 'Royalty Report Page'
+
+amt_royalty.page:
+  path: '/royalty-report'
+  defaults:
+    _controller: '\Drupal\amt_royalty\Controller\AmtRoyaltyController::basePageCallback'
+    _title: 'Royalty Report'
+  requirements:
+    _permission: 'Royalty Report Page'
+  options:
+    no_cache: 'TRUE'

@@ -1,0 +1,81 @@
+{% if teacher_data.no_teacher %}
+    <div class="alert alert-warning mt-5" style="background: none; border-left: 4px solid khaki;">
+        <p>{{ teacher_data.no_teacher }}</p>
+    </div>
+{% else %}
+    
+    <h1>{{teacher_data.name}}</h1>
+
+    <table class="table table-striped" style="white-space: nowrap;">
+        <thead>
+            <tr>
+                <th>
+                    Teacher ID
+                </th>
+                <th>
+                    Titles
+                </th>
+                <th>
+                    Birthday
+                </th>
+                <th>
+                    Hiring Date
+                </th>
+                <th>
+                    Phone
+                </th>
+                <th>
+                    Email
+                </th>
+                <th>
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    {% if teacher_data.legacy_id %}
+                        <h5>{{teacher_data.legacy_id}}</h5>
+                    {% endif %}
+                </td>
+                 <td>
+                    {% if teacher_data.titles %}
+                        {% for role in teacher_data.titles %}
+                            <span >{{role}}</span> 
+                        {% endfor %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if teacher_data.birthday %}
+                        <h5>{{teacher_data.birthday}}</h5>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if teacher_data.hiring_date %}
+                        <h5>{{teacher_data.hiring_date}}</h5>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if teacher_data.phone %}
+                        <h5>{{teacher_data.phone}}</h5>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if teacher_data.email %}
+                        <h5>{{teacher_data.email}}</h5>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/user/{{ teacher_data.id }}/edit?destination=/user/{{ teacher_data.id }}">Edit</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    {% if teacher_data.availability %}
+        {{teacher_data.availability}}
+    {% endif %}
+
+{% endif %}
+

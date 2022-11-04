@@ -1,0 +1,33 @@
+uuid: d64162b0-de1e-42e8-83c0-16e2eac01d57
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.contacts.student_record
+    - field.storage.contacts.field_gender
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: contacts.student_record.field_gender
+field_name: field_gender
+entity_type: contacts
+bundle: student_record
+label: Gender
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: Male
+  off_label: Female
+field_type: boolean

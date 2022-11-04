@@ -1,0 +1,9 @@
+uuid: 0e479181-b243-4f92-9990-be46bf188b3b
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_entity_type.attendees
+name: Attendance
+type: attendance
+description: ''

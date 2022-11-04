@@ -1,0 +1,83 @@
+amt_reports.autocomplete:
+  path: '/amt_reports/autocomplete'
+  defaults:
+    _controller: '\Drupal\amt_reports\Controller\AmtReportsController::ajaxLoadAutoComplete'
+    _title: 'Load the service type over ajax call'
+  requirements:
+    _permission: 'Auto Complete'
+
+chat_success_rate.page:
+  path: '/chat-success-rate'
+  defaults:
+    _controller: '\Drupal\amt_reports\Controller\AmtReportsController::loadChatSuccessRate'
+    _title: 'Chat Success Rate'
+  requirements:
+    _permission: 'Chat Success Rate Page'
+  options:
+    no_cache: 'TRUE'
+
+csv_export.page:
+  path: '/csv-export'
+  defaults:
+    _controller: '\Drupal\amt_reports\Controller\AmtReportsController::csvExport'
+    _title: 'Export CSV callbakc for AMI Reports.'
+  requirements:
+    _permission: 'AMI Staff Performance Page'
+  options:
+    no_cache: 'TRUE'
+
+csv_student_list_export.page:
+  path: '/student-list-csv-export'
+  defaults:
+    _controller: '\Drupal\amt_reports\Controller\AmtReportsController::csvExportStudentList'
+    _title: 'Export CSV callbakc for Student List.'
+  requirements:
+    _permission: 'AMI Staff Performance Page'
+  options:
+    no_cache: 'TRUE'
+
+amt_active_students.page:
+  path: '/students-list'
+  defaults:
+    _controller: '\Drupal\amt_reports\Controller\AmtReportsController::loadStudentsList'
+    _title: 'Students List'
+  requirements:
+    _permission: 'Students List'
+  options:
+    no_cache: 'TRUE'
+amt_students_inventory.page:
+  path: '/students-inventory'
+  defaults:
+    _controller: '\Drupal\amt_reports\Controller\AmtReportsController::loadStudentsInventory'
+    _title: 'Students Inventory'
+  requirements:
+    _permission: 'Students Inventory'
+  options:
+    no_cache: 'TRUE'
+amt_projections_report.page:
+  path: '/projections-report'
+  defaults:
+    _controller: '\Drupal\amt_reports\Controller\AmtReportsController::loadProjectionsReport'
+    _title: 'Projections Report'
+  requirements:
+    _permission: 'Projections Report'
+  options:
+    no_cache: 'TRUE'
+amt_instructor_conflict_list:
+  path: '/amt_reports/conflicts'
+  defaults:
+    _controller: '\Drupal\amt_reports\Controller\AmtReportsController::loadTimeConflictList'
+    _title_callback: '\Drupal\amt_reports\Controller\AmtReportsController::loadTimeConflictListpagetitle'
+  requirements:
+    _permission: 'Instructor Time Conflict'
+  options:
+    no_cache: 'TRUE'
+amt_mass_student_department_update:
+  path: '/amt_reports/mass_student_department_update'
+  defaults:
+    _controller: '\Drupal\amt_reports\Controller\AmtReportsController::massStudentDepartmentUpdate'
+    _title: 'Mass Update of student department for a chuck of students list'
+  requirements:
+    _permission: 'Students List'
+  options:
+    no_cache: 'TRUE'

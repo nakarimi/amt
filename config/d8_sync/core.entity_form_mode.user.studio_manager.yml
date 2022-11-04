@@ -1,0 +1,10 @@
+uuid: d6ca6df5-caac-487b-be12-f4fb874c5d41
+langcode: en
+status: true
+dependencies:
+  module:
+    - user
+id: user.studio_manager
+label: 'Studio Manager'
+targetEntityType: user
+cache: true

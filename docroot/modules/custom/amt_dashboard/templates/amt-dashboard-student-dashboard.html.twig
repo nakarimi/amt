@@ -1,0 +1,380 @@
+{% if message %}
+	<h2>{{ message }}</h2>
+{% else %}
+	<div
+		id="student_dashboard_container">
+
+		{# Balancing button #}
+		<div class="view-header">
+			{% if (totalLessonsPaidAhead == 0)  and (totalLessonsPassedUnposted > 0) %}
+				<div class="alert alert-success new p-4 col-lg-4 col-md-6 col-sm-6" style="background: none; border-left: 4px solid green;">
+					<p class="mb-0">This student has
+						<strong>{{totalLessonsPassedUnposted}}</strong>
+						unposted lessons.</p>
+				</div>
+			{% endif %}
+
+			<div class="text-right">
+				<div class="dropdown" style="display: initial;">
+					<button class="btn btn-info btn-lg dropdown-toggle" id="update_multiple_status_dropdown_btn" data-toggle="dropdown">
+						<i class="glyphicon glyphicon-file" aria-hidden="true" ></i> Status Update <span class="caret"></span>
+					</button>
+					<ul id="update_multiple_status_dropdown" class="dropdown-menu">
+						<li>
+							<a href="#" data-bundle="dayview_lessons" class="update_multiple_status_item" type="button" data-dialog-type="modal" data-dialog-options='{"width":"68%"}'>Update Lesson</a>
+						</li>
+						<li>
+							<a href="#" data-bundle="dayview_group_lessons" class="update_multiple_status_item" type="button" data-dialog-type="modal" data-dialog-options='{"width":"68%"}'>Update Group Lesson</a>
+						</li>
+						<li>
+							<a href="#" data-bundle="dayview_services" class="update_multiple_status_item" type="button" data-dialog-type="modal" data-dialog-options='{"width":"68%"}'>Update Services</a>
+						</li>
+					</ul>
+				</div>
+				<button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#updateStudentDepartmentModal">Department :
+					{{studentDepartment.list[studentDepartment.chosen_department]}}</button>
+				<button type="button" class="btn btn-info btn-lg" data-toggle="modal" id="paidAheadBalanceBTN" data-target="#paidAheadBalance">Set Opening Balance</button>
+			</div>
+		</div>
+
+
+		{# Summary Block start #}
+		<div class="widget" id="studentsLessonsDataInCirlcles">
+			<h3>
+				<b>{{studentName}}
+				</b>
+				Summary</h3>
+			<div style="overflow-x: scroll;">
+				<table class="table" style="white-space: nowrap;">
+					<tbody>
+						<tr>
+							<td class="text-center" id="totalLessonsEnrolled">
+								<div>{{ totalLessonsEnrolled }}
+									<br>
+								</div>
+								<p>
+									<b>Total Lessons Enrolled</b>
+								</p>
+							</td>
+							<td class="text-center" id="totalLessonsTaken">
+								<div>{{ totalLessonsTaken  }}
+									<br>
+
+								</div>
+								<p>
+									<b>Total Lessons Taken</b>
+								</p>
+							</td>
+							<td class="text-center" id="totalLessonsRemaining">
+								<div>{{ totalLessonsRemaining  }}
+									<br>
+
+								</div>
+								<p>
+									<b>Total Lessons Remaining</b>
+								</p>
+							</td>
+							<td class="text-center" id="totalLessonsPaidAhead">
+								<div>{{ totalLessonsPaidAhead  }}
+									<br>
+
+								</div>
+								<p>
+									<b>Total Lessons Paid Ahead</b>
+								</p>
+							</td>
+							<td class="text-center" id="totalFutureLessons">
+								<div>{{ totalFutureLessons }}
+									<br>
+								</div>
+								<p>
+									<b>Total Future Lessons</b>
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		{# Student Future lessons based on student Id #}
+		{% set view = drupal_view_result('student_future_lessons', 'block_1')|length %}
+		{% if view > 0 %}
+			<h3 id="FutureAppointments">Student Future Appointments</h3>
+			{{ drupal_view('student_future_lessons', 'block_1') }}
+		{% else %}
+			<h3 id="noFutureAppointments">No Future Appointments!
+			</h3>
+		{% endif %}
+		{# End of student Future Lessons #}
+		{# End of Summary Block #}
+		<h3>Student Basic/Inquiry Info</h3>
+		<div id="student-basic-info">
+			{% if studentBasicInfo %}
+				{{ studentBasicInfo }}
+			{% endif %}
+		</div>
+		<div id="student-inquiry-info">
+			{% if inquiry %}
+				{{ inquiry }}
+			{% endif %}
+		</div>
+		{# Enrollments List Main Container #}
+		<ul class="nav nav-tabs" id="myTab" role="tablist">
+			<li class="nav-item active">
+				<a class="nav-link active" id="lesson-enrollments-tab" data-toggle="tab" href="#lesson-enrollments" role="tab" aria-controls="lesson-enrollments" aria-selected="true" aria-expanded="true">Lesson Enrollments</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="service-enrollments-tab" data-toggle="tab" href="#service-enrollments" role="tab" aria-controls="service-enrollments">Service Enrollments</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="payments-tab" data-toggle="tab" href="#payments" role="tab" aria-controls="payments" aria-selected="false">Payments</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="lessons_list-tab" data-toggle="tab" href="#lessons_list" role="tab" aria-controls="lessons_list" aria-selected="false">Lessons List</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" id="service_list-tab" data-toggle="tab" href="#service_list" role="tab" aria-controls="service_list" aria-selected="false">Service List</a>
+			</li>
+		</ul>
+		<div class="tab-content" id="myTabContent">
+			<div class="tab-pane fade active in" id="lesson-enrollments" role="tabpanel" aria-labelledby="lesson-enrollments-tab">
+				<div>
+					<div
+						class="enrollmentsListContainer">
+						{# Enrollments List Heading #}
+						<h3 id="filtersTitle" data-toggle="collapse" href="#collapseFilter" role="button" aria-expanded="false" aria-controls="collapseFilter">
+							<span class="collapseBtn"> <img src="core/misc/icons/bebebe/hamburger.svg"> </span>Enrollments List
+						</h3>
+						{# Enrollments List Filters Container #}
+						<div class="collapse" id="collapseFilter">
+							<div class="enrollmentsFilters">
+								<div class="row">
+									<div class="form-group col-md-6 col-sm-12">
+										<input type="text" id="instrcutorFilter" name="instructor" data-id="" class="form-control" placeholder="Instructor">
+									</div>
+									<div class="form-group col-md-6 col-sm-12">
+										<input type="text" id="categoryFilter" name="category" data-id="" class="form-control" placeholder="Category">
+									</div>
+									<div class="form-group col-md-6 col-sm-12">
+										<input type="number" id="totalPriceFilter" name="totalPrice" data-id="" class="form-control numberFields" placeholder="Total Price">
+									</div>
+									<div class="form-group col-md-6 col-sm-12">
+										<input type="number" id="totalPaidFilter" name="totalPaid" data-id="" class="form-control numberFields" placeholder="Total Paid">
+									</div>
+									<div class="form-group col-sm-12">
+										<button type="button" id="filterEnrollmentBtn" name="filterEnrollmentBtn" class="btn btn-info btn-block">Filter</button>
+									</div>
+									<input type="number" id="studentId" name="studentId" readonly="readonly" style="display:none" value="{{studentId}}">
+								</div>
+							</div>
+						</div>
+						{# End of Enrollments List Filters Container #}
+						{# Enrollments List Container #}
+						<div
+							class="enrollmentsList">
+							{# Enrollments List Table Wrapper #}
+							<div class="enrollmentsList">
+								{% if enrollment %}
+									{{ enrollment }}
+								{% endif %}
+							</div>
+							{# End of Enrollments List Table Wrapper #}
+						</div>
+						{# End of Enrollments List Container #}
+					</div>
+					{# End of Enrollments List Container #}
+				</div>
+			</div>
+			<div class="tab-pane fade" id="service-enrollments" role="tabpanel" aria-labelledby="service-enrollments-tab">
+				<h3>Coming soon!</h3>
+			</div>
+			<div class="tab-pane fade" id="payments" role="tabpanel" aria-labelledby="payments-tab">
+				{# Show this view : admin/structure/views/view/payment_reports/edit/page_3 #}
+				<div>{{ drupal_view('payment_reports', 'page_3') }}</div>
+			</div>
+			<div class="tab-pane fade" id="lessons_list" role="tabpanel" aria-labelledby="lessons_list-tab">
+				<div
+					class="lessonsList">
+					{# Lessons List Heading #}
+					<h3 id="filtersTitle" data-toggle="collapse" href="#collapseLessonsFilter" role="button" aria-expanded="false" aria-controls="collapseLessonsFilter"> <span class="collapseBtn"> <img src="core/misc/icons/bebebe/hamburger.svg"> </span>Lessons List</h3>
+					{# Lessons List Table Wrapper #}
+					<div class="lessonsListTableWrapper">
+						<div class="collapse" id="collapseLessonsFilter">
+							<div class="event-list-filter row" style="margin-bottom: 10px">
+								<div class="col-sm-3">
+									<input class="form-control" type="date" id="datePickerForLessonList">
+								</div>
+								<div class="col-sm-3">
+									<select class="form-control" id="ServiceFilter">
+										<option value="">Select Service</option>
+									</select>
+								</div>
+								<div class="col-sm-3">
+									<select class="form-control" id="TeacherFilter">
+										<option value="">Select Teacher</option>
+									</select>
+								</div>
+								<div class="col-sm-3">
+									<a onclick="window.print();" class="btn btn-warning" id="printTableButton">
+										Print
+									</a>
+								</div>
+							</div>
+						</div>
+						{% if student %}
+							{{ student }}
+						{% endif %}
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="service_list" role="tabpanel" aria-labelledby="service_list-tab">
+				<div
+					class="servicesList">
+					{# Lessons List Heading #}
+					<h3 id="filtersTitle" data-toggle="collapse" href="#collapseServicesFilter" role="button" aria-expanded="false" aria-controls="collapseServicesFilter"> <span class="collapseBtn"> <img src="core/misc/icons/bebebe/hamburger.svg"> </span> Services List</h3>
+					{# Lessons List Table Wrapper #}
+					<div class="servicesListTableWrapper">
+					<div class="collapse" id="collapseServicesFilter">
+						<div class="event-list-filter row" style="margin-bottom: 10px">
+							<div class="col-sm-3">
+								<input class="form-control" type="date" id="datePickerForLessonList">
+							</div>
+							<div class="col-sm-3">
+								<select class="form-control" id="ServiceFilter">
+									<option value="">Select Service</option>
+								</select>
+							</div>
+							<div class="col-sm-3">
+								<select class="form-control" id="TeacherFilter">
+									<option value="">Select Teacher</option>
+								</select>
+							</div>
+							<div class="col-sm-3">
+								<a onclick="window.print();" class="btn btn-warning" id="printTableButton">
+									Print
+								</a>
+							</div>
+							</div>
+						</div>
+						{% if studentServices %}
+							{{ studentServices }}
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+{% endif %}{# Balancing modal #}
+{% include "@amt_dashboard/modal-balance.html.twig" %}{# Update Student Department Modal #}
+{% include "@amt_dashboard/amt-dashboard-student-department.html.twig" with {
+    departmentsObject: studentDepartment,
+    studentId: studentId
+} only %}
+<!-- Modal for Updating Multiple appointments statuses -->
+<div class="modal" tabindex="-1" role="dialog" id="update_multiple_status">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Updating Multiple
+					<span id="appointment_type_identifier"></span>' statuses</h3>
+			</div>
+			<div class="modal-body" style=" max-height: 70vh; overflow-y: scroll; ">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>
+								<div class="checkbox" id="multiple_status_update_select_all">
+									<label>
+										<input type="checkbox" id="multiple_status_update_select_all_checkbox">
+										select All
+									</label>
+								</div>
+							</th>
+							<th>Title</th>
+							<th>Instructor</th>
+							<th>Time</th>
+							<th id="multiple_status_update_status_column">Status</th>
+						</tr>
+					</thead>
+					<tbody id="glessons">
+						{% if studentGLessonsStatus %}
+							{{ studentGLessonsStatus|raw }}
+						{% endif %}
+					</tbody>
+					<tbody id="lessons">
+						{% if studentLessonsStatus %}
+							{{ studentLessonsStatus|raw }}
+						{% endif %}
+					</tbody>
+					<tbody id="services">
+						{% if studentServicesStatus %}
+							{{ studentServicesStatus|raw }}
+						{% endif %}
+					</tbody>
+				</table>
+			</div>
+			<div class="modal-footer" id="modal-footer">
+
+				<div class="col-md-8">
+					<select class="form-control" id="lessons_status_selectbox">
+						{% if lesson_status_list %}
+							{% for key,val in lesson_status_list %}
+								<option value="{{val.id}}" {% if val.name == "Pending Status" %} selected {% endif %} >{{val.name}}</option>
+							{% endfor %}
+						{% endif %}
+					</select>
+					<select class="form-control" id="services_status_selectbox">
+						{% if service_status_list %}
+							{% for key,val in service_status_list %}
+								<option value="{{val.id}}" {% if val.name == "Pending Status" %} selected {% endif %} >{{val.name}}</option>
+							{% endfor %}
+						{% endif %}
+					</select>
+				</div>
+
+				<div class="col-md-4">
+					<button class="btn btn-success" id="update_multiple_status_submit_btn">Update All</button>
+				</div>
+
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+<!-- End of modal for Updating Multiple appointments statuses -->
+
+
+<!-- Modal for Updating Multiple appointments statuses -->
+<div class="modal" tabindex="-1" role="dialog" id="update_multiple_status_result_modal">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Status Update Result
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</h3>
+				
+			</div>
+			<div class="modal-body">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th>Event Title</th>
+							<th>Reason</th>
+						</tr>
+					</thead>
+					<tbody id="update_multiple_status_result_body"></tbody>
+				</table>
+			</div>
+
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+<!-- End of modal for Updating Multiple appointments statuses -->
+

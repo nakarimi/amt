@@ -1,0 +1,14 @@
+uuid: 48deb11d-9992-4a37-99f4-3c373930d486
+langcode: en
+status: true
+dependencies: {  }
+_core:
+  default_config_hash: k3eoAl6CeJJ3qaF-9TUEsicWQ2uDBlvi7-wJTS9Avl0
+id: amt
+label: 'AMT Imports'
+description: 'AMT D8 importer.'
+source_type: 'Drupal 8'
+module: null
+shared_configuration:
+  source:
+    key: migrate

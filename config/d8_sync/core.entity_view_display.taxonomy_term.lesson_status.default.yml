@@ -1,0 +1,32 @@
+uuid: edb3a679-f1ec-4988-86e0-c3f39d210e4f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.lesson_status.field_color
+    - taxonomy.vocabulary.lesson_status
+  module:
+    - color_field
+    - text
+id: taxonomy_term.lesson_status.default
+targetEntityType: taxonomy_term
+bundle: lesson_status
+mode: default
+content:
+  description:
+    label: hidden
+    type: text_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_color:
+    weight: 1
+    label: above
+    settings:
+      format: hex
+      opacity: '1'
+    third_party_settings: {  }
+    type: color_field_formatter_text
+    region: content
+hidden: {  }

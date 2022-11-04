@@ -1,0 +1,137 @@
+uuid: b71ffb79-c13e-4b83-906b-c63de4edf9b3
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.contacts.popup
+    - eck.eck_type.contacts.student_record
+    - field.field.contacts.student_record.field_address
+    - field.field.contacts.student_record.field_attending_lessons
+    - field.field.contacts.student_record.field_cell_phone
+    - field.field.contacts.student_record.field_email
+    - field.field.contacts.student_record.field_first_name
+    - field.field.contacts.student_record.field_gender
+    - field.field.contacts.student_record.field_home_phone
+    - field.field.contacts.student_record.field_last_name
+    - field.field.contacts.student_record.field_notification_preference
+    - field.field.contacts.student_record.field_student_image
+  module:
+    - address
+    - field_group
+    - telephone
+third_party_settings:
+  field_group:
+    group_group:
+      children:
+        - field_first_name
+        - field_last_name
+      parent_name: ''
+      weight: 1
+      format_type: html_element
+      format_settings:
+        element: div
+        show_label: true
+        label_element: h3
+        label_element_classes: ''
+        required_fields: true
+        attributes: ''
+        effect: none
+        speed: fast
+        id: ''
+        classes: student_initials
+      label: group
+      region: content
+    group_group_elem:
+      children:
+        - field_email
+        - field_cell_phone
+      parent_name: ''
+      weight: 5
+      format_type: html_element
+      format_settings:
+        id: ''
+        classes: student_initials
+        element: div
+        show_label: false
+        label_element: h3
+        label_element_classes: ''
+        required_fields: true
+        attributes: ''
+        effect: none
+        speed: fast
+      label: group_elem
+      region: content
+id: contacts.student_record.popup
+targetEntityType: contacts
+bundle: student_record
+mode: popup
+content:
+  field_address:
+    weight: 4
+    settings: {  }
+    third_party_settings: {  }
+    type: address_default
+    region: content
+  field_attending_lessons:
+    type: options_buttons
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_cell_phone:
+    weight: 8
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: telephone_default
+    region: content
+  field_email:
+    weight: 7
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: email_default
+    region: content
+  field_first_name:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_gender:
+    type: options_buttons
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_last_name:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_notification_preference:
+    type: options_buttons
+    weight: 6
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  feeds_item: true
+  field_home_phone: true
+  field_student_image: true
+  uid: true

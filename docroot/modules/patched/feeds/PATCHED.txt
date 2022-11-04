@@ -1,0 +1,7 @@
+Autor: Nasser karimi - 2019-06-16
+
+Patch File: feeds-config-entityreference.patch
+Drupal adding the User role referencing fixed. 
+
+Patch File: EntityProcessorBase_eck_issue_patch.diff
+Fix the issue with import ECKs on feeds that don't working for cusom entity.

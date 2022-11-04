@@ -1,0 +1,20 @@
+uuid: d450d238-554d-41ba-935a-cad8a57248cb
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - taxonomy
+id: packages.field_category
+field_name: field_category
+entity_type: packages
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

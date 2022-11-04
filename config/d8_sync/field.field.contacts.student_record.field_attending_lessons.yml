@@ -1,0 +1,32 @@
+uuid: c5bb117f-4526-4cda-875d-52c04dd7e61c
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.contacts.student_record
+    - field.storage.contacts.field_attending_lessons
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: contacts.student_record.field_attending_lessons
+field_name: field_attending_lessons
+entity_type: contacts
+bundle: student_record
+label: 'Attending Lessons'
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: solo
+default_value_callback: ''
+settings: {  }
+field_type: list_string

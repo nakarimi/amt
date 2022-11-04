@@ -1,0 +1,69 @@
+amt_scripts:
+  version: 1.x
+  js:
+    assets/js/enrollment_form.js: {}
+  dependencies:
+    - core/jquery
+amt_package_total_price:
+  version: 1.x
+  js:
+    assets/js/package_total_price.js: {}
+  dependencies:
+    - core/jquery
+amt_available_office_hours:
+  version: 1.x
+  js:
+    assets/js/available_office_hours.js: {}
+  dependencies:
+    - core/jquery
+amt_enrollmentLoad:
+  version: 1.x
+  js:
+    assets/js/enrollment_load.js: {}
+  dependencies:
+    - core/jquery
+amt_enrollmentinline:
+  version: 1.x
+  js:
+    assets/js/enrollment_load_inline.js: {}
+  dependencies:
+    - core/jquery
+amt_enrollmentattendee:
+  version: 1.x
+  js:
+    assets/js/enrollment_load_attendee.js: {}
+  dependencies:
+    - core/jquery
+amt_view_filter_autocomplete:
+  version: 1.x
+  js:
+    assets/js/view_filter_autocomplete.js: {}
+  dependencies:
+    - core/jquery
+timeslot_check:
+  version: 1.x
+  css:
+    theme:
+      assets/css/jquery.timepicker.css : {}
+  js:
+    assets/js/jquery.timepicker.min.js: {}
+    assets/js/timeslot_check.js: {}
+  dependencies:
+    - core/jquery
+
+timeslot_check_inquery:
+  version: 1.x
+  css:
+    theme:
+      assets/css/jquery.timepicker.css : {}
+  js:
+    assets/js/jquery.timepicker.min.js: {}
+    assets/js/timeslot_check_inquery.js: {}
+  dependencies:
+    - core/jquery
+amt_view_filter_collapse:
+  version: 1.x
+  js:
+    assets/js/view_filter_collapse.js: {}
+  dependencies:
+    - core/jquery

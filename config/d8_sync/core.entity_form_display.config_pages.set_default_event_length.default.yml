@@ -1,0 +1,41 @@
+uuid: 1e6c10cc-f9f5-43ed-8d8b-1839ba55765e
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.set_default_event_length
+    - field.field.config_pages.set_default_event_length.field_dance_evaluation
+    - field.field.config_pages.set_default_event_length.field_lessons_length
+    - field.field.config_pages.set_default_event_length.field_pre_originals_length
+    - field.field.config_pages.set_default_event_length.field_services_length
+id: config_pages.set_default_event_length.default
+targetEntityType: config_pages
+bundle: set_default_event_length
+mode: default
+content:
+  field_dance_evaluation:
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_lessons_length:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_pre_originals_length:
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_services_length:
+    weight: 1
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+hidden:
+  label: true

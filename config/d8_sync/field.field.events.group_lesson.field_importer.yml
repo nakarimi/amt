@@ -1,0 +1,29 @@
+uuid: 26557a37-306e-423d-96d7-e3b784eb5b66
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.group_lesson
+    - field.storage.events.field_importer
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.group_lesson.field_importer
+field_name: field_importer
+entity_type: events
+bundle: group_lesson
+label: Importer
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

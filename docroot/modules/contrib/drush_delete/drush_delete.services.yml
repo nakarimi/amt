@@ -1,0 +1,3 @@
+services:
+  drush_delete.entity:
+    class: Drupal\drush_delete\DeleteContent

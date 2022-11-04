@@ -1,0 +1,30 @@
+uuid: 41cc7df3-d6fb-4dc8-9bb0-0c18673a4734
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.field_dances_type
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: student_accounts.student_account.field_dances_type
+field_name: field_dances_type
+entity_type: student_accounts
+bundle: student_account
+label: "What type of Dances?\t"
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

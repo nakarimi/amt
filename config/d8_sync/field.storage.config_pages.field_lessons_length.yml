@@ -1,0 +1,36 @@
+uuid: 560637ba-2ea9-4a15-a1ca-af5705baf1c0
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+    - options
+id: config_pages.field_lessons_length
+field_name: field_lessons_length
+entity_type: config_pages
+type: list_integer
+settings:
+  allowed_values:
+    -
+      value: 0
+      label: '0'
+    -
+      value: 15
+      label: '15'
+    -
+      value: 30
+      label: '30'
+    -
+      value: 45
+      label: '45'
+    -
+      value: 60
+      label: '60'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

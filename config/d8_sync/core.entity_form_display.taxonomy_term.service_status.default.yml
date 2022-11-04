@@ -1,0 +1,37 @@
+uuid: 7597bf98-2d1e-4797-8cde-c0c62433b81e
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.service_status.field_color
+    - taxonomy.vocabulary.service_status
+  module:
+    - color_field
+id: taxonomy_term.service_status.default
+targetEntityType: taxonomy_term
+bundle: service_status
+mode: default
+content:
+  field_color:
+    weight: 1
+    settings:
+      show_input: ''
+      show_palette: ''
+      palette: ''
+      show_palette_only: ''
+      show_buttons: ''
+      allow_empty: ''
+    third_party_settings: {  }
+    type: color_field_widget_spectrum
+    region: content
+  name:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  description: true
+  path: true

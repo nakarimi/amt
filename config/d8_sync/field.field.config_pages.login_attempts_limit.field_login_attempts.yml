@@ -1,0 +1,37 @@
+uuid: 5c587b95-3ce4-491a-8cdc-b4e53d583190
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.login_attempts_limit
+    - field.storage.config_pages.field_login_attempts
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: roles_enable
+    add_disable_roles: {  }
+    edit_disable: roles_enable
+    edit_disable_roles: {  }
+    add_enable_roles:
+      administrator: administrator
+    edit_enable_roles:
+      administrator: administrator
+id: config_pages.login_attempts_limit.field_login_attempts
+field_name: field_login_attempts
+entity_type: config_pages
+bundle: login_attempts_limit
+label: 'Login attempts'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 10
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

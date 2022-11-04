@@ -1,0 +1,38 @@
+diff --git a/config/d8_sync/auto_entitylabel.settings.events.services.yml b/config/d8_sync/auto_entitylabel.settings.events.services.yml
+index 6ff1c85ec..e43045c37 100644
+--- a/config/d8_sync/auto_entitylabel.settings.events.services.yml
++++ b/config/d8_sync/auto_entitylabel.settings.events.services.yml
+@@ -1,5 +1,5 @@
+ status: 1
+-pattern: '[events:field_student:entity:field_students], [events:field_date_and_time:date:short]'
++pattern: '[events:field_instructor], [events:field_date_and_time:date:short]'
+ php: false
+ escape: false
+ dependencies:
+diff --git a/docroot/modules/contrib/inline_entity_form/src/Plugin/Field/FieldWidget/InlineEntityFormComplex.php b/docroot/modules/contrib/inline_entity_form/src/Plugin/Field/FieldWidget/InlineEntityFormComplex.php
+index b8424be3b..d18e3fecc 100644
+--- a/docroot/modules/contrib/inline_entity_form/src/Plugin/Field/FieldWidget/InlineEntityFormComplex.php
++++ b/docroot/modules/contrib/inline_entity_form/src/Plugin/Field/FieldWidget/InlineEntityFormComplex.php
+@@ -720,6 +720,12 @@ protected function buildRemoveForm(&$form) {
+     if ($entity_label) {
+       $message = $this->t('Are you sure you want to remove %label?', ['%label' => $entity_label]);
+     }
++    elseif ($labels['singular'] == "attendees") {
++      // if the student account has more than one student in it.
++      if (sizeof($entity->field_students) > 1) {
++        $message = $this->t('Are you sure you want to remove these attendees?');
++      }
++      else {
++        $message = $this->t('Are you sure you want to remove this attendee?');
++      }
++    }
++    elseif ($labels['singular'] == "students") {
++      $message = $this->t('Are you sure you want to remove this student?');
++    }
+     else {
+       $message = $this->t('Are you sure you want to remove this %entity_type?', ['%entity_type' => $labels['singular']]);
+     }
+-- 
+2.17.0.windows.1
+
+

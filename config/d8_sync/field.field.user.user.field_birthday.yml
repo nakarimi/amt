@@ -1,0 +1,30 @@
+uuid: 248467d1-e33f-4c9f-8fd8-e7bc0461e61a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_birthday
+  module:
+    - datetime
+    - disable_field
+    - user
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: user.user.field_birthday
+field_name: field_birthday
+entity_type: user
+bundle: user
+label: Birthday
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

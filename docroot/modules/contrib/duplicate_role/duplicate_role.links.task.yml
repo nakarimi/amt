@@ -1,0 +1,5 @@
+duplicaterole.overview:
+  title: 'Duplicate Roles'
+  route_name: duplicaterole.overview
+  base_route: entity.user.collection
+  weight: 10

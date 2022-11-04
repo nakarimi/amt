@@ -1,0 +1,23 @@
+uuid: edc07d91-ac23-45e7-a2b0-1c8c4d8e5c1f
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+id: config_sync.module.config_pages
+snapshotSet: config_sync
+extensionType: module
+extensionName: config_pages
+items:
+  -
+    collection: ''
+    name: core.entity_view_mode.config_pages.full
+    data:
+      id: config_pages.full
+      label: Full
+      status: true
+      cache: true
+      targetEntityType: config_pages
+      dependencies:
+        module:
+          - config_pages

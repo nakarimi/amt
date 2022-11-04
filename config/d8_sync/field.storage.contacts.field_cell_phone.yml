@@ -1,0 +1,19 @@
+uuid: 79f814d4-b6d7-4fa9-8e23-74e4e6f15d82
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - telephone
+id: contacts.field_cell_phone
+field_name: field_cell_phone
+entity_type: contacts
+type: telephone
+settings: {  }
+module: telephone
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

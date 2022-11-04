@@ -1,0 +1,22 @@
+uuid: 8717d44c-8927-478a-a8c8-4ee95916daf2
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - amt
+_core:
+  default_config_hash: 9RnnTUBcn0WRWXfrGOnId2H0Q31uQUeu_F5TnDxl2yg
+id: amt_messages
+theme: amt
+region: header
+weight: -50
+provider: null
+plugin: system_messages_block
+settings:
+  id: system_messages_block
+  label: 'Status messages'
+  provider: system
+  label_display: '0'
+visibility: {  }

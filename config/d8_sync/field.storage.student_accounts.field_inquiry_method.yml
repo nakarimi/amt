@@ -1,0 +1,36 @@
+uuid: cd334284-b70d-411f-8899-36d3759b9ce4
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - options
+id: student_accounts.field_inquiry_method
+field_name: field_inquiry_method
+entity_type: student_accounts
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: Internet
+      label: Internet
+    -
+      value: Phone
+      label: Phone
+    -
+      value: Walk-in
+      label: Walk-in
+    -
+      value: Other
+      label: Other
+    -
+      value: Guest
+      label: Guest
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

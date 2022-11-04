@@ -1,0 +1,33 @@
+uuid: 1ee07102-5b5d-4731-bc69-32abf2adc373
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.field_sale_date
+  module:
+    - datetime
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: packages.enrollment.field_sale_date
+field_name: field_sale_date
+entity_type: packages
+bundle: enrollment
+label: 'Sale Date'
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    default_date_type: now
+    default_date: now
+default_value_callback: ''
+settings: {  }
+field_type: datetime

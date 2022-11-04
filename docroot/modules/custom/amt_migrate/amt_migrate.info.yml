@@ -1,0 +1,7 @@
+type: module
+name: AMT Migrate
+description: 'Provides migration classes for migrating AMT from Data Rain Flow.'
+package: Development
+core: 8.x
+tags:
+ - custom

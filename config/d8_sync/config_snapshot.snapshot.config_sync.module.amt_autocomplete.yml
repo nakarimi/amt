@@ -1,0 +1,11 @@
+uuid: c8fcfb0b-a517-4b71-a2d4-4ce04d9acd7f
+langcode: en
+status: true
+dependencies:
+  module:
+    - amt_autocomplete
+id: config_sync.module.amt_autocomplete
+snapshotSet: config_sync
+extensionType: module
+extensionName: amt_autocomplete
+items: {  }

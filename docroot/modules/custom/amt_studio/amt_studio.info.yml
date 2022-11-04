@@ -1,0 +1,10 @@
+name: AMT Studio Business Summary Report
+description: Generate Studio Business Summary report to view and send to PAI.
+package: Custom
+type: module
+version: 1.0
+core: 8.x
+
+dependencies:
+- amt_general
+- amt_staff

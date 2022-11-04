@@ -1,0 +1,38 @@
+uuid: 6f5565cc-1306-4b3b-a809-58c6c007d2b8
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.attendees.attendance
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.attendees.field_student_account
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: attendees.attendance.field_student_account
+field_name: field_student_account
+entity_type: attendees
+bundle: attendance
+label: 'Student Account'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:student_accounts'
+  handler_settings:
+    target_bundles:
+      student_account: student_account
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

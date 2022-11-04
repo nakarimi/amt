@@ -1,0 +1,53 @@
+{% include "@amt_reports/amt-reports-students-filters.html.twig" %}
+<table class="table" id="studentsListTable">
+  <thead>
+    <tr>
+      <th sort="student" class="studentsNamesColumn">Student</th>
+      <th sort="email" class="studentEmailsColumn">Email</th>
+      <th class="studentPhonesColumn disableSort">Phone</th>
+      <th sort="department" class="studentDepartmentColumn">Student Department</th>
+      <th sort="upCommingLesson" class="upCommingLessonColumn">Next Lesson Scheduled</th>
+      <th sort="paidAhead" class="paidAheadColumn">Paid Ahead</th>
+      {# <th sort="lessonRemaining" class="lessonRemaining">Lesson Remaining</th> #}
+      <th sort="instructor" class="instructorsColumn">Instructor</th>
+      {# <th sort="stac_id" class="status">Status</th> #}
+      <th class="tableCellHideOnPrint">View</th>
+      <th class="tableCellHideOnPrint">Dashboard</th>
+    </tr>
+  </thead>
+  <tbody id="studentsListTableBody">
+    {% if events %}
+      {% for getdata in events %}
+        <tr>
+          <td class="studentNamesTd studentsNamesColumn">{{getdata.student}}</td>
+          <td class="studentEmailsTd studentEmailsColumn">{{getdata.email}}</td>
+          <td class="studentPhonesTd studentPhonesColumn">{{getdata.phone}}</td>
+          <td>{{getdata.department}}</td>
+          <td>{{ (getdata.upCommingLesson != null) ? getdata.upCommingLesson|date('Y-m-d') : '' }}</td>
+          <td class="paidAhead">{{getdata.paidAhead}}</td>
+          <td class="studentsListInstructors">{{getdata.instructor}}</td>
+          {# <td class="status">{{filterData.status}}</td> #}
+          <td class="tableCellHideOnPrint"><a href="/student_accounts/{{getdata.stac_id}}">View</a></td>
+          <td class="tableCellHideOnPrint"><a href="/student-dashboard?id={{getdata.link}}">View</a></td>
+        </tr>
+      {% endfor %}
+    {% endif %}
+  </tbody>
+</table>
+{%- if events is empty -%}
+  <div>
+    <h5>No Data</h5>
+  </div>
+{% endif %}
+
+
+<!-- this is for adding pagination for projection reports table -->
+{% include '@amt_reports/pagination.html.twig' with {
+    currentPage: active_page,
+    paginationPath: pager_url,
+    lastPage: total_pages,
+    showAlwaysFirstAndLast: true
+} only %}
+
+<!-- this is for adding pagination for projection reports table -->
+{% include '@amt_reports/amt-reports-student-department-modal.html.twig' %}

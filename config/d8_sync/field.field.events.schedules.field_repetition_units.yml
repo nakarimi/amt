@@ -1,0 +1,30 @@
+uuid: fb0645c0-adab-444c-afd2-24860e27f801
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.schedules
+    - field.storage.events.field_repetition_units
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.schedules.field_repetition_units
+field_name: field_repetition_units
+entity_type: events
+bundle: schedules
+label: 'Repetition Units'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

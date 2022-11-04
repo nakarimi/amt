@@ -1,0 +1,47 @@
+<div class="widget">
+  <h3><b>Inquiry Data</b></h3>
+  <div style="overflow-x: scroll;">
+    <table class="table" style="white-space: nowrap;">
+      <tbody>
+      <tr>
+        <td class="text-center" id="contact">
+          <div>{{ contact.lastFourWeeks }} 
+            <br>
+          </div>
+          <p>
+            <b>Contact</b>
+          </p>
+          <span> {{ contact.current }} YTD</span> &nbsp&nbsp| &nbsp
+          <span> {{ contact.previous }} PYTD</span>
+        </td>
+        <td class="text-center" id="booked">
+          <div>{{ booked.lastFourWeeks}} 
+            <br>
+          </div>
+          <p>
+            <b>Booked</b>
+          </p>
+          <span> {{ booked.current }} YTD</span> &nbsp&nbsp| &nbsp
+          <span> {{ booked.previous  }} PYTD</span>
+        </td>
+        <td class="text-center" id="showed">
+          <div>{{ showed.lastFourWeeks  }} 
+            <br>
+            
+          </div>
+          <p>
+            <b>Showed</b>
+          </p>
+          <span> {{ showed.current }} YTD</span> &nbsp&nbsp| &nbsp
+          <span> {{ showed.previous}} PYTD</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div id="dashboard_charts">
+  <div id="lessons_booked" style="height: 600px;"></div>
+  <div id="paymentChart" style="height: 600px;"></div>
+  <div id="enrollment_sold_chart" style="height: 600px;"></div>
+</div>

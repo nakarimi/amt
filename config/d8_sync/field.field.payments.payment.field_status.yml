@@ -1,0 +1,32 @@
+uuid: d12e7ae5-7669-400a-a21c-c5a087db7824
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.payments.payment
+    - field.storage.payments.field_status
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: payments.payment.field_status
+field_name: field_status
+entity_type: payments
+bundle: payment
+label: Status
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: Paid
+default_value_callback: ''
+settings: {  }
+field_type: list_string

@@ -1,0 +1,19 @@
+uuid: 13026d72-49b2-45cd-b389-15e8ae9866c9
+langcode: en
+status: true
+dependencies:
+  module:
+    - mailsystem
+id: config_sync.module.mailsystem
+snapshotSet: config_sync
+extensionType: module
+extensionName: mailsystem
+items:
+  -
+    collection: ''
+    name: mailsystem.settings
+    data:
+      theme: current
+      defaults:
+        sender: php_mail
+        formatter: php_mail

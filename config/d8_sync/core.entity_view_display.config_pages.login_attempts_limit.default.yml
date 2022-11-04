@@ -1,0 +1,22 @@
+uuid: 59b45994-aeea-44b6-a0e5-de0e6799aa9e
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.login_attempts_limit
+    - field.field.config_pages.login_attempts_limit.field_login_attempts
+id: config_pages.login_attempts_limit.default
+targetEntityType: config_pages
+bundle: login_attempts_limit
+mode: default
+content:
+  field_login_attempts:
+    weight: 0
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    type: number_integer
+    region: content
+hidden: {  }

@@ -1,0 +1,16 @@
+uuid: 9eb72d09-46a3-4400-9f46-f248f77bd3b1
+langcode: en
+status: true
+dependencies:
+  module:
+    - rest
+id: config_sync.module.rest
+snapshotSet: config_sync
+extensionType: module
+extensionName: rest
+items:
+  -
+    collection: ''
+    name: rest.settings
+    data:
+      bc_entity_resource_permissions: false

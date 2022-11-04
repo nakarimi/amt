@@ -1,0 +1,82 @@
+amt_scripts:
+  version: 1.x
+  css:
+    theme:
+      assets/css/fullcalendar.css: {}
+      assets/css/context.css: {}
+      assets/css/amt_dayview.css: {}
+  js:
+    assets/js/popper.min.js: {}
+    assets/js/bootstrap.min.js: {}
+    assets/js/moment.min.js: {}
+    assets/js/fullcalendar.min.js: {}
+    assets/js/scheduler.min.js: {}
+    assets/js/fullcalendar-right-click.js: {}
+    assets/js/context.js: {}
+    assets/js/update_multiple_status.js: {}
+    assets/js/amt_dayview.js: {}
+  dependencies:
+    - core/jquery
+    - amt_dayview/amt_day_week_view_common
+    # - core/jquery-ui
+    # - bootstrap/modal
+    # - bootstrap/tooltip
+    # - bootstrap/popover
+  library_dependencies:
+    - fullcalendar
+
+amt_week_scripts:
+  version: 1.x
+  css:
+    theme:
+      assets/css/fullcalendar.css: {}
+      assets/css/context.css: {}
+      assets/css/amt_dayview.css: {}
+  js:
+    assets/js/popper.min.js: {}
+    assets/js/bootstrap.min.js: {}
+    assets/js/moment.min.js: {}
+    assets/js/fullcalendar.min.js: {}
+    assets/js/scheduler.min.js: {}
+    assets/js/fullcalendar-right-click.js: {}
+    assets/js/context.js: {}
+    assets/js/update_multiple_status.js: {}
+    assets/js/amt_week_view.js: {}
+  dependencies:
+    - core/jquery
+    - amt_dayview/amt_day_week_view_common
+    # - core/jquery-ui
+    # - bootstrap/modal
+    # - bootstrap/tooltip
+    # - bootstrap/popover
+  library_dependencies:
+    - fullcalendar
+
+amt_collapse_menu:
+  version: 1.x
+  js:
+    assets/js/bootstrap.min.js: {}
+  dependencies:
+    - core/jquery
+
+amt_sort_date:
+  version: 1.x
+  js:
+    assets/js/moment.min.js: {}
+    assets/js/moment_date_sort.js: {}
+  dependencies:
+    - core/jquery
+
+amt_dayview_script:
+  version: 1.x
+  js:
+    assets/js/amt_dayview_script.js: {}
+  dependencies:
+    - core/jquery
+
+amt_day_week_view_common:
+  version: 1.x
+  js:
+    assets/js/amt_day_week_view_common.js: {}
+  dependencies:
+    - core/jquery

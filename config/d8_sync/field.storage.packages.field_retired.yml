@@ -1,0 +1,18 @@
+uuid: 2119ac62-a875-4dc9-ab9c-6b7adb839895
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: packages.field_retired
+field_name: field_retired
+entity_type: packages
+type: boolean
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

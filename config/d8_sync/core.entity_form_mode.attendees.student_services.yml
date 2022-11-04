@@ -1,0 +1,10 @@
+uuid: e1cc5093-1907-49fc-bd22-fcdf7ced9f13
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: attendees.student_services
+label: 'Student Services'
+targetEntityType: attendees
+cache: true

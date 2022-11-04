@@ -1,0 +1,9 @@
+uuid: 59cbcb60-3aff-47d0-b586-a236aa7fa6af
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_entity_type.events
+name: Services
+type: services
+description: ''

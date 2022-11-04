@@ -1,0 +1,31 @@
+.widget
+  border: 1px solid black
+  margin-top: 30px
+  padding: 5px
+  h3
+    text-align: center
+@mixin circle_divs($border_color)
+  width: 120px
+  height: 120px
+  position: relative
+  border-radius: 50%
+  padding-top: 20px
+  font-size: 36px
+  margin: 0 auto
+  font-family: "Bahnschrift"
+  border: 12px solid $border_color
+#contact
+  div
+    @include circle_divs(#68BC94)
+#booked
+  div
+    @include circle_divs(#0077B7)
+#showed
+  div
+    @include circle_divs(#E5E5E5)
+#contact p, #booked p, #showed p
+  font-size: 20px
+  font-weight: bold
+  font-family: "Bahnschrift"
+#contact span, #booked span, #showed span
+  font-family: "Bahnschrift"

@@ -1,0 +1,20 @@
+uuid: f8f0caac-3bf9-482f-80a3-f91f18e0e355
+langcode: en
+status: true
+dependencies:
+  module:
+    - datetime
+    - eck
+id: packages.field_next_scheduled_payment
+field_name: field_next_scheduled_payment
+entity_type: packages
+type: datetime
+settings:
+  datetime_type: date
+module: datetime
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

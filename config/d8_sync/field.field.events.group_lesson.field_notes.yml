@@ -1,0 +1,29 @@
+uuid: fa3c3ccf-a3da-4e63-926a-b553a4d23f16
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.group_lesson
+    - field.storage.events.field_notes
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.group_lesson.field_notes
+field_name: field_notes
+entity_type: events
+bundle: group_lesson
+label: Notes
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

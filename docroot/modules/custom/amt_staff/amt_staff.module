@@ -1,0 +1,495 @@
+<?php
+
+/**
+ * @file
+ * Provides Reports functionality and alterations for AMT AMI.
+ */
+
+use Drupal\amt_staff\SendReportsToAPI;
+use Drupal\user\Entity\User;
+use Drupal\amt_general\LogMessage;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Implements hook_theme().
+ */
+function amt_staff_theme($existing, $type, $theme, $path)
+{
+  return [
+    'amt_staff' => [
+      'variables' => [
+        'staff_header_table' => NULL,
+        'staff_content_table' => NULL,
+        'table_empty' => TRUE,
+        'empty_text' => t('Select Year and Week then "Apply" to generate the report!'),
+        'years' => NULL,
+        'weeks' => NULL,
+        'selectedData' => NULL,
+      ],
+      'path' => $path . '/templates',
+      'template' => 'amt-staff-report',
+    ],
+  ];
+}
+
+/**
+ * Generate the Staff reports.
+ *
+ * This function load the view by view id and get the executive and
+ * instructor and load the related report for that.
+ *
+ * @return object
+ *   Return any array contain week_start and week_end dates.
+ */
+function _amt_staff_performance_reports()
+{
+
+  if (isset($_GET['staff_name']) &&  $_GET['staff_name'] != '') {
+    $ids[] = explode(')', explode('(', $_GET['staff_name'])[1])[0];
+  } else {
+    $ids = \Drupal::entityQuery('user')
+      ->condition('roles', ['instructor', 'executive'], 'IN')
+      ->condition('field_ami_id', NULL, '<>');
+    $ids = $ids->execute();
+  }
+
+  $users = User::loadMultiple($ids);
+
+  // $studentFrontDeptIDs = _amt_staff_get_student_account_ids_from_specific_department('Front Dept');
+  // $studentBackDeptIDs = _amt_staff_get_student_account_ids_from_specific_department('Back Dept');
+  
+  // $studentFrontDeptIDs = [49, 50, 51]; //Front Dept, Sales (ProOriginal, Original, Extension)
+  $proparty = [
+    'name' => ['Extension', 'Pre-Original', 'Original', 'Front Department Lesson (FD)'],
+    'vid' => 'enrollment_type',
+  ];
+  $studentFrontDeptIDs = array_keys(\Drupal::entityTypeManager()
+    ->getStorage('taxonomy_term')
+    ->loadByProperties($proparty));
+  
+  // $studentBackDeptIDs = [65]; //Back Dept, Sales (Renewals)
+  $proparty = [
+    'name' => ['Renewals', 'Back Department Lesson (BD)'],
+    'vid' => 'enrollment_type',
+  ];
+  $studentBackDeptIDs = array_keys(\Drupal::entityTypeManager()
+    ->getStorage('taxonomy_term')
+    ->loadByProperties($proparty));
+
+  // Getting the date in start and end range.
+  $dateRange = SendReportsToAPI::convertStartEndDate($_GET['week'], $_GET['year']);
+  // Get the header of of reports for staff.
+  $staffDataForAPI = SendReportsToAPI::getReportHeaders('staff_performance');
+  $staffDataForSystem = $staffDataForAPI;
+  $staffDataForSystem['date_range'] = date('m-d-Y', strtotime($dateRange['week_start'])) . " To " . date('m-d-Y', strtotime($dateRange['week_end']));
+  $itemIndex = 0;
+
+  // Charging statuses IDs.
+  $lessonStatusProparty = [
+    'name' => ['Showed', 'No Showed, Charged'],
+    'vid' => 'lesson_status',
+  ];
+
+  $lessonStatusIds = array_keys(\Drupal::entityTypeManager()
+    ->getStorage('taxonomy_term')
+    ->loadByProperties($lessonStatusProparty));
+  foreach ($users as $key => $user) {
+    // Get Staff Legacy Id.
+    $staffLegacyId = $user->field_legacy_id->value;
+    // We want to exclude Pro Coach instructor from report.
+    // So the loop will skip this instructor.
+    if ($staffLegacyId == "6-procoach") {
+      continue;
+    }
+    $staffType = strtoupper($user->roles->getString());
+
+    // Staff type get the Multi role but we need the executive
+    // and instructor role.
+    if (strstr($staffType, 'EXECUTIVE') && strstr($staffType, 'INSTRUCTOR')) {
+      $staffType = 'EXECUTIVE';
+      // If the staff have instructor and executive we need calculate report
+      // for every role of staff this one is for executive.
+      _amt_staff_provide_staff_data($staffDataForSystem, $staffDataForAPI, $user, $itemIndex, $staffType, $dateRange, $studentFrontDeptIDs, $studentBackDeptIDs, $lessonStatusIds);
+      // And we change the role of staff to instructor.
+      $staffType = 'INSTRUCTOR';
+    }
+    // This one is for role of executive.
+    elseif (strstr($staffType, 'EXECUTIVE')) {
+      $staffType = 'EXECUTIVE';
+    } else {
+      $staffType = 'INSTRUCTOR';
+    }
+
+    // This function run for calculate the report for executive and instructor
+    // according to above condition.
+    _amt_staff_provide_staff_data($staffDataForSystem, $staffDataForAPI, $user, $itemIndex, $staffType, $dateRange, $studentFrontDeptIDs, $studentBackDeptIDs, $lessonStatusIds);
+  } //end of for each
+  if (isset($_GET['operation'])) {
+
+    $response = SendReportsToAPI::sendReports($staffDataForAPI);
+    LogMessage::showMessage($response['message'], $response['message_type'], TRUE, 'amt_staff');
+  }
+  return $staffDataForSystem;
+}
+
+/**
+ * Provide the Number in Class for staff.
+ *
+ * We load the group lesson in specific date range and get the count of
+ * all student for every group lesson of staff for that range of date.
+ *
+ * @param int $type
+ *   The type of the event bundle.
+ * @param int $staffId
+ *   Have the staff Id.
+ * @param object $dateRange
+ *   The start and end of the week date.
+ * @param object $lessonStatusIds
+ *   The showed and no showed, charge attendance status Id.
+ *
+ * @return int
+ *   Return Number In Class.
+ */
+function _amt_staff_get_private_num_in_class($type, $staffId, &$dateRange, &$lessonStatusIds, $staffType)
+{
+  // Execurtives don't have private class.
+  if ($staffType == 'EXECUTIVE') {
+    return 0;
+  }
+
+  // Custom query for providing the number of private
+  // and number in class student.
+  $connection = \Drupal::database();
+  // Select the event database for loading all events.
+  $lessonQuery = db_select('events_field_data', 'events');
+  // Join the other table with parent of events table.
+  $lessonQuery->innerjoin('events__field_date_and_time', 'ev_dt', 'ev_dt.entity_id = events.id');
+  $lessonQuery->innerjoin('events__field_instructor', 'ev_ins', 'ev_ins.entity_id = events.id');
+  $lessonQuery->innerjoin('events__field_type', 'ev_type', 'ev_type.entity_id = ev_dt.entity_id');
+
+  // Set condition for filtering the events.
+  $lessonQuery->condition('ev_dt.field_date_and_time_value', $dateRange, 'BETWEEN');
+  $lessonQuery->condition('ev_ins.field_instructor_target_id', $staffId, '=');
+  $lessonQuery->condition('att_st.field_status_target_id', $lessonStatusIds, 'IN');
+
+  // If type was lesson we calculate the private lesson.
+  if ($type == 'lesson') {
+    // Join private lesson attendance to events.
+    $lessonQuery->innerjoin('events__field_student', 'ev_st', 'ev_st.entity_id = events.id');
+    // Join the attendance status in event for filtering.
+    $lessonQuery->innerjoin('attendees__field_status', 'att_st', 'att_st.entity_id = ev_st.field_student_target_id');
+    $lessonQuery->addField('ev_st', 'field_student_target_id', 'att_id');
+    $finalQuery = $connection->select($lessonQuery);
+    $finalQuery->fields(NULL, ['att_id']);
+    // Return the number of student account in private lesson.
+
+    return $finalQuery->countQuery()->execute()->fetchCol()[0];
+  } else {
+    // Join group lesson attendance to events.
+    $lessonQuery->innerjoin('events__field_students', 'ev_st', 'ev_st.entity_id = events.id');
+    // Join the attendance status in event for filtering.
+    $lessonQuery->innerjoin('attendees__field_status', 'att_st', 'att_st.entity_id = ev_st.field_students_target_id');
+    // Join student record to events.
+    $lessonQuery->innerjoin('attendees__field_students', 'att_stu', 'att_stu.entity_id = ev_st.field_students_target_id');
+    // Add student record id for calculating the number of students.
+    $lessonQuery->addField('att_stu', 'field_students_target_id', 'att_stu_id');
+    $finalQuery = $connection->select($lessonQuery);
+    $finalQuery->fields(NULL, ['att_stu_id']);
+    // Return attendance id of group class students.
+    $numberInClass = $finalQuery->countQuery()->execute()->fetchCol()[0];
+    return $numberInClass;
+  }
+}
+
+/**
+ * Provide the Interview and Renewal Department for every staff.
+ *
+ * Load the enrollment for every staff by id and calculate the Interview and
+ * renewal Dept by front dept and back dept categroy of enrollment.
+ *
+ * @param int $role
+ *   Show the role of the staff.
+ * @param int $staffId
+ *   Have the staff Id.
+ * @param string $dateRange
+ *   The start and end of the week date.
+ * @param array $deptIds
+ *   It have front dept or back dept enrollment category.
+ *
+ * @return int
+ *   Return the interview and renewal dept values.
+ */
+function _amt_staff_get_inter_renewal_dept($role, $staffId, &$dateRange, &$studentDepartIDs, $field = 'field_category')
+{
+ 
+  $dropValue = 0;
+  $totalPrice = 0;
+
+  if ($studentDepartIDs != Null && !empty($studentDepartIDs)) {
+    $enrollmentQuery = Drupal::service('entity.query')
+      ->get('packages')
+      ->condition('type', 'enrollment')
+      ->condition($field, $studentDepartIDs, 'IN');
+
+    if ($role == 'INSTRUCTOR') {
+      $enrollmentQuery->condition('field_instructor', $staffId);
+    } else {
+      $enrollmentQuery->condition('field_executive', $staffId);
+    }
+
+    // I get this query for calculate the drop value.
+    $newQuery = clone $enrollmentQuery;
+    $enrollmentQuery->condition('field_sale_date', $dateRange, 'BETWEEN');
+    $enrollmentIds = $enrollmentQuery->execute();
+
+    $enrEntities = \Drupal::entityTypeManager()
+      ->getStorage('packages')
+      ->loadMultiple($enrollmentIds);
+
+    foreach ($enrEntities as $key => $enrEntity) {
+      $totalPrice += $enrEntity->field_enrollment_total_price->value;
+    }
+
+    // Load the enrollment have any drop date in this week for this staff.
+    $newQuery->condition('field_dropped_date', $dateRange, 'BETWEEN');
+    $enrIds = $newQuery->execute();
+    // Load all enrollment by Id.
+    $enrEntities = \Drupal::entityTypeManager()->getStorage('packages')->loadMultiple($enrIds);
+
+    foreach ($enrEntities as $key => $enrEntity) {
+      $dropValue += $enrEntity->field_drop->value;
+    }
+  }
+
+  return $totalPrice - $dropValue;
+}
+
+/**
+ * Provide the API and system data for every staff.
+ *
+ * This function get the user object and set the report data for system
+ * and API.
+ *
+ * @param string $staffDataForSystem
+ *   Get the reference of the system data.
+ * @param string $staffDataForAPI
+ *   Get the API data for sending report.
+ * @param object $user
+ *   The object of user.
+ * @param string $itemIndex
+ *   Show the record number.
+ * @param string $staffType
+ *   Show the role of staff.
+ * @param string $dateRange
+ *   The date range for generating report.
+ * @param string $frontDeptIds
+ *   Front Dept name.
+ * @param string $backDeptIds
+ *   Back Dept name.
+ * @param string $lessonStatusIds
+ *   The id of showed and no showed, charge attendance status id.
+ */
+function _amt_staff_provide_staff_data(&$staffDataForSystem, &$staffDataForAPI, $user, &$itemIndex, $staffType, &$dateRange, &$studentFrontDeptIDs, &$studentBackDeptIDs, &$lessonStatusIds)
+{
+
+  // For getting user id.
+  $staffId = $user->id();
+  $staffMember = $user->field_ami_id->value;
+  $fullName = $user->field_first_name->value . ' ' . $user->field_last_name->value;
+
+  $fullName = new TranslatableMarkup(
+    "<a href='/user/@id'>@message</a>",
+    ['@message' => $fullName, '@id' => $staffId]
+  );
+  // $staffEmail = $user->mail->value;
+
+
+  // Get the Private Lesson for every Instructor or Executive.
+  $privateLesson = _amt_staff_get_private_num_in_class('lesson', $staffId, $dateRange, $lessonStatusIds, $staffType);
+  // Get the Number In Class for every Instructor or Executive.
+  $numberInClass = _amt_staff_get_private_num_in_class('group_lesson', $staffId, $dateRange, $lessonStatusIds, $staffType);
+  // Get the interview Department value with front dept category.
+  $interviewDept = _amt_staff_get_inter_renewal_dept($staffType, $staffId, $dateRange, $studentFrontDeptIDs);
+  // Get the Renewal Department value with back dept category.
+  $renewalDept = _amt_staff_get_inter_renewal_dept($staffType, $staffId, $dateRange, $studentBackDeptIDs);
+
+  // For Showcase Medal Ball Department.
+  $studentMedalBallPackageCodes = ['MISC_07 - Showcase (Combined)', 'MISC_23 - Medal Ball', 'MISC_36 - Virtual Dance Challenge', 'Showcase (Individual Studio)'];
+  $studentMedalBallIDs = _amt_staff_get_package_ids($studentMedalBallPackageCodes);
+
+  // For Party Time Non-Unit Department.
+  $studentNoneUnitPackageCodes = ['MISC_14 - Party Time/NonUnit', 'Non Unit Private Lessons', 'Non Unit Coaching Lessons', 'Non Unit Group Class', 'Master Class/Dance Camp', 'Cruise/Trip', ];
+  $studentNoneUnitIDs = _amt_staff_get_package_ids($studentNoneUnitPackageCodes);
+
+  // DOR/Sanct. Competition Department.
+  $studentDorPackageCodes = ['MISC_01 - Area 10 DOR', 'MISC_02 - Area 6 DOR', 'MISC_03 - Area 1 DOR', 'MISC_06 - Area 8 DOR - Ciao Amore DOR', 'MISC_08 - Embassy Ball', 'MISC_11 - HulaRama DOR', 'MISC_13 - Area 4 DOR - Northstar DOR', 'MISC_15 - AMI Superama', 'MISC_16 - Area 7 DOR - Unique DOR', 'MISC_17 - Area 2 DOR - Holiday Ball', 'MISC_18 - AMI World DOR', 'MISC_31 - Area 5 DOR - Texas DOR', 'MISC_32 - Blackpool Dance Festival', 'MISC_34 - Area 3 DOR - FlamingoRama', 'MISC_37 - Beach-O-Rama'];
+  $studentDorIDs = _amt_staff_get_package_ids($studentDorPackageCodes);
+
+  // Get the Dor/Sanct Department value with back dept category.
+  $dorDept = _amt_staff_get_inter_renewal_dept($staffType, $staffId, $dateRange, $studentDorIDs, 'field_enrollment_package_name');
+
+  // Get the Showcase Medal Ball Department value with back dept category.
+  $medalBallDept = _amt_staff_get_inter_renewal_dept($staffType, $staffId, $dateRange, $studentMedalBallIDs, 'field_enrollment_package_name');
+
+  // Get the Time Non-Unit Department value with back dept category.
+  $noneUnitDept = _amt_staff_get_inter_renewal_dept($staffType, $staffId, $dateRange, $studentNoneUnitIDs, 'field_enrollment_package_name');
+
+  $numOfGuests = (int) _amt_studio_number_of_guests('field_inquired', $dateRange['week_start'], $dateRange['week_end'], $staffId);
+  $deBonus = _amt_studio_de_bonus($dateRange, $staffId);
+  // If all params of staff is 0 then ignore adding it's data. (($privateLesson + $numberInClass + $interviewDept + $renewalDept + $dorDept + $medalBallDept + $noneUnitDept) > 0)
+  if (($privateLesson + $numberInClass + $interviewDept + $renewalDept + $dorDept + $medalBallDept + $noneUnitDept + $numOfGuests) > 0) {
+    // This is for generating the report for presenting in view.
+    $staffDataForSystem['items'][$itemIndex]['name'] = $fullName;
+    // $staffDataForSystem['items'][$itemIndex]['email'] = $staffEmail;
+    $staffDataForSystem['items'][$itemIndex]['staff_type'] = $staffType;
+    $staffDataForSystem['items'][$itemIndex]['de/bonus'] = $deBonus;
+    $staffDataForSystem['items'][$itemIndex]['number_of_guest'] = $numOfGuests;
+    $staffDataForSystem['items'][$itemIndex]['private_lessons'] = (float) $privateLesson;
+    $staffDataForSystem['items'][$itemIndex]['number_in_class'] = $numberInClass;
+    // $staffDataForSystem['items'][$itemIndex]['staff_member'] = $staffMember;
+    $staffDataForSystem['items'][$itemIndex]['interview_department'] = $interviewDept;
+    $staffDataForSystem['items'][$itemIndex]['renewal_department'] = $renewalDept;
+    $staffDataForSystem['items'][$itemIndex]['dor_sanct_competition'] = $dorDept;
+    $staffDataForSystem['items'][$itemIndex]['showcase_medal_ball'] = $medalBallDept;
+    $staffDataForSystem['items'][$itemIndex]['party_time_non_unit'] = $noneUnitDept;
+
+    // This report generate if the send flag is true.
+    if (isset($_GET['operation'])) {
+      $staffDataForAPI["line_items[$itemIndex][staff_member]"] = $staffMember;
+      $staffDataForAPI["line_items[$itemIndex][staff_type]"] = $staffType;
+      // array_keys(unserialize($value->staff_type))[0];.
+      $staffDataForAPI["line_items[$itemIndex][number_guests]"] = (float) $numOfGuests;
+      $staffDataForAPI["line_items[$itemIndex][private_lessons]"] = (float) $privateLesson;
+      $staffDataForAPI["line_items[$itemIndex][number_in_class]"] = (int) $numberInClass;
+      $staffDataForAPI["line_items[$itemIndex][interview_department]"] = (int) $interviewDept;
+      $staffDataForAPI["line_items[$itemIndex][renewal_department]"] = (int) $renewalDept;
+      $staffDataForAPI["line_items[$itemIndex][dor_sanct_competition]"] = (int) $dorDept;
+      $staffDataForAPI["line_items[$itemIndex][showcase_medal_ball]"] = (int) $medalBallDept;
+      $staffDataForAPI["line_items[$itemIndex][party_time_non_unit]"] = (int) $noneUnitDept;
+    }
+
+    $itemIndex++;
+  }
+}
+
+/**
+ * Getting Ids of student account from specific department.
+ */
+function _amt_staff_get_student_account_ids_from_specific_department($dept)
+{
+
+  // Load Id of taxonomy of given student department.
+  $studentsInDept = _amt_feeds_find_single_eck_id('student_department', $dept);
+
+  // Load all student account IDs with that student department ID.
+  $studentAccountsQuery = Drupal::service('entity.query')
+    ->get('student_accounts')
+    ->condition('field_student_department', $studentsInDept)->execute();
+
+  return $studentAccountsQuery;
+}
+
+/**
+ * Get the package ids based on the list of accepted package codes.
+ *
+ * @param  mixed $packageCodes
+ *   The list of accepted package codes.
+ * @param  mixed $operator
+ *   How load it from query.
+ * @return array
+ *   The list of matched data.
+ */
+function _amt_staff_get_package_ids($packageCodes, $operator = 'IN')
+{
+
+  // Getting IDs package codes from texonomy.
+  $queryPackageCodes = \Drupal::entityQuery('taxonomy_term')
+    ->condition('vid', 'package_code')
+    ->condition('name', $packageCodes, $operator)->execute();
+
+  // Getting IDs packages.
+  if ($queryPackageCodes) {
+    $packageIds = \Drupal::entityQuery('packages')
+      ->condition('type', 'package')
+      ->condition('field_package_code', array_values($queryPackageCodes), 'IN')->execute();
+  } else {
+    $packageIds = [];
+  }
+
+  return $packageIds;
+}
+
+function _amt_studio_de_bonus($dateRange, $id)
+{
+  $lessonStatusProparty = [
+    'name' => ['Bonus/Comp Lesson', 'Group',  'Dance Evaluation (DE)', 'Practice Party'],
+    'vid' => 'lesson_type',
+  ];
+
+  $freeCompTypeIds = array_keys(\Drupal::entityTypeManager()
+    ->getStorage('taxonomy_term')
+    ->loadByProperties($lessonStatusProparty));
+
+  // Get the Free/Comp Lesson for every Instructor or Executive.
+  return _amt_dayview_get_free_comp_lessons($id, $dateRange, $freeCompTypeIds);
+}
+
+/**
+ * Provide the Number in Class for staff.
+ *
+ * We load the group lesson in specific date range and get the count of
+ * all student for every group lesson of staff for that range of date.
+ *
+ * @param int $type
+ *   The type of the event bundle.
+ * @param int $staffId
+ *   Have the staff Id.
+ * @param object $dateRange
+ *   The start and end of the week date.
+ * @param object $exceptionTypeIds
+ *   The showed and no showed, charge attendance status Id.
+ *
+ * @return int
+ *   Return Number In Class.
+ */
+function _amt_dayview_get_free_comp_lessons($staffId, $dateRange, $TypeIds)
+{
+
+  // Getting IDs of lessons that are not being counted.
+  $nuteralLessons = amt_general_load_nuteral_lessons();
+
+  // Custom query for providing the number of private
+  // and number in class student.
+  $connection = \Drupal::database();
+  // Select the event database for loading all events.
+  $lessonQuery = db_select('events__field_date_and_time', 'ev_dt');
+  // Join the other table with parent of events table.
+  $lessonQuery->innerjoin('events__field_instructor', 'ev_ins', 'ev_ins.entity_id = ev_dt.entity_id');
+
+  // Join private lesson attendance to events. (Caneled events should not be counted.)
+  $lessonQuery->innerjoin('events__field_student', 'ev_st', 'ev_st.entity_id = ev_dt.entity_id');
+  // Join the attendance status in event for filtering. (Caneled events should not be counted.)
+  $lessonQuery->innerjoin('attendees__field_status', 'att_st', 'att_st.entity_id = ev_st.field_student_target_id');
+
+  $lessonQuery->innerjoin('events__field_type', 'ev_type', 'ev_type.entity_id = ev_dt.entity_id');
+
+  // Set condition for filtering the events.
+  $lessonQuery->condition('ev_dt.field_date_and_time_value', $dateRange, 'BETWEEN');
+  // Limiting to the result of a single instructor.
+  $lessonQuery->condition('ev_ins.field_instructor_target_id', $staffId, '=');
+  // Limiting to only lessons bundle.
+  $lessonQuery->condition('ev_type.bundle', 'lesson');
+  // Just load events with out CompLesson, Group, Practice Party and Dance Evaluation (DE) Type.
+  $lessonQuery->condition('ev_type.field_type_target_id', $TypeIds, 'IN');
+
+  // Caneled, "No Showed Not Charged" and Rescheduled events should not be counted.
+  $lessonQuery->condition('att_st.field_status_target_id', $nuteralLessons, 'NOT IN');
+
+  // Choosing one sinlge field to return.
+  $lessonQuery->addField('ev_type', 'entity_id', 'en_id');
+  $finalQuery = $connection->select($lessonQuery);
+  $finalQuery->fields(NULL, ['en_id']);
+  // Return the number of student account in private lesson.
+  // dd($finalQuery->execute()->fetchCol());
+  return $finalQuery->countQuery()->execute()->fetchCol()[0];
+}

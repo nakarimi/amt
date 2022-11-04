@@ -1,0 +1,64 @@
+
+<div class="projections-report">
+  {# Lessons List Heading #}
+  <br>
+  <h1 id="filtersTitle" data-toggle="collapse" href="#collapseFilter" role="button" aria-expanded="false" aria-controls="collapseFilter"> <span class="collapseBtn"> <img src="core/misc/icons/bebebe/hamburger.svg"> </span> Filters</h1>
+  <div class="collapse" id="collapseFilter">
+    <div class="projections-report-filters">
+      <div class="row">
+        <form method="GET">
+        <div class="form-group col-md-3 col-sm-6">
+          <label for="days" class="control-label">Weeks</label>
+          <div class="select-wrapper">
+            <input type="week" id="projection_date" name="projection_date" class="form-control" placeholder="Enrollment" value="{{ filter_data.projection_date }}">
+          </div>
+        </div>
+        <div class="form-group col-md-3 col-sm-6">
+          <label style="display: inline-block;text-align: right;">Student</label>
+          <input type="text" id="student_name" name="student_name" class="form-control" placeholder="Student Name" value="{{ filter_data.student_name }}">
+        </div>
+        <div class="form-group col-md-3 col-sm-6">
+          <label style="display: inline-block;text-align: right;">Enrollment</label>
+          <input type="text" id="enrollment_title" name="enrollment_title" data-id=""  class="form-control" placeholder="Enrollment" value="{{ filter_data.enrollment_title }}">
+        </div>
+        <div class="form-group col-md-3 col-sm-6">
+          <label for="status" class="control-label">Status</label>
+          <div class="select-wrapper">
+            <select class="form-select form-control" id="status" name="status">
+              <option value="" >-- Select Status --</option>
+              <option value="1" {{ (filter_data.status == 1) ? 'selected' : '' }} >Paid</option>
+              <option value="2" {{ (filter_data.status == 2) ? 'selected' : '' }} >Not Paid</option>
+            </select>
+          </div>
+        </div>
+        <input type="hidden" name="page">
+        <div class="form-group col-md-2 col-sm-6">
+          <label style="display: inline-block;"></label>
+          <button type="submit" class="btn btn-info btn-block">Apply</button>
+        </div>
+          
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% if projections_table %}
+  <div class="view-tables">
+    {{ projections_table }}
+  </div>
+{% endif %}
+
+{% if table_empty %}
+  <div class="show-empty-message">
+    {{ empty_text }}
+  </div>
+
+{% endif %}
+
+<!-- this is for adding pagination for projection reports table -->
+{% include '@amt_reports/pagination.html.twig' with {
+    currentPage: active_page,
+    paginationPath: pager_url,
+    lastPage: total_pages,
+    showAlwaysFirstAndLast: true
+} only %}

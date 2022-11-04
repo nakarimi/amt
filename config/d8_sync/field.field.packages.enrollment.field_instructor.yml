@@ -1,0 +1,45 @@
+uuid: c9d3159d-2a2e-4314-9cc5-1ec73b9e33a5
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.field_instructor
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: packages.enrollment.field_instructor
+field_name: field_instructor
+entity_type: packages
+bundle: enrollment
+label: Instructor
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:user'
+  handler_settings:
+    include_anonymous: true
+    filter:
+      type: role
+      role:
+        instructor: instructor
+        administrator: '0'
+        studio_director: '0'
+        studio_manager: '0'
+        developer: '0'
+        executive: '0'
+    target_bundles: null
+    sort:
+      field: _none
+    auto_create: false
+field_type: entity_reference

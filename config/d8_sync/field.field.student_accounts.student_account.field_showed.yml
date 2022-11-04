@@ -1,0 +1,30 @@
+uuid: bd9d5f38-dd80-486a-aeef-ccf79783be4f
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.field_showed
+  module:
+    - datetime
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: student_accounts.student_account.field_showed
+field_name: field_showed
+entity_type: student_accounts
+bundle: student_account
+label: Showed
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

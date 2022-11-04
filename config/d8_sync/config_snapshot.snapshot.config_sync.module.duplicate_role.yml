@@ -1,0 +1,11 @@
+uuid: d9ce57ee-762d-45a5-b0d7-8f26aa2b4214
+langcode: en
+status: true
+dependencies:
+  module:
+    - duplicate_role
+id: config_sync.module.duplicate_role
+snapshotSet: config_sync
+extensionType: module
+extensionName: duplicate_role
+items: {  }

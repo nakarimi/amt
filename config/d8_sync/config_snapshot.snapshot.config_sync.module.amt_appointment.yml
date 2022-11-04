@@ -1,0 +1,24 @@
+uuid: ff61131e-590d-4557-abeb-8e5808dd548d
+langcode: en
+status: true
+dependencies:
+  module:
+    - amt_appointment
+id: config_sync.module.amt_appointment
+snapshotSet: config_sync
+extensionType: module
+extensionName: amt_appointment
+items:
+  -
+    collection: ''
+    name: core.entity_form_mode.events.continuous_appointment
+    data:
+      langcode: en
+      status: true
+      dependencies:
+        module:
+          - eck
+      id: events.continuous_appointment
+      label: Standing-appointment
+      targetEntityType: events
+      cache: true

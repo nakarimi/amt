@@ -1,0 +1,29 @@
+uuid: 43a63d7a-d583-4d17-9e48-9f5e971d75ea
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.contacts.student_record
+    - field.storage.contacts.field_first_name
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: contacts.student_record.field_first_name
+field_name: field_first_name
+entity_type: contacts
+bundle: student_record
+label: 'First Name'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

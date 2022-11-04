@@ -1,0 +1,52 @@
+uuid: 8b3d7b19-4ff3-4c35-8e4f-6dff3bcadccf
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.service_type.field_abbreviation
+    - field.field.taxonomy_term.service_type.field_color
+    - field.field.taxonomy_term.service_type.field_hide
+    - taxonomy.vocabulary.service_type
+  module:
+    - color_field
+    - text
+id: taxonomy_term.service_type.default
+targetEntityType: taxonomy_term
+bundle: service_type
+mode: default
+content:
+  description:
+    label: hidden
+    type: text_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_abbreviation:
+    weight: 2
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_color:
+    weight: 1
+    label: above
+    settings:
+      format: hex
+      opacity: '1'
+    third_party_settings: {  }
+    type: color_field_formatter_text
+    region: content
+  field_hide:
+    weight: 3
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+    region: content
+hidden: {  }

@@ -1,0 +1,7 @@
+status: 1
+pattern: '[attendees:field_student_account]'
+php: false
+escape: false
+dependencies:
+  config:
+    - eck.eck_type.attendees.attendance

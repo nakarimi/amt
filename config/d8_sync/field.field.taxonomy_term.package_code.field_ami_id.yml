@@ -1,0 +1,29 @@
+uuid: e83c9686-625c-47e7-82d0-9e1e1c209d6d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_ami_id
+    - taxonomy.vocabulary.package_code
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: taxonomy_term.package_code.field_ami_id
+field_name: field_ami_id
+entity_type: taxonomy_term
+bundle: package_code
+label: 'AMI Code'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,23 @@
+
+<!-- this for adding the fillter of staff performace report view -->
+{% include "@amt_royalty/amt-royalty-report_filter.html.twig" %}
+
+{% if royalty_header_table %}
+  <div class="view-tables table-headers rprt_table">
+    {{ royalty_header_table }}
+  </div>
+{% endif %}
+
+{% if royalty_content_table %}
+  <div class="view-tables">
+    {{ royalty_content_table }}
+  </div>
+{% endif %}
+
+{% if table_empty %}
+
+  <div class="show-empty-message">
+    {{ empty_text }}
+  </div>
+
+{% endif %}

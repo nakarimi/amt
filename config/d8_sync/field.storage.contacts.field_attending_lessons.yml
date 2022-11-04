@@ -1,0 +1,27 @@
+uuid: 13dc0081-2f9f-4e7b-b9db-28d8f9974d08
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - options
+id: contacts.field_attending_lessons
+field_name: field_attending_lessons
+entity_type: contacts
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: solo
+      label: Solo
+    -
+      value: partner
+      label: 'With a Partner'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

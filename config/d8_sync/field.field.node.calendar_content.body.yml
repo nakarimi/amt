@@ -1,0 +1,22 @@
+uuid: 20b5d962-3a7f-4a8c-bbdc-d7484c49adbc
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.body
+    - node.type.calendar_content
+  module:
+    - text
+id: node.calendar_content.body
+field_name: body
+entity_type: node
+bundle: calendar_content
+label: Body
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  display_summary: true
+field_type: text_with_summary

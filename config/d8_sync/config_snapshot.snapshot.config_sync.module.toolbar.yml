@@ -1,0 +1,11 @@
+uuid: 226da3b2-b0b3-41b6-8b6f-b6294d0f7429
+langcode: en
+status: true
+dependencies:
+  module:
+    - toolbar
+id: config_sync.module.toolbar
+snapshotSet: config_sync
+extensionType: module
+extensionName: toolbar
+items: {  }

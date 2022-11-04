@@ -1,0 +1,11 @@
+uuid: b8d2a239-fdca-4195-b705-0213b7c1fcbd
+langcode: en
+status: true
+dependencies:
+  module:
+    - redirect_after_login
+id: config_sync.module.redirect_after_login
+snapshotSet: config_sync
+extensionType: module
+extensionName: redirect_after_login
+items: {  }

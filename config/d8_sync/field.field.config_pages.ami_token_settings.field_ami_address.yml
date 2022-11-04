@@ -1,0 +1,32 @@
+uuid: c253a4d8-20d5-44da-a5c5-9ae1263cdc57
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.ami_token_settings
+    - field.storage.config_pages.field_ami_address
+  module:
+    - disable_field
+    - link
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.ami_token_settings.field_ami_address
+field_name: field_ami_address
+entity_type: config_pages
+bundle: ami_token_settings
+label: 'AMI Address'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  link_type: 16
+  title: 0
+field_type: link

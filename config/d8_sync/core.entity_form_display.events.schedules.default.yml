@@ -1,0 +1,96 @@
+uuid: 3dae18dd-2aae-4c4a-b374-090d2e4779b3
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.schedules
+    - field.field.events.schedules.field_date_and_time
+    - field.field.events.schedules.field_duration
+    - field.field.events.schedules.field_expiration_date
+    - field.field.events.schedules.field_notes
+    - field.field.events.schedules.field_parent
+    - field.field.events.schedules.field_repetition_frequency
+    - field.field.events.schedules.field_repetition_units
+    - field.field.events.schedules.field_schedule_instructor
+    - field.field.events.schedules.field_type
+  module:
+    - datetime
+    - field_group
+third_party_settings:
+  field_group:
+    group_standing_appointment:
+      children:
+        - field_expiration_date
+        - field_repetition_frequency
+        - field_repetition_units
+      parent_name: ''
+      weight: 4
+      format_type: tab
+      format_settings:
+        description: ''
+        formatter: closed
+        id: ''
+        classes: ''
+        required_fields: false
+      label: 'Standing Schedule'
+      region: content
+id: events.schedules.default
+targetEntityType: events
+bundle: schedules
+mode: default
+content:
+  field_date_and_time:
+    type: datetime_default
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_duration:
+    type: options_select
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_expiration_date:
+    type: datetime_default
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_notes:
+    type: string_textarea
+    weight: 5
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_repetition_frequency:
+    type: number
+    weight: 4
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_repetition_units:
+    type: options_select
+    weight: 5
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_schedule_instructor:
+    weight: 1
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_type:
+    type: options_select
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  created: true
+  field_parent: true
+  title: true

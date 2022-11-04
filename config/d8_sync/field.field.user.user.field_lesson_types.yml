@@ -1,0 +1,54 @@
+uuid: 6d55b2e3-4552-4b7a-ba72-871082c2f57b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_lesson_types
+  content:
+    - 'taxonomy_term:lesson_type:09a7ffee-f8ea-4886-8805-0bd544240bbf'
+    - 'taxonomy_term:lesson_type:1035db0c-11e2-4d44-bf34-8c8f4951cf7c'
+    - 'taxonomy_term:lesson_type:5b5ab0c8-cc21-46b8-806d-1b04a77e7aeb'
+    - 'taxonomy_term:lesson_type:5f8f7f8f-3502-49bf-905d-d8db40887c23'
+    - 'taxonomy_term:lesson_type:93319df5-be47-4c5f-8e7a-6368b7df22d6'
+    - 'taxonomy_term:lesson_type:9651329e-2975-4a79-8d9c-3dde0a016c13'
+  module:
+    - disable_field
+    - user
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: user.user.field_lesson_types
+field_name: field_lesson_types
+entity_type: user
+bundle: user
+label: 'Lesson Types'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    target_uuid: 5f8f7f8f-3502-49bf-905d-d8db40887c23
+  -
+    target_uuid: 5b5ab0c8-cc21-46b8-806d-1b04a77e7aeb
+  -
+    target_uuid: 93319df5-be47-4c5f-8e7a-6368b7df22d6
+  -
+    target_uuid: 1035db0c-11e2-4d44-bf34-8c8f4951cf7c
+  -
+    target_uuid: 9651329e-2975-4a79-8d9c-3dde0a016c13
+  -
+    target_uuid: 09a7ffee-f8ea-4886-8805-0bd544240bbf
+default_value_callback: ''
+settings:
+  handler: views
+  handler_settings:
+    view:
+      view_name: active_lesson_type
+      display_name: entity_reference_2
+      arguments: {  }
+field_type: entity_reference

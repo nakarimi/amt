@@ -1,0 +1,10 @@
+uuid: 6732a1e7-c5d6-4f4d-a5a6-f8e9fd562c65
+langcode: en
+status: true
+dependencies:
+  module:
+    - user
+id: user.developer
+label: Developer
+targetEntityType: user
+cache: true

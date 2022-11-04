@@ -1,0 +1,19 @@
+diff --git a/src/Controller/TaxonomiesController.php b/src/Controller/TaxonomiesController.php
+old mode 100755
+new mode 100644
+index 910e6d1..38b23a4
+--- a/src/Controller/TaxonomiesController.php
++++ b/src/Controller/TaxonomiesController.php
+@@ -705,6 +705,7 @@ class TaxonomiesController extends ControllerBase {
+ 
+               $entity_properties = [
+                 'vid' => $vid,
++                'tid' => $taxonomy['tid'],
+                 'langcode' => $taxonomy['langcode'],
+                 'name' => $taxonomy['name'],
+                 'description' => [
+@@ -823,3 +824,4 @@ class TaxonomiesController extends ControllerBase {
+   }
+ 
+ }
++

@@ -1,0 +1,19 @@
+uuid: b19ca863-14ae-4dd2-801a-310277c1ed26
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.field_notes
+id: student_accounts.student_account.field_notes
+field_name: field_notes
+entity_type: student_accounts
+bundle: student_account
+label: Notes
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

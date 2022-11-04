@@ -1,0 +1,1443 @@
+<?php
+
+/**
+ * @file
+ * Provides DayView functionality and alterations for AMT AMI.
+ */
+
+use Drupal\user\Entity\User;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Implements hook_theme().
+ */
+function amt_dashboard_theme($existing, $type, $theme, $path)
+{
+  return [
+    'amt_student_dashboard' => [
+      'variables' => [
+        'studentId' => NULL,
+        'studentBasicInfo' => NULL,
+        'inquiry' => NULL,
+        'enrollment' => NULL,
+        'student' => NULL,
+        'studentServices' => NULL,
+        'studentName' => NULL,
+        'message' => NULL,
+        'studentDepartment' => NULL,
+        'totalLessonsEnrolled' => NULL,
+        'totalFutureLessons' => NULL,
+        'totalLessonsPaidAhead' => NULL,
+        'totalLessonsPassedUnposted' => NULL,
+        'totalLessonsTaken' => NULL,
+        'totalLessonsRemaining' => NULL,
+        'studentLessonsStatus' => NULL,
+        'studentGLessonsStatus' => NULL,
+        'lesson_status_list' => NULL,
+        'service_status_list' => NULL,
+        'studentServicesStatus' => NULL,    
+      ],
+      'path' => $path . '/templates',
+      'template' => 'amt-dashboard-student-dashboard',
+    ],
+  ];
+}
+
+/**
+ * Calculate the total of lesson Paid ahead and taken lesson.
+ *
+ * This function get student account id and join some enrollment
+ * table and filter it by student id and calculate the total
+ * number of lesson available and lesson used from enrollment ECK.
+ *  @param int $studentId
+ *    This comes from controller, which is using this function.
+ *  @param boolean $convert
+ *    This is a flag, so that when we pass student account directly, don't try to query that again.
+ *
+ * @return array
+ *   Return the total of lesson available & lesson used of enrollment.
+ */
+function amt_dashboard_total_lessons_paid_ahead_taken($studentId = false, $convert = true)
+{
+  
+  if (!$studentId && !isset($_GET['id'])) { return 0; }
+
+  // Get student contact id from URL with get method, if it was not passed by pramater.
+  $studentId = ($studentId) ? $studentId : $_GET['id'];
+  
+  // Getting IDs of free enrollments which are Sundy and Uncategorized.
+  $enrollmentTypesIds = amt_general_load_nuteral_enrollments();
+
+  // Loading the student account of this student.
+  if ($convert) {
+    $queryStudentAccount = \Drupal::entityQuery('student_accounts')
+      ->condition('field_contacts', $studentId);
+    $studentAccountId = $queryStudentAccount->execute();
+
+    $totalLesson['paid_ahead'] = amt_general_total_lessons_available($studentAccountId, $enrollmentTypesIds);
+    return $totalLesson;
+  } else {
+
+    $totalLesson['paid_ahead'] = amt_general_total_lessons_available($studentId, $enrollmentTypesIds);
+    return $totalLesson['paid_ahead'];
+  }
+}
+/**
+ * Calculate the total of lesson used.
+ *
+ * This function get student account id and join some enrollment
+ * table and filter it by student id and calculate the total
+ * number of lesson used from enrollment ECK.
+ *  @param int $studentId
+ *    This comes from controller, which is using this function.
+ * @return array
+ *   Return the total of lesson used of enrollment.
+ */
+function amt_dashboard_total_lessons_used($studentId, $convert = false)
+{
+  // Getting IDs of free enrollments which are Sundy and Uncategorized.
+  $enrollmentTypesIds = amt_general_load_nuteral_enrollments();
+
+  $studentAccountId = $totalLessonUsed = 0;
+
+  if ($convert) {
+    // Loading the student account of this student.
+    $queryStudentAccount = \Drupal::entityQuery('student_accounts')
+      ->condition('field_contacts', $studentId);
+    $studentAccountId = $queryStudentAccount->execute();
+  } else {
+    $studentAccountId = $studentId;
+  }
+
+  // Query enrollments using student account id.
+  $enrollmentQuery = \Drupal::entityQuery('packages')
+    ->condition('type', 'enrollment')
+    ->condition('field_student', $studentAccountId, 'IN')->execute();
+
+  // Load all enrollments of student account.
+  $studentEnrollments = \Drupal::entityTypeManager()->getStorage('packages')->loadMultiple($enrollmentQuery);
+  // Get All Lessons available of student account.
+  $enrollmentsLessonUsed = [];
+  foreach ($studentEnrollments as $key => $enrollment) {
+    if (!in_array($enrollment->field_category->target_id, $enrollmentTypesIds)) {
+      $enrollmentsLessonUsed[$key] = $enrollment->field_lesson_used->value;
+    }
+  }
+
+  if (isset($enrollmentsLessonUsed)) {
+
+    // Sum all Lesson available.
+    $totalLessonUsed = array_sum($enrollmentsLessonUsed);
+  }
+
+  return $totalLessonUsed;
+}
+
+/**
+ * Loading all the data for the student dashboard page.
+ *
+ * This function is going to load the data for all four
+ * tables that are inside the student dashboard page when
+ * the page is being loaded.
+ */
+function amt_dashboard_load_data_for_student_dashboard()
+{
+  // Getting the student Id from the URL.
+  $studentId = $_GET['id'];
+
+  // Variable for holding our final data to be sent to the view.
+  $vars = [];
+  $vars['lesson'] = '';
+  $vars['group_lesson'] = '';
+  $vars['services'] = '';
+  // Variable for holding the count for future lessons of a student.
+  $vars['futureLessonsCount'] = 0;
+  $vars['lesson_status_list'] = _amt_dayview_load_statuses('lesson_status');
+  $vars['service_status_list'] = _amt_dayview_load_statuses('service_status');
+  // Loading the lesson list for the student.
+  $vars['student'] = amt_dashboard_student_lessons_list($vars, $studentId);
+  $vars['studentServices'] = amt_dashboard_student_lessons_list($vars, $studentId, 'services');
+  // Calling function Saving the basic student info in an array.
+  $vars['studentBasicInfo'] = amt_dashboard_student_basic_data($studentId);
+
+  // Loading the inquiry data for this student.
+  $vars['inquiry'] = _amt_dashboard_load_inquiry($studentId);
+
+  // Loading the enrollments for this student.
+  $vars['enrollment'] = amt_dashboard_load_student_enrollments($studentId);
+
+  // Loading The Student total enrolled (total Lesson Count).
+  $vars['totalLessonEnrolled'] = amt_dashboard_load_student_total_lessons_enrolled($studentId);
+
+  // Loading The Student total Lessons Taken.
+  $vars['totalLessonsTaken'] = amt_dashboard_student_total_lessons_taken($studentId);
+
+  // Loading The Student total Lessons Remaining.
+  $vars['totalLessonsRemaining'] = amt_dashboard_student_total_lessons_remaining($studentId);
+
+  // Loading List of Student Departments for creating the student department select list.
+  $vars['student_department']['list'] = amt_dashboard_load_departments_ids();
+
+  // Loading the ID of the student department chosen for this student account.
+  $vars['student_department']['chosen_department'] = amt_dashboard_get_students_department_id($studentId);
+
+  return $vars;
+}
+
+/**
+ * Loading the Basic data for this student.
+ *
+ * @param int $studentId
+ *   Id of the student contact.
+ */
+function amt_dashboard_student_basic_data($studentId)
+{
+  // Loading the Student entity to extract data.
+  $fullInfoStudent = \Drupal::entityTypeManager()->getStorage('contacts')->load($studentId);
+
+  // Getting the basic info and saving them in an array.
+  $studentBasicInfo[0]['name'] = $fullInfoStudent->field_first_name->value;
+  $studentBasicInfo[0]['lastName'] = $fullInfoStudent->field_last_name->value;
+  $studentBasicInfo[0]['cell'] = $fullInfoStudent->field_cell_phone->value;
+  $studentBasicInfo[0]['email'] = $fullInfoStudent->field_email->value;
+
+  // Determining the gender of the student.
+  if ($fullInfoStudent->field_gender->value == 1) {
+    $studentBasicInfo[0]['gender'] = "Male";
+  } else {
+    $studentBasicInfo[0]['gender'] = "Female";
+  }
+
+  // Setting the links for edit option.
+  $studentBasicInfo[0]['settings'] = [
+    'data' => new TranslatableMarkup("<a href='/contacts/@id/edit?destination=/student-dashboard?id=@stu_id' style='margin:2px 0;'>@editMessage</a>", [
+      '@id' => $fullInfoStudent->id(),
+      '@editMessage' => 'Edit',
+      '@stu_id' => $_GET['id']
+    ]),
+    'class' => 'tableCellHideOnPrint',
+  ];
+  return $studentBasicInfo;
+}
+
+/**
+ * Loading the Inquiry data for this student.
+ *
+ * This function is taking an entity as an input
+ * which is a student account and extract all the
+ * required fields from it and save them in an array
+ * and then returns the array back to where it was called.
+ *
+ * @param int $studentId
+ *   Id of the student contact.
+ */
+function _amt_dashboard_load_inquiry($studentId)
+{
+  // Loaing the student account of this student.
+  $queryStudentAccount = \Drupal::entityQuery('student_accounts')
+    ->condition('field_contacts', $studentId);
+  $studentAccountIds = $queryStudentAccount->execute();
+
+  // Loading the Student Account entity to extract inquiry data.
+  $fullInfoStudentAccount = \Drupal::entityTypeManager()->getStorage('student_accounts')->loadMultiple($studentAccountIds);
+
+  // Getting the inquiry data from the entity.
+  foreach ($fullInfoStudentAccount as $fullInfoStudentAccountKey => $fullInfoStudentAccountValue) {
+
+    // Setting empty values as default for these dates.
+    $studentInquiryData[0]['inquired'] = "";
+    $studentInquiryData[0]['bookedOn'] = "";
+    $studentInquiryData[0]['showed'] = "";
+
+    // If booked on date is available.
+    if (isset($fullInfoStudentAccountValue->field_booked_on->value)) {
+      $studentInquiryData[0]['bookedOn'] = date('m-d-Y', strtotime($fullInfoStudentAccountValue->field_booked_on->value));
+    }
+
+    // If inquired date is available.
+    if (isset($fullInfoStudentAccountValue->field_inquired->value)) {
+      $studentInquiryData[0]['inquired'] = date('m-d-Y', strtotime($fullInfoStudentAccountValue->field_inquired->value));
+    }
+
+    // If inquiry showed date is available.
+    if (isset($fullInfoStudentAccountValue->field_showed->value)) {
+      $studentInquiryData[0]['showed'] = date('m-d-Y', strtotime($fullInfoStudentAccountValue->field_showed->value));
+    }
+
+    $studentInquiryData[0]['inquiryMethod'] = $fullInfoStudentAccountValue->field_inquiry_method->value;
+
+    $inquiry_taker = '';
+    if ($instructor = User::load($fullInfoStudentAccountValue->field_inquiry_taker->target_id)) {
+      $inquiry_taker = $instructor->name->value;
+    }
+
+    $studentInquiryData[0]['inquiryTaker'] = $inquiry_taker;
+    $studentInquiryData[0]['notes'] = $fullInfoStudentAccountValue->field_notes->value;
+    // Setting the links for edit option.
+    $studentInquiryData[0]['settings'] = new TranslatableMarkup("<a href='/student_accounts/@id/edit?destination=/student-dashboard?id=@stu_id' style='margin:2px 0;'>@editMessage</a>", [
+      '@id' => $fullInfoStudentAccountValue->id(),
+      '@editMessage' => 'Edit',
+      '@stu_id' => $_GET['id']
+    ]);
+  }
+  return $studentInquiryData;
+}
+
+/**
+ * Querying and filtering the database to fetch the disred enrollments.
+ */
+function _amt_dashboard_filter_enrollment()
+{
+  // Creating an empty array for strorign the final array of
+  // of filtered data.
+  $enrollmentFinalList = [];
+  // Getting the filter parameters from $_POST[]
+  // which are passed from view through ajax.
+  $fieldTotalPaidFilter = $_POST['totalPaid'];
+  $fieldTotalPriceFilter = $_POST['totalPrice'];
+  $fieldCategoryFilter = $_POST['category'];
+  $fieldInstructorFilter = $_POST['instructor'];
+  $field_student_id = $_POST['studentId'];
+
+  // Checking and then extracting id from Instructor.
+  if ($fieldInstructorFilter != '') {
+    // Extract the id from terms.
+    $fieldInstructorFilter = explode(')', explode('(', $fieldInstructorFilter)[1])[0];
+  }
+
+  // Checking and then extracting id from Category.
+  if ($fieldCategoryFilter != '') {
+    // Extract the id from terms.
+    $fieldCategoryFilter = explode(')', explode('(', $fieldCategoryFilter)[1])[0];
+  }
+
+  // Loaing the student account of this student.
+  $queryStudentAccount = \Drupal::entityQuery('student_accounts')
+    ->condition('field_contacts', $field_student_id);
+  $studentAccountIds = $queryStudentAccount->execute();
+  // Getting Attendees Ids based on Student account Ids.
+  $queryEnrollment = \Drupal::entityQuery('packages');
+  $group = $queryEnrollment->andConditionGroup();
+  $group->condition('field_student', $studentAccountIds, 'IN');
+
+  // Checking if the filter parameters are passed,
+  // if so, for each one, a condition is added to the query.
+  if ($fieldTotalPaidFilter != "") {
+    $group->condition('field_total_paid', $fieldTotalPaidFilter);
+  }
+  if ($fieldTotalPriceFilter != "") {
+    $group->condition('field_enrollment_total_price', $fieldTotalPriceFilter);
+  }
+  if ($fieldCategoryFilter != "") {
+    $group->condition('field_category', $fieldCategoryFilter);
+  }
+  if ($fieldInstructorFilter != "") {
+    $group->condition('field_instructor', $fieldInstructorFilter);
+  }
+  $enrollmentIds = $queryEnrollment->condition($group)->execute();
+
+  // Loading the enrollments data.
+  $finalArray = amt_dashboard_get_enrollment_data($enrollmentIds, FALSE, $field_student_id);
+  return $finalArray;
+}
+
+/**
+ * Extracting the entities and saving them into an array.
+ *
+ * This function extracts the data inside the entities
+ * and save them them into an array that is passed back
+ * to where it is called which consequently, that data is
+ * sent back to view for display.
+ *
+ * @param int $studentId
+ *   Id of the student contact.
+ */
+function amt_dashboard_load_student_enrollments($studentId, $filterZeroCount = false, $moreFields = false)
+{
+  // Getting enrollment entity Ids based on the attendees.
+  $getStudentAccountId = \Drupal::entityQuery('student_accounts')
+    ->condition('field_contacts', $studentId);
+  $studentAccountId = $getStudentAccountId->execute();
+
+  // Getting enrollment entity Ids based on the attendees.
+  if (!empty($studentAccountId)) {
+    $queryEnrollment = \Drupal::entityQuery('packages')
+      ->condition('field_student', $studentAccountId)
+      ->condition('type', 'enrollment')
+      ->sort('field_sale_date', 'asc');
+    if ($filterZeroCount) {
+      $queryEnrollment = $queryEnrollment->condition('field_enrollment_lesson_count', '0', '>');
+    }
+    $enrollmentIds = $queryEnrollment->execute();
+  }
+
+  // If enrollment Ids was not empty.
+  if (!empty($enrollmentIds)) {
+    // Load the data from those enrollments.
+    $enrollmentFinalList = amt_dashboard_get_enrollment_data($enrollmentIds, $moreFields);
+  }
+
+  // If the array is empty.
+  if (empty($enrollmentFinalList)) {
+    return $enrollmentFinalList = "";
+  }
+  // If the array is not empty.
+  return $enrollmentFinalList;
+}
+
+/**
+ * Retrive the next lesson date for a student.
+ *
+ * @param int $studentId
+ *   The Id of student contacts.
+ */
+function amt_dashboard_student_next_lesson($studentId)
+{
+  // Getting the Ids of the attendees for the student.
+  $attendeesId = \Drupal::entityQuery('attendees')
+    ->condition('field_students', $studentId)
+    ->execute();
+
+  // If the attendeesId is not empty.
+  if (!empty($attendeesId)) {
+    // Getting the events Ids for the student.
+    $getEventsIds = \Drupal::entityQuery('events');
+    $getEventsIdsG = $getEventsIds->orConditionGroup()
+      ->condition('field_student', $attendeesId, 'IN')
+      ->condition('field_students', $attendeesId, 'IN');
+    $getEventsIdsType = $getEventsIds->orConditionGroup()
+      ->condition('type', 'lesson')
+      ->condition('type', 'group_lesson');
+
+    $getEventsIds->condition($getEventsIdsG);
+    $getEventsIds->condition($getEventsIdsType);
+
+    // Next lesson is the one that has the schedule for tomorrow or later.
+    $today = new DateTime();
+    $startOfTomorrow = $today->setTime(24, 00, 00)->format('Y-m-d H:i:s');
+    $getEventsIds->condition('field_date_and_time', $startOfTomorrow, '>=');
+
+    $getEventsIds->sort('field_date_and_time', 'ASC');
+    $getEventsIds->range(0, 1);
+    $result = $getEventsIds->execute();
+    $eid = reset($result);
+    if ($eid) {
+      $lesson = \Drupal::entityTypeManager()->getStorage('events')->load($eid);
+      // return $lesson;
+      $date = $lesson->field_date_and_time->getString();
+      return $date;
+    }
+  }
+  return NULL;
+}
+
+/**
+ * Show all lessons for specific student.
+ *
+ * This function show all events (lessons, group lesson, service) for a
+ * single student in student dashboard.
+ *
+ * @param array $vars
+ *   The referenced variable.
+ * @param int $studentId
+ *   The Id of student that redirects to student dashboard.
+ */
+function amt_dashboard_student_lessons_list(array &$vars, $studentId, $eventType = null)
+{
+  // Getting the Ids of the attendees for the student.
+  $getAttendeesIds = \Drupal::entityQuery('attendees')
+    ->condition('field_students', $studentId);
+  $attendeesId = $getAttendeesIds->execute();
+
+  // If the attendeesId is not empty.
+  if (!empty($attendeesId)) {
+    // Getting the events Ids for the student.
+    $getEventsIds = \Drupal::entityQuery('events');
+    $getEventsIdsG = $getEventsIds->orConditionGroup()
+      ->condition('field_student', $attendeesId, 'IN')
+      ->condition('field_students', $attendeesId, 'IN');
+    if ($eventType == 'services') {
+      $getEventsIdsType = $getEventsIds->orConditionGroup()
+        ->condition('type', 'services');
+    } else {
+      $getEventsIdsType = $getEventsIds->orConditionGroup()
+        ->condition('type', 'lesson')
+        ->condition('type', 'group_lesson');
+    }
+
+
+    $getEventsIds->condition($getEventsIdsG);
+    $getEventsIds->condition($getEventsIdsType);
+
+    // Filter to show lessons with date before and including today.
+    $today = new DateTime();
+    $startOfTomorrow = $today->setTime(24, 00, 00)->format('Y-m-d H:i:s');
+
+    // apply date filters just for lessons and group lessons.
+    if ($eventType == NULL) {
+      $futureQuery = clone $getEventsIds;
+      // Get future appointments for curcle data.
+      $futureQuery->condition('field_date_and_time', date('Y-m-d H:i:s'), '>');
+      // Get future appointments.
+      $futureQuery->condition('field_date_and_time', $startOfTomorrow, '>=');
+
+      $vars['futureLessonsCount'] += $futureQuery->count()->execute();
+      // Get past appointments.
+      $getEventsIds->condition('field_date_and_time', $startOfTomorrow, '<');
+    }
+    $getEventsIds->sort('field_date_and_time', 'desc');
+    $eventsIds = $getEventsIds->execute();
+  }
+
+  $pendingStatusId = \Drupal::entityQuery('taxonomy_term')
+    ->condition('name', 'Pending Status')
+    ->condition('vid', 'lesson_status')
+    ->execute();
+  $pendingStatusId = array_values($pendingStatusId);
+
+  if (!empty($eventsIds)) {
+    // Loading all the events entities based on their Ids.
+    $lessonsEntities = \Drupal::entityTypeManager()->getStorage('events')->loadMultiple($eventsIds);
+    $filteringData = amt_dayview_filter_data();
+
+    foreach ($lessonsEntities as $key => $lesson) {
+
+      $timeStamp = strtotime($lesson->field_date_and_time->value);
+      // Getting the date of the event.
+      $lessonsList[$key][] = [
+        'data' => date('m-d-Y', $timeStamp),
+        'data-order' => $timeStamp,
+      ];
+
+      // Getting the timing of the event.
+      $lessonsList[$key][] = [
+        'data' => date('h:i A', $timeStamp),
+        'data-order' => strtotime(date('h:i A', $timeStamp)),
+      ];
+
+      // Getting the type of the lesson.
+      if ($lesson->field_type->target_id != NULL && Term::load($lesson->field_type->target_id) != NULL) {
+        $lessonsList[$key][] = Term::load($lesson->field_type->target_id)->getName();
+      } else {
+        $lessonsList[$key][] = 'Not Assigned';
+      }
+
+      // Getting the duration of the event.
+      $lessonsList[$key][] = $lesson->field_duration->value;
+
+      // Getting the instructor for the event.
+      if ($lesson->field_instructor->target_id != NULL) {
+        $matchedUser = User::load($lesson->field_instructor->target_id);
+        if ($matchedUser != NULL) {
+          $lessonsList[$key][] = $matchedUser->getAccountName();
+        } else {
+          $lessonsList[$key][] = "NAN";
+        }
+      } else {
+        $lessonsList[$key][] = 'Not Assigned';
+      }
+
+      $status = '';
+      // If the status was available for this event.
+      if ($lesson->field_student && $lesson->field_student->entity->field_status && $lesson->field_student->entity->field_status->target_id != NULL) {
+        // Getting the status of this lesson.
+        $statusTerm = Term::load($lesson->field_student->entity->field_status->target_id);
+
+        // If the status Id matches any Lesson Status term.
+        if ($statusTerm != NULL) {
+          // Get the Name of the status.
+          $status = $statusTerm->getName();
+
+          // Getting the Color related to this status.
+          $color = $statusTerm->field_color->color;
+        }
+        // If the Id does not match any Status term.
+        else {
+          // Setting the status to empty.
+          $status = " ";
+
+          // Setting color to empty.
+          $color = " ";
+        }
+        // Passing the content and the background color of the <td>.
+        $lessonsList[$key][] = ['data' => $status, 'style' => 'background-color:' . $color];
+      } else {
+        $lessonsList[$key][] = 'No Status';
+      }
+
+      // Keep index for later use.
+      $lessonsList[$key][] = '';
+
+      // Setting the links for edit, delete and view.
+      $lessonsList[$key][] = [
+        'data' => new TranslatableMarkup("<a href='/events/@id/edit?destination=/student-dashboard?id=@stu_id' style='margin:2px 0;'>@editMessage</a>", [
+          '@id' => $lesson->id(),
+          '@editMessage' => 'Edit',
+          '@stu_id' => $_GET['id'],
+        ]),
+        'class' => 'tableCellHideOnPrint',
+      ];
+
+      // Build status table structure.
+      // $lessonDataToShow = _amt_dayview_event_details($lesson, $filteringData);
+      // $vars[$lesson->type->getString()] .= new TranslatableMarkup(
+      //   '<tr> <td> <div class="checkbox"> <label> <input type="checkbox" data-entity-id="@entity_id" class="update_multiple_status_checkbox_@type"> </label> </div> </td> <td class="update_multiple_status_event_title">' . $lessonDataToShow['dataToShow'] . '</td> <td>@instructorName</td> <td> @start <br> @end </td> <td><span class="badge badge-secondary">@status</span></td> </tr>',
+      //   [
+      //     '@type' => $lesson->type->getString(),
+      //     '@entity_id' => $lesson->id(),
+      //     '@instructorName' => $lessonDataToShow['instructorName'],
+      //     '@start' => date('H:i', strtotime($lessonDataToShow['start'])),
+      //     '@end' => date('H:i', strtotime($lessonDataToShow['end'])),
+      //     '@status' => ($lessonDataToShow['status']) ? $lessonDataToShow['status'] : NULL,
+      //   ]
+      // );
+    }
+
+    if (is_null($eventType)) {
+      $lessonsList = _amt_dashboard_sort_lessons($lessonsList, $studentId);
+    }
+  }
+  return $lessonsList;
+}
+
+/**
+ * Creating Table for enrollments in student dashboard.
+ */
+function _create_table_for_enrollments($enrollments)
+{
+  $enrollmentTable['enrollments'] = [
+    '#type' => 'table',
+    '#header' => [
+      'Sale Date',
+      'Instructor',
+      'Category',
+      'Package Name',
+      '# of Lessons',
+      'Total Price',
+      'Total Paid',
+      'Last Payment',
+      // 'Total Dropped',
+      'Lessons Available',
+      // 'Document ID',
+      'Hide',
+      'Edit',
+    ],
+    '#rows' => $enrollments,
+  ];
+  // Id for the table.
+  $enrollmentTable['enrollments']['#attributes']['id'] = 'EnrollmentsTable';
+  return $enrollmentTable['enrollments'];
+}
+
+/**
+ * Creating tables for lessons in student dashboard page.
+ */
+function _create_table_for_lessons_list($lessonsList)
+{
+  // Creating the table.
+  $lessonsListTable['lessonsList'] = [
+    '#type' => 'table',
+    '#header' => [
+      'Date',
+      'Time',
+      'Service',
+      'Length',
+      'Teacher',
+      'Status',
+      'Taken / Rem',
+      [
+        'data' => 'Edit',
+        'class' => 'tableCellHideOnPrint',
+      ],
+    ],
+    '#rows' => $lessonsList,
+  ];
+  // Id for the table.
+  $lessonsListTable['lessonsList']['#attributes']['id'] = 'LessonsListTable';
+  return $lessonsListTable['lessonsList'];
+}
+
+/**
+ * Creating tables for services in student dashboard page.
+ */
+function _create_table_for_services_list($servicesList)
+{
+  // Creating the table.
+  $servicesListTable['servicesList'] = [
+    '#type' => 'table',
+    '#header' => [
+      'Date',
+      'Time',
+      'Service',
+      'Length',
+      'Teacher',
+      'Status',
+      [
+        'data' => 'Edit',
+        'class' => 'tableCellHideOnPrint',
+      ],
+    ],
+    '#rows' => $servicesList,
+  ];
+  // Id for the table.
+  $servicesListTable['servicesList']['#attributes']['id'] = 'ServicesListTable';
+  return $servicesListTable['servicesList'];
+}
+
+/**
+ * Creating tables for inquiry data in student dashboard page.
+ */
+function _create_table_for_inquiry($inquiry)
+{
+  // Creating the table.
+  $inquiryTable['inquiry'] = [
+    '#type' => 'table',
+    '#header' => [
+      'Inquired',
+      'Booked On',
+      'Showed',
+      'Inquiry Method',
+      'Inquiry Taker',
+      'Notes',
+      'Edit',
+    ],
+    '#rows' => $inquiry,
+    '#empty' => 'No Data',
+  ];
+  // Id for the table.
+  $inquiryTable['inquiry']['#attributes']['id'] = 'InquiryTable';
+  return $inquiryTable['inquiry'];
+}
+
+/**
+ * Creating tables for student basic info in student dashboard page.
+ */
+function _create_table_for_student_basic_info($studentBasicInfo)
+{
+  // Creating the table.
+  $studentBasicInfoTable['studentBasicInfo'] = [
+    '#type' => 'table',
+    '#header' => [
+      'First Name',
+      'Last Name',
+      'Cell',
+      'Email',
+      'Gender',
+      [
+        'data' => 'Edit',
+        'class' => 'tableCellHideOnPrint',
+      ],
+    ],
+    '#rows' => $studentBasicInfo,
+    '#empty' => 'No Data',
+  ];
+  // Id for the table.
+  $studentBasicInfoTable['studentBasicInfo']['#attributes']['id'] = 'StudentBasicInfoTable';
+  return $studentBasicInfoTable['studentBasicInfo'];
+}
+
+/**
+ * Getting the related data out of enrollments list.
+ *
+ * This function is called on students dashboard loading
+ * time or when the enrollments list in that page gets filtered.
+ * The function is going to extract the related data from the list
+ * of the enrollments and sends them back.
+ *
+ * @param array $enrollmentIds
+ *   Id of the enrollments.
+ */
+function amt_dashboard_get_enrollment_data($enrollmentIds, $moreFields = false, $studentId = NULL)
+{
+  // Loading all the data for the retrieved enrollments.
+  $fullEnrollmentEntities = \Drupal::entityTypeManager()->getStorage('packages')->loadMultiple($enrollmentIds);
+  foreach ($fullEnrollmentEntities as $enrollmentKey => $enrollmentValue) {
+    // Loading the Sale date.
+    if (!empty($enrollmentValue->field_sale_date)) {
+      // Extracting the name of the instructor.
+      $enrollmentFinalList[$enrollmentKey]['saleDate'] = date('m-d-Y', strtotime($enrollmentValue->field_sale_date->value));
+    } else {
+      // Leaving the instructor empty.
+      $enrollmentFinalList[$enrollmentKey]['saleDate'] = "";
+    }
+
+
+    if (!empty($enrollmentValue->field_instructor->target_id)) {
+      // Load the instructor for this enrollment.
+      $instructor = User::load($enrollmentValue->field_instructor->target_id);
+      if (!empty($instructor)) {
+        // Extracting the full name of the instructor from first last name.
+        $instructorFullName = $instructor->field_first_name->value . " " . $instructor->field_last_name->value;;
+        $enrollmentFinalList[$enrollmentKey]['instructor'] = $instructorFullName;
+      } else {
+        // Leaving the instructor empty.
+        $enrollmentFinalList[$enrollmentKey]['instructor'] = "";
+      }
+    } else {
+      // Leaving the instructor empty.
+      $enrollmentFinalList[$enrollmentKey]['instructor'] = "";
+    }
+    // Checking if the entity has category field in it.
+    if (!empty($enrollmentValue->field_category->target_id)) {
+      // Loading the Taxonomy term for Category.
+      $category = Term::load($enrollmentValue->field_category->target_id)->getName();
+      if (!empty($category)) {
+        // Extracting the name of the instructor.
+        $enrollmentFinalList[$enrollmentKey]['category'] = $category;
+      } else {
+        // Leaving the instructor empty.
+        $enrollmentFinalList[$enrollmentKey]['category'] = "";
+      }
+    } else {
+      // Leaving the instructor empty.
+      $enrollmentFinalList[$enrollmentKey]['category'] = "";
+    }
+    // Checking if the entity has a package name field in it.
+    if (!empty($enrollmentValue->field_enrollment_package_name)) {
+      // Loading the Package name for this enrollment.
+      $packageEntity = $enrollmentValue->get('field_enrollment_package_name')->referencedEntities();
+      if (!empty($packageEntity)) {
+        foreach ($packageEntity as $packageEntityKey => $packageEntityValue) {
+          // Extracting the name of the instructor.
+          $enrollmentFinalList[$enrollmentKey]['packageName'] = $packageEntityValue->field_package_name->value;
+        }
+      } else {
+        // Leaving the instructor empty.
+        $enrollmentFinalList[$enrollmentKey]['packageName'] = "";
+      }
+    } else {
+      // Leaving the instructor empty.
+      $enrollmentFinalList[$enrollmentKey]['packageName'] = "";
+    }
+    // Loading the total paid.
+    if (!empty($enrollmentValue->field_enrollment_lesson_count)) {
+      // Extracting the name of the instructor.
+      $enrollmentFinalList[$enrollmentKey]['#ofLessons'] = $enrollmentValue->field_enrollment_lesson_count->value;
+    } else {
+      // Leaving the instructor empty.
+      $enrollmentFinalList[$enrollmentKey]['#ofLessons'] = "";
+    }
+
+    // Laoding the Total price.
+    if (!empty($enrollmentValue->field_enrollment_total_price)) {
+      // Extracting the name of the instructor.
+      $enrollmentFinalList[$enrollmentKey]['totalPrice'] = '$' . $enrollmentValue->field_enrollment_total_price->value;
+    } else {
+      // Leaving the instructor empty.
+      $enrollmentFinalList[$enrollmentKey]['totalPrice'] = "";
+    }
+
+    // Loading the total paid.
+    if (!empty($enrollmentValue->field_total_paid)) {
+      // Extracting the name of the instructor.
+      $enrollmentFinalList[$enrollmentKey]['totalPaid'] = '$' . $enrollmentValue->field_total_paid->value;
+    } else {
+      // Leaving the instructor empty.
+      $enrollmentFinalList[$enrollmentKey]['totalPaid'] = "";
+    }
+
+    // // Loading the total Dropped.
+    // if ($enrollmentValue->field_drop->value > 0) {
+    //   $enrollmentFinalList[$enrollmentKey]['totalDropped'] = '$' . $enrollmentValue->field_drop->value;
+    // }
+    // else {
+    //   // Leaving the instructor empty.
+    //   $enrollmentFinalList[$enrollmentKey]['totalDropped'] = "";
+    // }
+
+    // Get the last payment for this enrollment.
+    $enrollmentFinalList[$enrollmentKey]['last_payment'] = _amt_dashboard_get_last_payment_for_this_enrollment($enrollmentValue->id());
+
+    // Loading the Avaible Lessons.
+    if (!empty($enrollmentValue->field_lesson_available)) {
+      // Extracting the name of the instructor.
+      $enrollmentFinalList[$enrollmentKey]['lessonAvailable'] = $enrollmentValue->field_lesson_available->value;
+    } else {
+      // Leaving the instructor empty.
+      $enrollmentFinalList[$enrollmentKey]['lessonAvailable'] = "";
+    }
+
+    if ($moreFields) {
+      // Loading the Avaible Lessons.
+      if (!empty($enrollmentValue->field_lesson_used)) {
+        // Extracting the name of the instructor.
+        $enrollmentFinalList[$enrollmentKey]['lessonUsed'] = $enrollmentValue->field_lesson_used->value;
+      } else {
+        // Leaving the instructor empty.
+        $enrollmentFinalList[$enrollmentKey]['lessonUsed'] = 0;
+      }
+    }
+
+    // // Loading Legacy Id.
+    // if (!empty($enrollmentValue->field_legacy_id->value)) {
+    //   // Extracting the id of document.
+    //   $enrollmentFinalList[$enrollmentKey]['documentId'] = $enrollmentValue->field_legacy_id->value;
+    // }
+    // else {
+    //   // Leaving N/A for empty legacy id.
+    //   $enrollmentFinalList[$enrollmentKey]['documentId'] = 'N/A';
+    // }
+
+    $checked = '';
+
+    if ($enrollmentValue->field_visibility->value) {
+      $checked =  'checked';
+    }
+
+    // P tag is added and hidden to make the sorting work for the checkbox column.
+    $enrollmentFinalList[$enrollmentKey]['display'] = new TranslatableMarkup("<input type='checkbox' $checked class='hide_enrollment' value='@id' > <p style='display:none'>$checked</p>", [
+      '@id' => $enrollmentValue->id(),
+    ]);
+
+    // Setting the links for edit, delete and view.
+    $enrollmentFinalList[$enrollmentKey]['settings'] = new TranslatableMarkup("<a href='/packages/@id/edit?destination=/student-dashboard?id=@stu_id' style='margin:2px 0;'>@editMessage </a>", [
+      '@id' => $enrollmentValue->id(),
+      '@editMessage' => 'Edit',
+      '@stu_id' => $_GET['id'],
+    ]);
+  }
+  return $enrollmentFinalList;
+}
+
+/**
+ * Getting Total Lesson Count.
+ *
+ * This function is to show the total lesson count
+ * of a specific student,and return a value.
+ *
+ * @param int $studentId
+ *   An Integer that contains student id.
+ */
+function amt_dashboard_load_student_total_lessons_enrolled($studentId, $from = false, $to = false)
+{
+  // Getting IDs of free enrollments which are Sundy and Uncategorized.
+  $enrollmentTypesIds = amt_general_load_nuteral_enrollments();
+
+  // Getting enrollment entity Ids based on the attendees.
+  $studentAccountId = \Drupal::entityQuery('student_accounts')
+    ->condition('field_contacts', $studentId)->execute();
+
+  $enrollmentIds = [];
+  // Getting enrollment entity Ids based on the attendees.
+  if (!empty($studentAccountId)) {
+
+    $queryEnrollment = \Drupal::entityQuery('packages')
+      ->condition('field_student', reset($studentAccountId))
+      ->condition('type', 'enrollment')
+      ->condition('field_category', $enrollmentTypesIds, 'NOT IN');
+
+    if (isset($from[5]) && isset($to[5])) {
+      $queryEnrollment = $queryEnrollment->condition('field_sale_date', [$from, $to], 'BETWEEN');
+    }
+    $enrollmentIds = $queryEnrollment->execute();
+  }
+  // Loading all the data for the retrieved enrollments.
+  $enrollmentLessonCountList = [];
+  if (count($enrollmentIds) > 0) {
+    $database = \Drupal::database();
+    $query = $database->query("SELECT 
+  
+    CASE WHEN c.field_enrollment_lesson_count_value IS NULL THEN 0 ELSE c.field_enrollment_lesson_count_value END
+     - 
+    IF ( pr.field_enrollment_lesson_price_value != NULL, FLOOR(CASE WHEN dr.field_drop_value IS NULL THEN 0 ELSE dr.field_drop_value END
+     / 
+    CASE WHEN pr.field_enrollment_lesson_price_value IS NULL THEN 0 ELSE pr.field_enrollment_lesson_price_value END)
+    , 0) as lessonCount
+    
+    FROM packages_field_data as p 
+  
+    LEFT JOIN packages__field_enrollment_lesson_count as c ON p.id = c.entity_id
+    LEFT JOIN packages__field_enrollment_lesson_price as pr ON p.id = pr.entity_id
+    LEFT JOIN packages__field_drop as dr ON p.id = dr.entity_id
+    -- LEFT JOIN packages__field_student as st ON p.id = st.entity_id
+    WHERE p.id IN (" . implode(',', $enrollmentIds) . ")
+    
+    ");
+    $enrollmentLessonCountList = $query->fetchAll();
+  }
+
+  // Sum the Lesson count of these arrays.
+  $totalLessonCount = array_sum(array_column($enrollmentLessonCountList, 'lessonCount'));
+
+  if ($totalLessonCount == NULL) {
+    $totalLessonCount = 0;
+  }
+  // Pass the Value.
+  return $totalLessonCount;
+}
+
+/**
+ * Show total lessons taken for specific student.
+ *
+ * This function shows total Lessons (only Lesson) with
+ * status of "Showed" or "No Showed, Charged" for a
+ * single student in student dashboard.
+ * 
+ * NOTE: The $includeDEs is there for future possible configurations
+ * but for now it is not being used anywhere.
+ *
+ * @param int $studentId
+ *   The Id of student that redirects to student dashboard.
+ */
+function amt_dashboard_student_total_lessons_taken($studentId, $includeDEs = false)
+{
+  // Getting IDs of free enrollments which are Sundy and Uncategorized.
+  // TODO: THE IS ISSUE WITH TERM ID AND REVISION ID THEY SHOULD BE FIXED.
+  $enrollmentTypesIds = amt_general_load_nuteral_enrollments();
+  // $enrollmentTypesIds = [67, 70];
+  // Getting the Ids of the attendees for the student.
+  $getAttendeesIds = \Drupal::entityQuery('attendees')
+    ->condition('field_students', $studentId);
+  $attendeesId = $getAttendeesIds->execute();
+
+  // By Default shows Total Lesson taken to Zero.
+  $totalLessonsTaken = 0;
+
+  // If the attendeesId is not empty.
+  if (!empty($attendeesId)) {
+    // Getting the events Ids for the student.
+    $eventsIds = amt_dashboard_get_events_by_attendance($attendeesId);
+  }
+
+  if (!empty($eventsIds)) {
+    $enrollmentTypesIds = "(" . implode(',', $enrollmentTypesIds) . ")";
+
+    $eventsIds = "(" . implode(',', $eventsIds) . ")";
+    $database = \Drupal::database();
+    $sql_query = "SELECT e.id FROM events_field_data as e 
+      LEFT JOIN events__field_date_and_time as dt ON e.id = dt.entity_id
+      LEFT JOIN events__field_student as att ON e.id = att.entity_id
+      LEFT JOIN attendees__field_status as st ON att.field_student_target_id = st.entity_id
+      LEFT JOIN attendees__field_enrollment as a_enr ON att.field_student_target_id = a_enr.entity_id
+      LEFT JOIN packages__field_category as p_enr ON a_enr.field_enrollment_target_id = p_enr.entity_id
+      LEFT JOIN taxonomy_term_field_data as term ON term.tid = st.field_status_target_id";
+    // Special processing to exclude DEs from the count.
+    if ($includeDEs) {
+      $sql_query .= " LEFT JOIN events__field_type as dty ON e.id = dty.entity_id
+        LEFT JOIN taxonomy_term_field_data as term_type ON term_type.tid = dty.field_type_target_id";
+    }
+
+    $sql_query .= " WHERE e.id IN $eventsIds
+      AND term.name IN ('Showed', 'No Showed, Charged')
+      AND ( p_enr.field_category_target_id IS NULL or p_enr.field_category_target_id NOT IN $enrollmentTypesIds)";
+    // Special processing to exclude DEs from the count.
+    if ($includeDEs) {
+      $sql_query .= " AND term_type.name NOT IN ('Dance Evaluation (DE)')";
+    }
+
+    // Execute the built query.
+    $query = $database->query($sql_query);
+    $totalLessonsTaken = count($query->fetchAll());
+  }
+
+  return $totalLessonsTaken;
+}
+
+/**
+ * Show total lessons taken for specific student.
+ *
+ * This function shows total Lessons (only Lesson) with
+ * status of "Showed" or "No Showed, Chargef" for a
+ * single student in student dashboard.
+ *
+ * @param int $studentId
+ *   The Id of student that redirects to student dashboard.
+ */
+function amt_dashboard_student_total_lessons_remaining($studentId)
+{
+  // Loading The Student total enrolled (total Lesson Count).
+  $totalEnrolled = amt_dashboard_load_student_total_lessons_enrolled($studentId);
+  // Loading The Student total Lessons Taken.
+  // $totalEnrolled = 0;
+  $totalTaken = amt_dashboard_student_total_lessons_taken($studentId);
+  // "Remaining should be equaled to total lessons enrolled minus lessons taken"
+  $totalLessonsTaken = ($totalEnrolled - $totalTaken) < 0 ? 0 : ($totalEnrolled - $totalTaken);
+  return $totalLessonsTaken;
+}
+
+/**
+ * Return the date for the Last payment for the enrollment.
+ * 
+ * This function is used to get the last payment
+ * that is done for a given enrollment. This is specifically
+ * used in the enrollments list page and also in student
+ * dashboard page, where we are listing all the enrollments
+ * for a student. Each enrollment record should display the
+ * last payment for it, and this function returns the date for
+ * that specific payment.
+ */
+function _amt_dashboard_get_last_payment_for_this_enrollment($enrollmentID)
+{
+
+  // Assuming there is no payment for this enrollment by default.
+  $lastPayment = null;
+
+  // Get the IDs of the payments for this enrollment.
+  $payments = \Drupal::entityQuery('payments')
+    ->condition('field_enrollment_name', $enrollmentID)
+    ->condition('field_status', 'Paid')
+    ->sort('field_date_and_time', 'DESC')
+    ->sort('id', 'DESC')
+    ->range(0, 1);
+  $paymentsIDs = $payments->execute();
+
+  // If there were payments for this enrollment.
+  if ($paymentsIDs != null) {
+
+    // Load the payments entity.
+    $paymentsObjects = \Drupal::entityTypeManager()->getStorage('payments')->load(array_shift($paymentsIDs));
+    if ($paymentsObjects != null) {
+
+      if ($paymentsObjects->field_date_and_time->value) {
+        // Get the date for this payment.
+        $lastPayment = date('m-d-Y', strtotime($paymentsObjects->field_date_and_time->value));
+      }
+    }
+  }
+
+  return $lastPayment;
+}
+
+/**
+ * Loading the list of taxonomy terms
+ * that make up the student department
+ * list. The list can be used anywhere.
+ * 
+ * For example, it is used in the student
+ * dashboard page to make up a select list
+ * so that the user can change the student's
+ * department based on this list.
+ */
+function amt_dashboard_load_departments_ids()
+{
+  // Load all taken category IDs from description.
+  $studentDepartmentsTerms = \Drupal::entityManager()
+    ->getStorage('taxonomy_term')
+    ->loadByProperties(['vid' => 'student_department']);
+
+  $department = [];
+
+  // If taxonomy terms of student department were not empty.
+  if ($studentDepartmentsTerms != NULL) {
+    foreach ($studentDepartmentsTerms as $index => $dep) {
+      $department[$index] = $dep->name->value;
+    }
+  }
+
+  return $department;
+}
+
+function amt_dashboard_get_students_department_id($contactId)
+{
+  $studentAccountIds = _amt_dashboard_load_student_account_based_on_contact($contactId);
+  // Loading the Student Account entity to extract inquiry data.
+  $fullInfoStudentAccount = \Drupal::entityTypeManager()->getStorage('student_accounts')->load(array_shift($studentAccountIds));
+
+  return $fullInfoStudentAccount->field_student_department->target_id;
+}
+
+
+/**
+ * Update the student department for the given student.
+ * 
+ * This function is used to update the student department
+ * and change it to the newly one that is selected
+ * by the user.
+ */
+function _amt_dashboard_update_student_department_based_on_contact($contactId, $department_id)
+{
+  $studentAccountIds = _amt_dashboard_load_student_account_based_on_contact($contactId);
+
+  // Do the actual update and return the result.
+  return _amt_dashboard_update_student_department(array_shift($studentAccountIds), $department_id);
+}
+
+/**
+ * This is the actual function that literally
+ * attempts to update the student department
+ * for a given student account based on the
+ * department ID that is provided in the
+ * second parameter.
+ */
+function _amt_dashboard_update_student_department($student, $department_id)
+{
+  // Loading the Student Account entity to extract inquiry data.
+  $fullInfoStudentAccount = \Drupal::entityTypeManager()->getStorage('student_accounts')->load($student);
+
+  // If student account is loaded.
+  if ($fullInfoStudentAccount != null) {
+
+    // Attempt to update the student department field.
+    try {
+      $fullInfoStudentAccount->field_student_department->target_id = $department_id;
+      $fullInfoStudentAccount->save();
+      $result = true;
+    }
+
+    // Catch if the attempt fails.
+    catch (Exception $e) {
+      $result = false;
+    }
+  }
+
+  // If no student account was fetched.
+  else {
+    $result = false;
+  }
+
+  return $result;
+}
+
+/**
+ * Loading the IDs of student account(s)
+ * based on the contacts ID(s) given.
+ */
+function _amt_dashboard_load_student_account_based_on_contact($contactId)
+{
+  // Loaing the student account of this student.
+  $queryStudentAccount = \Drupal::entityQuery('student_accounts')
+    ->condition('field_contacts', $contactId);
+  $studentAccountIds = $queryStudentAccount->execute();
+
+  return $studentAccountIds;
+}
+
+/**
+ * Creating Table for enrollments in student dashboard, also embed enrollment to the list.
+ */
+function _amt_dashboard_sort_lessons($lessonsList, $studentId)
+{
+
+  $takenCounter = 0;
+  // $remCounter = amt_dashboard_load_student_total_lessons_enrolled($studentId);
+
+  // $enrollment_list = amt_dashboard_load_student_enrollments($studentId, true);
+
+  // if (is_array($enrollment_list)) {
+  //   // usort($enrollment_list, 'amt_dashboard_sort_by_option');
+  //   amt_dashboard_add_time_to_enrollments($enrollment_list);
+  // }
+
+  $array = [];
+  $now = new DateTime();
+
+  // Create an array from index and dates of event list.
+  foreach ($lessonsList as $key => $item) {
+    $array[$key] = $item[0]['data'] . ' ' . $item[1]['data'];
+  }
+
+  // Sort the created from backend.
+  asort($array);
+
+  $newLessonsList = [];
+  $currentEnrollment = [];
+  $newEnrollment = false;
+  $lastRemaining = 0;
+  $lastTakens = 0;
+  // Here we modify each row to add the needed infor and finally push it to new array.
+  foreach ($array as $key => $item) {
+
+    $status = (!empty($lessonsList[$key][5]['data'])) ? $lessonsList[$key][5]['data'] : $lessonsList[$key][5];
+    $name = $lessonsList[$key][2];
+
+    // Since date is provide, in d-m-y. we need to convert it to m-d-y.
+    $dateArray = explode('-', $lessonsList[$key][0]['data']);
+    $event_date = $dateArray[1] . '-' . $dateArray[0] . '-' . $dateArray[2];
+    $event_date = new DateTime($event_date);
+
+    if (true) {
+
+      // Here we select the proper enrollment and store it as current enrollment in session.
+      // $enrs = amt_dashboard_get_enrollments($enrollment_list, $event_date);
+
+      $lesson = \Drupal::entityTypeManager()->getStorage('events')->load($key);
+      $att = reset($lesson->field_student->referencedEntities());
+      $enrollment_list = !empty($att->field_enrollment) ? $att->field_enrollment->referencedEntities() : [];
+      if (is_array($enrollment_list)) {
+        // usort($enrollment_list, 'amt_dashboard_sort_by_option');
+        // amt_dashboard_add_time_to_enrollments($enrollment_list);
+      }  
+      foreach ($enrollment_list as $enr) {
+
+        $lastRemaining = (!empty($currentEnrollment['#ofLessons'])) ? $currentEnrollment['#ofLessons'] : 0;
+
+        // originalEnrollment for passing purpose to other function so it wont' be modified like currentEnrollment.
+        $originalEnrollment = $currentEnrollment = $enr;
+        $currentEnrollment['#ofLessons'] += $lastRemaining;
+
+        $newLessonsList[] = amt_dashboard_embed_enrollments_in_lessons($originalEnrollment, $lastRemaining, $lessonsList[$key], $lastTakens);
+      }
+      $lastTakens = 0;
+    }
+    // Make sure this is defined, so it doesn't show blank.
+    if (empty($currentEnrollment['#ofLessons'])) {
+      $currentEnrollment['#ofLessons'] = 0;
+    }
+
+    // Determine if this lesson was taken.
+    if (amt_dashboard_lesson_is_taken($status, $name)) {
+      $takenCounter++;
+    }
+    // Determine if this should decrement their prepaid lessons.
+    if (amt_dashboard_lesson_is_chargeable($status, $name)) {
+      $currentEnrollment['#ofLessons']--;
+    }
+
+    if ($status != "Pending Status" || $event_date < $now) {
+      $lessonsList[$key][6] = $takenCounter . ' / ' . $currentEnrollment['#ofLessons'];
+    }
+    $lastTakens += $takenCounter;
+    $newLessonsList[] = $lessonsList[$key];
+  }
+
+  return $newLessonsList;
+}
+
+/**
+ * Determine if a lesson on a user's list should be considered chargeable.
+ */
+function amt_dashboard_lesson_is_chargeable($status, $name) {
+  if (($status == "Showed" || $status == "No Showed, Charged")) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Determine if a lesson on a user's list should be considered taken.
+ */
+function amt_dashboard_lesson_is_taken($status, $name) {
+  if (($status == "Showed" || $status == "No Showed, Charged")) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Creating Table for enrollments in student dashboard, also embed enrollment to the list.
+ */
+function amt_dashboard_embed_enrollments_in_lessons($enrollment, $lastRemaining, $row, $lastTaken)
+{
+
+  // Next we need to push each enrollment record to correct position of the lesson list.
+  #1: This is for + enrollments.
+  // Empty columns.
+
+  $row[5] = $row[3] = $row[5] = $row[7] = '';
+  $row[0]['data'] = substr($enrollment['saleDate'], 0, 10);
+  // Since date is provide, in d-m-y. we need to convert it to m-d-y.
+  $event_date = DateTime::createFromFormat('m-d-Y H:i:sO', $enrollment['saleDate']);
+  $dateFormated = $event_date->format("d-m-Y");
+  // add end of the day to be on top.
+  $row[0]['data-order'] = strtotime($dateFormated . ' 00:00:00');
+  $row[1] = 'Enrollment';
+  $row[2] = $enrollment['packageName'] . ' + ' . $enrollment['#ofLessons'];
+  $row[4] = $enrollment['instructor'];
+  $row[6] = $lastTaken . " / " . sprintf("%+d", ($enrollment['#ofLessons'] + $lastRemaining));
+  // Return the new row to be added to the final array of lesson list.
+  return $row;
+}
+
+/**
+ * Attaching script to the page.
+ */
+function amt_dashboard_page_attachments(array &$attachments)
+{
+  // Check if user has instructor or studio manager role.
+  $currentPath = \Drupal::service('path.current')->getPath();
+
+  // adding the js to Enrollment list select.
+  if (strpos($currentPath, 'enrollment') > 0) {
+    $attachments['#attached']['library'][] = 'amt_dashboard/amt_filters';
+  }
+  // Include jquery.print.js in student dashboard.
+  if (strpos($currentPath, 'student-dashboard') > 0) {
+    $attachments['#attached']['library'][] = 'amt_general/jquery_print';
+  }
+}
+
+/**
+ * This helper is to load correct enrollments and unset the loaded ones from the enrollment list.
+ */
+function amt_dashboard_get_enrollments(array &$enrollment_list, $event_date = false)
+{
+
+  $enrollmentList = [];
+
+  foreach ($enrollment_list as $k => $enrollment) {
+
+    $enrollment_date = DateTime::createFromFormat('m-d-Y H:i:sO', $enrollment['saleDate']);
+    // Load and unset the enrollments purchases before the lesson date.  
+    if ($enrollment_date->format('Y-m-d') <= $event_date->format('Y-m-d')) {
+      $enrollmentList[] = $enrollment_list[$k];
+      unset($enrollment_list[$k]);
+    }
+    if($enrollment_date->format('Y-m-d') > $event_date->format('Y-m-d')) {
+      break;
+    }
+
+  }
+  return $enrollmentList;
+}
+
+/**
+ * Sort enrollments based on their saleDate.
+ */
+function amt_dashboard_sort_by_option($a, $b)
+{
+  return strcmp($a['saleDate'], $b['saleDate']);
+}
+
+/**
+ * Add time part to date field of enrollments to sort effectively, when multiple enrollments are in same day.
+ */
+function amt_dashboard_add_time_to_enrollments(array &$enrollment_list)
+{
+
+  $counter = 1; // Hours.
+  foreach ($enrollment_list as $k => $enrollment) {
+    // if ($enrollment->field_sale_date){
+    //   $row = $enrollment->field_sale_date->getString();
+    //   // dd($row);
+    // }else{
+    //   $row = DateTime::createFromFormat('m-d-Y', $enrollment['saleDate']);
+    // }
+    // $row->modify("+" . $counter . " hours");
+    $enrollment_list[$k]['saleDate'] = $enrollment->field_sale_date->format("m-d-Y H:i:sO");
+    $counter++;
+  }
+
+  return $enrollment_list;
+}
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * Add a new filter to student_future_lessons view
+ * to show lessons from tomorrow or later.
+ */
+function amt_dashboard_views_query_alter($view, $query)
+{
+  $view_id = $view->id();
+  if ($view_id == 'student_future_lessons') {
+    $today = new DateTime();
+    $startOfTomorrow = $today->setTime(24, 00, 00)->format('Y-m-d H:i:s');
+    // Read more about addWhere() here:
+    // https://api.drupal.org/api/drupal/core%21modules%21views%21src%21Plugin%21views%21query%21Sql.php/function/Sql%3A%3AaddWhere/8.2.x
+    $query->addWhere(0, "events__field_date_and_time.field_date_and_time_value", $startOfTomorrow, '>=');
+  }
+}
+
+/**
+ * This helper gets events connected the 
+ * the gived attendance ids.
+ */
+function amt_dashboard_get_events_by_attendance($attendeesId) {
+  
+  $eventsIds = \Drupal::entityQuery('events')
+    ->condition('type', 'lesson')
+    ->condition('field_student', $attendeesId, 'IN')->execute();
+
+  return $eventsIds;
+}

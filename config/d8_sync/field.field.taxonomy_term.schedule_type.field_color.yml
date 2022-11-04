@@ -1,0 +1,31 @@
+uuid: 921f4528-0e8f-426a-9891-bddff9a61f64
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_color
+    - taxonomy.vocabulary.schedule_type
+  module:
+    - color_field
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: taxonomy_term.schedule_type.field_color
+field_name: field_color
+entity_type: taxonomy_term
+bundle: schedule_type
+label: Color
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  opacity: 0
+field_type: color_field_type

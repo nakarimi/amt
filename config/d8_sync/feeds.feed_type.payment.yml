@@ -1,0 +1,169 @@
+uuid: f0bca3a3-c342-4bc6-99ef-2170c7929d6a
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.payments.payment
+    - field.field.payments.payment.field_date_and_time
+    - field.field.payments.payment.field_enrollment_name
+    - field.field.payments.payment.field_gross_tuition
+    - field.field.payments.payment.field_payment_id
+    - field.field.payments.payment.field_payment_type
+    - field.field.payments.payment.field_status
+    - field.field.payments.payment.field_student_name
+  module:
+    - eck
+    - feeds_tamper
+third_party_settings:
+  feeds_tamper:
+    tampers: {  }
+label: Payment
+id: payment
+description: 'To Import Payment Data'
+import_period: -1
+fetcher: upload
+fetcher_configuration:
+  allowed_extensions: 'txt csv tsv xml opml'
+  directory: 'private://feeds'
+parser: csv
+parser_configuration:
+  delimiter: ','
+  no_headers: false
+  line_limit: 100
+processor: 'entity:payments'
+processor_configuration:
+  update_existing: 1
+  update_non_existent: _keep
+  expire: -1
+  owner_feed_author: true
+  owner_id: 0
+  authorize: true
+  skip_hash_check: false
+  values:
+    type: payment
+custom_sources:
+  title:
+    label: Title
+    value: Title
+    machine_name: title
+  payment_id:
+    label: 'Payment ID'
+    value: 'Payment ID'
+    machine_name: payment_id
+  customer_name:
+    label: 'Customer Name'
+    value: 'Customer Name'
+    machine_name: customer_name
+  date_and_time:
+    label: 'Date and Time'
+    value: 'Date and Time'
+    machine_name: date_and_time
+  net_sales:
+    label: 'Net Sales'
+    value: 'Net Sales'
+    machine_name: net_sales
+  student_name:
+    label: 'Student Name'
+    value: 'Student Name'
+    machine_name: student_name
+  payment_type:
+    label: 'Payment Type'
+    value: 'Payment Type'
+    machine_name: payment_type
+  status:
+    label: Status
+    value: Status
+    machine_name: status
+  enrollment_name:
+    label: 'Enrollment Name'
+    value: 'Enrollment Name'
+    machine_name: enrollment_name
+  docid:
+    label: docid
+    value: docid
+    machine_name: docid
+  datepaid:
+    label: datepaid
+    value: datepaid
+    machine_name: datepaid
+  amountpaid:
+    label: amountpaid
+    value: amountpaid
+    machine_name: amountpaid
+  scode:
+    label: scode
+    value: scode
+    machine_name: scode
+  enrollid:
+    label: enrollid
+    value: enrollid
+    machine_name: enrollid
+  cardtype:
+    label: cardtype
+    value: cardtype
+    machine_name: cardtype
+  _title:
+    label: _title
+    value: _title
+    machine_name: _title
+  title_:
+    label: title
+    value: title
+    machine_name: title_
+  _title_:
+    label: _title_
+    value: _title_
+    machine_name: _title_
+  paid_status:
+    label: paid_status
+    value: paid_status
+    machine_name: paid_status
+mappings:
+  -
+    target: field_enrollment_name
+    map:
+      target_id: enrollid
+    settings:
+      reference_by: field_legacy_id
+      feeds_item: guid
+      autocreate: 0
+  -
+    target: field_date_and_time
+    map:
+      value: datepaid
+    settings:
+      timezone: UTC
+  -
+    target: field_payment_type
+    map:
+      target_id: cardtype
+    settings:
+      reference_by: name
+      autocreate: false
+  -
+    target: field_gross_tuition
+    map:
+      value: amountpaid
+  -
+    target: field_student_name
+    map:
+      target_id: scode
+    settings:
+      reference_by: field_legacy_id
+      feeds_item: guid
+      autocreate: 0
+  -
+    target: field_payment_id
+    map:
+      value: docid
+    unique:
+      value: '1'
+  -
+    target: title
+    map:
+      value: docid
+    unique: {  }
+  -
+    target: field_status
+    map:
+      value: paid_status

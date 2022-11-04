@@ -1,0 +1,23 @@
+uuid: 1426c987-23b7-4594-8d56-441638fce92c
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.group_lesson
+    - field.storage.events.feeds_item
+  module:
+    - feeds
+id: events.group_lesson.feeds_item
+field_name: feeds_item
+entity_type: events
+bundle: group_lesson
+label: 'Feeds item'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:feeds_feed'
+  handler_settings: {  }
+field_type: feeds_item

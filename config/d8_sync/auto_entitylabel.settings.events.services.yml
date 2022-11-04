@@ -1,0 +1,7 @@
+status: 1
+pattern: '<?php if (''[events:field_instructor:entity:field_first_name]'' == '''') { echo  ''Service, '' . date(''m-d-Y h:i A'', strtotime(''[events:field_date_and_time:value]'')); } else { echo ''[events:field_instructor:entity:field_first_name] [events:field_instructor:entity:field_last_name], '' . date(''m-d-Y h:i A'', strtotime(''[events:field_date_and_time:value]''));} ?>'
+php: true
+escape: false
+dependencies:
+  config:
+    - eck.eck_type.events.services

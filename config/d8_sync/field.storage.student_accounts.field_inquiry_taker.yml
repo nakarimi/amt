@@ -1,0 +1,20 @@
+uuid: e21c10d1-c9b2-4d0d-bc23-0db2f628ff65
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - user
+id: student_accounts.field_inquiry_taker
+field_name: field_inquiry_taker
+entity_type: student_accounts
+type: entity_reference
+settings:
+  target_type: user
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

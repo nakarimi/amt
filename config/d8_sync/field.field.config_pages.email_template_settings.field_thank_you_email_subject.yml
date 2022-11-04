@@ -1,0 +1,19 @@
+uuid: be17158f-812f-4cb5-bd21-610c1006ab68
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.email_template_settings
+    - field.storage.config_pages.field_thank_you_email_subject
+id: config_pages.email_template_settings.field_thank_you_email_subject
+field_name: field_thank_you_email_subject
+entity_type: config_pages
+bundle: email_template_settings
+label: 'Thank You Email Subject'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

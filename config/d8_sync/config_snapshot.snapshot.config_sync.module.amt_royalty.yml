@@ -1,0 +1,11 @@
+uuid: b9ed8d5d-6b59-4367-b714-d185ca297efd
+langcode: en
+status: true
+dependencies:
+  module:
+    - amt_royalty
+id: config_sync.module.amt_royalty
+snapshotSet: config_sync
+extensionType: module
+extensionName: amt_royalty
+items: {  }

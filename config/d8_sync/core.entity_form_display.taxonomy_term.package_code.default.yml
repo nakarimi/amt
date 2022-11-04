@@ -1,0 +1,41 @@
+uuid: 3cec12c7-7180-42b2-ad89-b4b0df11e612
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.package_code.field_ami_id
+    - field.field.taxonomy_term.package_code.field_hide
+    - field.field.taxonomy_term.package_code.field_package_label
+    - taxonomy.vocabulary.package_code
+id: taxonomy_term.package_code.default
+targetEntityType: taxonomy_term
+bundle: package_code
+mode: default
+content:
+  field_ami_id:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_hide:
+    weight: 3
+    settings:
+      display_label: true
+    third_party_settings: {  }
+    type: boolean_checkbox
+    region: content
+  field_package_label:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+hidden:
+  description: true
+  name: true
+  path: true

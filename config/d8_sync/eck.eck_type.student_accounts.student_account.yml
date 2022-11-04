@@ -1,0 +1,9 @@
+uuid: e87f1d59-4036-430b-9f22-5c95bb06c6ec
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_entity_type.student_accounts
+name: 'Student Account'
+type: student_account
+description: ''

@@ -1,0 +1,8 @@
+uuid: ddb7ee95-729d-4872-9748-69eb2c7ec01a
+langcode: en
+status: true
+dependencies: {  }
+name: 'Payment Type'
+vid: payment_type
+description: ''
+weight: 0

@@ -1,0 +1,19 @@
+uuid: a9d5aad7-fdb5-403a-a2a1-d06433584b54
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.field_legacy_id
+id: student_accounts.student_account.field_legacy_id
+field_name: field_legacy_id
+entity_type: student_accounts
+bundle: student_account
+label: 'Legacy ID'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

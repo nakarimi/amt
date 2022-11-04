@@ -1,0 +1,21 @@
+uuid: e495b205-9571-4ce5-b7cd-26541cfa2c06
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.contacts.student_record
+    - field.storage.contacts.field_cell_phone
+  module:
+    - telephone
+id: contacts.student_record.field_cell_phone
+field_name: field_cell_phone
+entity_type: contacts
+bundle: student_record
+label: 'Cell Phone'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: telephone

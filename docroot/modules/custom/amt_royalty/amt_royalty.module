@@ -1,0 +1,308 @@
+<?php
+
+/**
+ * @file
+ * Provides Reports functionality and alterations for AMT AMI.
+ */
+
+use Drupal\amt_staff\SendReportsToAPI;
+use Drupal\amt_general\LogMessage;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Implements hook_theme().
+ */
+function amt_royalty_theme($existing, $type, $theme, $path)
+{
+  return [
+    'amt_royalty' => [
+      'variables' => [
+        'royalty_header_table' => NULL,
+        'royalty_content_table' => NULL,
+        'table_empty' => NULL,
+        'empty_text' => NULL,
+        'years' => NULL,
+        'weeks' => NULL,
+        'selectedData' => NULL,
+      ],
+      'path' => $path . '/templates',
+      'template' => 'amt-royalty-report',
+    ],
+  ];
+}
+
+/**
+ * The function that will run on send to api button on view.
+ *
+ * Provide the royalty data and send them to api.
+ */
+function _amt_royalty_api_submit_royalty()
+{
+  if (!empty($_GET)) {
+    if ($_GET['week'] != '' || $_GET['year'] != '') {
+      $dateRange = SendReportsToAPI::convertStartEndDate($_GET['week'], $_GET['year']);
+      $postData = _amt_royalty_generate($dateRange['week_start'], $dateRange['week_end']);
+      return $postData;
+    }
+  }
+}
+
+/**
+ * Generate and send to api the royalty reports.
+ *
+ * @param string $start
+ *   Date of the start of the week.
+ * @param string $end
+ *   Date of the end of the week.
+ *
+ * @return array
+ *   Data of royalty report for system view.
+ */
+function _amt_royalty_generate($start, $end)
+{
+  // Get the header of the reports for royalty.
+  $apiData = SendReportsToAPI::getReportHeaders('royalty');
+  // Get the filter data send in URL for filtering.
+  $filterDateTime = $_GET['field_date_and_time_value'];
+
+  // If the package filter set it get the id of package.
+  if ($_GET['field_enrollment_package_name_target_id'] != '') {
+    preg_match_all('!\d+!', $_GET['field_enrollment_package_name_target_id'], $matches);
+    $filterPackageId = end($matches[0]);
+  }
+
+  // If the student filter set it get the student id.
+  if ($_GET['field_student_target_id'] != '') {
+    preg_match_all('!\d+!', $_GET['field_student_target_id'], $matches);
+    $filterStudentId = end($matches[0]);
+  }
+
+  $pymIndex = 0;
+  $systemData = $apiData;
+  $systemData['date_range'] = date('m-d-Y', strtotime($start)) . " To " . date('m-d-Y', strtotime($end));
+  // Load all payment for this week.
+
+  $paymentQuery = Drupal::service('entity.query')
+    ->get('payments')
+    ->condition('field_date_and_time', [$start, $end], 'BETWEEN');
+
+  if ($filterStudentId != NULL || $filterPackageId != NULL) {
+    $enrQuery = Drupal::service('entity.query')
+      ->get('packages')
+      ->condition('type', 'enrollment');
+    if ($filterStudentId != '') {
+      $enrQuery->condition('field_student', $filterStudentId);
+    }
+    if ($filterPackageId != '') {
+      $enrQuery->condition('field_enrollment_package_name', $filterPackageId);
+    }
+    $enrollmentIds = $enrQuery->execute();
+    if ($enrollmentIds != NULL) {
+      $paymentQuery->condition('field_enrollment_name', $enrollmentIds, 'IN');
+    } else {
+      $paymentQuery->condition('field_enrollment_name', NULL, 'IN');
+    }
+  }
+
+  if ($filterDateTime != '') {
+    $paymentQuery->condition('field_date_and_time', $filterDateTime . "%", 'LIKE');
+  }
+
+  $paymentIds = $paymentQuery->execute();
+
+  // Get the Sundry and Miscellaneous terms Id from database.
+  $sundryId = _amt_studio_find_single_eck_id('sps_code', 'SUNDRY');
+  $miscId = _amt_studio_find_single_eck_id('sps_code', 'MISC');
+
+  // Nonunit enrollment money should going under misc. (T:25417332)
+  $nonUnitId = _amt_studio_find_single_eck_id('sps_code', 'Non Unit');
+
+  $paymentEntities = \Drupal::entityTypeManager()
+    ->getStorage('payments')
+    ->loadMultiple($paymentIds);
+  // Loop on all payments to calculate the report data.
+  foreach ($paymentEntities as $key => $paymentEntity) {
+
+    $spsCode = NULL;
+    $isSundry = FALSE;
+    $isMisc = FALSE;
+    $is_firstPayment = _amt_royalty_is_first_payment($paymentEntity);
+
+    $enrollData = $paymentEntity->field_enrollment_name->referencedEntities()[0];
+    $grossTuition = $paymentEntity->field_gross_tuition->getString();
+    $receiptNumber = $paymentEntity->field_payment_id->getString();
+    $datePaid = date('Y-m-d', strtotime($paymentEntity->field_date_and_time->getString()));
+
+    // Load DANCE-O-RAMA, and its enrollments to ignore from the cach value.
+    $DORQuery = Drupal::service('entity.query')
+      ->get('packages')
+      ->condition('type', 'package')
+      ->condition('title', 'DANCE-O-RAMA');
+    $DORId = $DORQuery->execute();
+    $isDor = false;
+    if (isset($enrollData->field_enrollment_package_name)) {
+
+      // Specify it is a MISC or Sundry enrollment
+      $package = reset($enrollData->field_enrollment_package_name->referencedEntities());
+      if (isset($package->field_sps_code)) {
+        $isMisc = $package->field_sps_code->getString() == $miscId;
+        $isSundry = $package->field_sps_code->getString() == $sundryId;
+        
+        // As Non Unit should be count as MISC, the if it is not misc, maybe is Non Unit.
+        if(!$isMisc) {
+          $isMisc = $package->field_sps_code->getString() == $nonUnitId;
+        }
+      }
+      $isDor = reset($DORId) == $enrollData->field_enrollment_package_name->getString();
+    }
+
+    if ($enrollData != NULL) {
+      $studentsFullName = NULL;
+      // Load the student account entity and get full name of students.
+      $studentAccounts = $enrollData->field_student->referencedEntities()[0];
+      if ($studentAccounts != NULL) {
+        $studentId = $studentAccounts->id();
+        $studentContacts = $studentAccounts->field_contacts->referencedEntities();
+        foreach ($studentContacts as $key => $student) {
+          $studentsFullName .= $student->field_first_name->getString() . ' ' . $student->field_last_name->getString() . ' & ';
+        }
+        if ($studentsFullName != NULL) {
+          $studentsFullName = substr($studentsFullName, 0, strlen($studentsFullName) - 3);
+        }
+      }
+      // Get id of the enrollment category.
+      // $categoryId = $enrollData->field_category->getString();
+      $lessonPrice = $enrollData->field_enrollment_lesson_price->getString();
+      // Load the enrollment package by reference.
+      $package = $enrollData->field_enrollment_package_name->referencedEntities()[0];
+      if ($package != NULL) {
+        $spsCode = $package->field_sps_code->referencedEntities()[0];
+        $spsCode = ($spsCode != NULL) ? $spsCode->name->value : '';
+        if($spsCode == 'SUNDRY'){
+          $spsCode = "SUN";
+        }
+        $packageCode = $package->field_package_code->referencedEntities()[0];
+        $packageCode = ($packageCode != NULL) ? _amt_royalty_extract_package_code($packageCode) : '';
+      }
+      // Getting the value for element of report.
+      $numberOfUnits = (int) $enrollData->field_enrollment_lesson_count->getString();
+      $numberOfUnits = 0;
+      if ($lessonPrice != 0) {
+        $numberOfUnits = (int) ($grossTuition / $lessonPrice);
+      }
+
+      $saleValue = (int) $enrollData->field_enrollment_total_price->getString();
+      $executeData = $enrollData->field_executive->referencedEntities()[0];
+      $jexecuteData = $enrollData->field_junior_executive->referencedEntities()[0];
+      $staffMembers = $jexecuteData->field_ami_id->value;
+      $executive = $executeData->field_ami_id->value;
+
+      // The Lesson count should show the total number of lessons enrolled on not just lessons paid for
+      $total_enroll_lessons = $enrollData->field_enrollment_lesson_count->getString();
+
+      // Get Executive and Junior Executive Legacy Id.
+      $executiveLegacyId = $executeData->field_legacy_id->value;
+      $juniorExeLegacyId = $jexecuteData->field_legacy_id->value;
+      // We exclude Pro Coach from report.
+      // So the loop will skip this index.
+      if ($executiveLegacyId == "6-procoach" || $juniorExeLegacyId == "6-procoach") {
+        continue;
+      }
+      // If the send API is clicked the data stored in $apiData.
+    }
+
+    if (isset($_GET['operation'])) {
+      $apiData["line_items[$pymIndex][receipt_number]"]     = $receiptNumber;
+      $apiData["line_items[$pymIndex][date_paid]"]          = $datePaid;
+      $apiData["line_items[$pymIndex][students_full_name]"] = $studentsFullName;
+      $apiData["line_items[$pymIndex][executive]"]          = $executive;
+      $apiData["line_items[$pymIndex][staff_members][0]"]   = $staffMembers;
+
+      $packageCodeMessage = '';
+      if (($spsCode == "MISC" || $spsCode == "SUN") && $packageCode == NULL) {
+        $packageCodeMessage .= "the package code for this <b> " . $receiptNumber . "</b> receipt number is NULL<br> ";
+      } else {
+        // If custom package wasn't given.
+        $apiData["line_items[$pymIndex][package_code]"] = $packageCode;
+      }
+      $apiData["line_items[$pymIndex][sale_code]"]              = $spsCode;
+      $apiData["line_items[$pymIndex][number_of_units]"]        = ($is_firstPayment) ? $numberOfUnits : 0;
+      $apiData["line_items[$pymIndex][sale_value]"]             = ($is_firstPayment) ? $saleValue : 0;
+      // TODO: THIS IS A TEMPRARY FIX, BUT WE NEED TO CHECK THE NEGATIVE CACHE VALUES.
+      $apiData["line_items[$pymIndex][cash]"]                   = (int) abs(((!$isMisc && !$isDor) && !$isSundry) ? $grossTuition : 0);
+      $apiData["line_items[$pymIndex][miscellaneous_services]"] = (int) ($isMisc || $isDor) ? $grossTuition : 0;
+      $apiData["line_items[$pymIndex][sundry]"]                 = (int) ($isSundry) ? $grossTuition : 0;
+    }
+
+    // This is for storing the data for represented in the views.
+    $systemData['items'][$pymIndex]['receipt_number']         = $receiptNumber;
+    $systemData['items'][$pymIndex]['date_paid']              = date('m-d-Y', strtotime($datePaid));
+    $systemData['items'][$pymIndex]['student_name']           = new TranslatableMarkup(
+      "<a href='/student_accounts/@studentId'>@message</a>",
+      ['@message' => $studentsFullName, '@studentId' => $studentId]
+    );
+    $systemData['items'][$pymIndex]['executive']              = $executive;
+    $systemData['items'][$pymIndex]['sale_code']              = ($is_firstPayment) ? $spsCode : "PMT";
+    $systemData['items'][$pymIndex]['package_name']           = ($package != NULL) ? $package->field_package_name->getString() : 0;
+    // $systemData['items'][$pymIndex]['lesson_count']        = ($is_firstPayment) ? $numberOfUnits : 0;    
+    $systemData['items'][$pymIndex]['lesson_count']           = ($is_firstPayment) ? $total_enroll_lessons : 0;
+    $systemData['items'][$pymIndex]['total_price']            = '$' . ((int) ($is_firstPayment) ? $saleValue : 0);
+
+    // Miscellaneous and Sundry enrollments should not appear under the cash column. If the enrollment is misc or sundry that column should be 0
+    $cash = ((int) ((!$isMisc && !$isDor) && !$isSundry) ? $grossTuition : 0);
+    $systemData['items'][$pymIndex]['cash']                   = '$' . $cash;
+    $misc_amount = (int) ($isMisc || $isDor) ? $grossTuition : 0;
+    $systemData['items'][$pymIndex]['miscellaneous_services'] = $misc_amount;
+    $systemData['items'][$pymIndex]['subject_to_royalty'] = '$' . ($cash + $misc_amount);
+
+    $sundry_amount = (int) ($isSundry) ? $grossTuition : 0;
+    $systemData['items'][$pymIndex]['sundry']                 = $sundry_amount;
+    $systemData['items'][$pymIndex]['total_receipts'] = '$' . ($cash + $misc_amount + $sundry_amount);
+
+    $pymIndex++;
+  }
+
+  // Checks if the "Send API" button is clicked, the data will be sent.
+  if ($packageCodeMessage != NULL) {
+    LogMessage::showMessage($packageCodeMessage, 'warning', TRUE, 'amt_royalty');
+  } elseif (isset($_GET['operation'])) {
+    $response = SendReportsToAPI::sendReports($apiData);
+    // Show Message.
+    LogMessage::showMessage($response['message'], $response['message_type'], TRUE, 'amt_royalty');
+  }
+
+  return $systemData;
+}
+
+/**
+ * The function check if this payment is first payment of an enrollment.
+ */
+function _amt_royalty_is_first_payment($paymentEntity)
+{
+
+  // Is this a first payment for the associated enrollment or not.
+  $payment_enrollment_id = $paymentEntity->field_enrollment_name->getString();
+  $payment_id = $paymentEntity->id();
+
+  $enrQuery = \Drupal::entityQuery('payments')
+    ->condition('id', $payment_id, "<")
+    ->condition('field_enrollment_name', $payment_enrollment_id);
+
+  return ($enrQuery->execute()) ? false : true;
+}
+
+/**
+ * Extract the code from package code title, as it conflict with AMI report.
+ * i.e. MISC_14 - Party Time/NonUnit > MISC_14
+ *
+ * @param  mixed $packageCode
+ * @return string
+ *   The code of pacakge code.
+ */
+function _amt_royalty_extract_package_code($packageCode){
+  $code = '';
+  if ($packageCode->field_ami_id) {
+    $code = $packageCode->field_ami_id->getString();
+  }
+  return $code;
+}

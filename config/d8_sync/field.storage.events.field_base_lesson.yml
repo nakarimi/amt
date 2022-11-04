@@ -1,0 +1,19 @@
+uuid: 1572c98d-772b-46e4-8b48-4cfa74a10154
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: events.field_base_lesson
+field_name: field_base_lesson
+entity_type: events
+type: entity_reference
+settings:
+  target_type: events
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

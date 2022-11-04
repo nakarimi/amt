@@ -1,0 +1,18 @@
+uuid: e1fde282-b7cb-461a-b4b1-0f8256c6f604
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+id: config_pages.field_refetch_resource_ajax
+field_name: field_refetch_resource_ajax
+entity_type: config_pages
+type: boolean
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

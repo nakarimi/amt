@@ -1,0 +1,32 @@
+uuid: d2970861-7e8c-440c-875a-700ff24a4a0e
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.ami_token_settings
+    - field.storage.config_pages.field_grant_type
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.ami_token_settings.field_grant_type
+field_name: field_grant_type
+entity_type: config_pages
+bundle: ami_token_settings
+label: 'Grant Type'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: password
+default_value_callback: ''
+settings: {  }
+field_type: list_string

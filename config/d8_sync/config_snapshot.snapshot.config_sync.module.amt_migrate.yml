@@ -1,0 +1,11 @@
+uuid: dea9bf4a-67be-46b6-80f6-6345c72a2645
+langcode: en
+status: true
+dependencies:
+  module:
+    - amt_migrate
+id: config_sync.module.amt_migrate
+snapshotSet: config_sync
+extensionType: module
+extensionName: amt_migrate
+items: {  }

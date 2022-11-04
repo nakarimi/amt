@@ -1,0 +1,32 @@
+uuid: f2c3017e-6209-4bd9-ad86-59d7bbb03be2
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.schedules
+    - field.storage.events.field_duration
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.schedules.field_duration
+field_name: field_duration
+entity_type: events
+bundle: schedules
+label: Duration
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: '00:15'
+default_value_callback: ''
+settings: {  }
+field_type: list_string

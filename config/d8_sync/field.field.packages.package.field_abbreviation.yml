@@ -1,0 +1,29 @@
+uuid: 7f17435a-950c-4896-8b0a-318d4227af8e
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.package
+    - field.storage.packages.field_abbreviation
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: packages.package.field_abbreviation
+field_name: field_abbreviation
+entity_type: packages
+bundle: package
+label: Abbreviation
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

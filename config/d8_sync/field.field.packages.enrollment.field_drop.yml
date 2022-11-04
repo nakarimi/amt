@@ -1,0 +1,23 @@
+uuid: ed6c8d81-d1f3-42eb-a9c1-101001499c52
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.field_drop
+id: packages.enrollment.field_drop
+field_name: field_drop
+entity_type: packages
+bundle: enrollment
+label: 'Dropped Amount'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: float

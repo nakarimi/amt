@@ -1,0 +1,120 @@
+uuid: ac200871-1ee5-4237-9bcd-fe25cfaf904b
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.contacts.popup
+    - core.entity_form_mode.student_accounts.popup
+    - eck.eck_type.student_accounts.student_account
+    - field.field.student_accounts.student_account.feeds_item
+    - field.field.student_accounts.student_account.field_booked_on
+    - field.field.student_accounts.student_account.field_contacts
+    - field.field.student_accounts.student_account.field_dances_type
+    - field.field.student_accounts.student_account.field_inquired
+    - field.field.student_accounts.student_account.field_inquiry_method
+    - field.field.student_accounts.student_account.field_inquiry_studen
+    - field.field.student_accounts.student_account.field_inquiry_taker
+    - field.field.student_accounts.student_account.field_legacy_id
+    - field.field.student_accounts.student_account.field_lesson_available
+    - field.field.student_accounts.student_account.field_low_lesson_threshold
+    - field.field.student_accounts.student_account.field_notes
+    - field.field.student_accounts.student_account.field_showed
+    - field.field.student_accounts.student_account.field_student_department
+    - field.field.student_accounts.student_account.field_teacher
+  module:
+    - datetime
+    - inline_entity_form
+id: student_accounts.student_account.popup
+targetEntityType: student_accounts
+bundle: student_account
+mode: popup
+content:
+  field_contacts:
+    weight: 1
+    settings:
+      form_mode: popup
+      label_singular: ''
+      label_plural: ''
+      allow_new: true
+      match_operator: CONTAINS
+      allow_duplicate: true
+      override_labels: false
+      collapsible: false
+      collapsed: false
+      allow_existing: false
+    third_party_settings: {  }
+    type: inline_entity_form_complex
+    region: content
+  field_dances_type:
+    type: options_select
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_inquired:
+    type: datetime_default
+    weight: 7
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_inquiry_method:
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_inquiry_studen:
+    type: boolean_checkbox
+    weight: 9
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  field_inquiry_taker:
+    weight: 6
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_notes:
+    weight: 5
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textarea
+    region: content
+  field_showed:
+    type: datetime_default
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_student_department:
+    weight: 8
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_teacher:
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  feeds_item: true
+  field_booked_on: true
+  field_legacy_id: true
+  field_lesson_available: true
+  field_low_lesson_threshold: true
+  uid: true

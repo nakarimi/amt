@@ -1,0 +1,65 @@
+uuid: ffdea71f-6fee-4982-bd48-c974c7c6f625
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.contacts.student_record
+    - field.storage.contacts.field_address
+  module:
+    - address
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: contacts.student_record.field_address
+field_name: field_address
+entity_type: contacts
+bundle: student_record
+label: Address
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    langcode: ''
+    country_code: US
+    administrative_area: ''
+    locality: ''
+    dependent_locality: null
+    postal_code: ''
+    sorting_code: null
+    address_line1: ''
+    address_line2: ''
+    organization: ''
+    given_name: null
+    additional_name: null
+    family_name: null
+default_value_callback: ''
+settings:
+  available_countries:
+    US: US
+  langcode_override: ''
+  field_overrides:
+    givenName:
+      override: hidden
+    additionalName:
+      override: hidden
+    familyName:
+      override: hidden
+    addressLine1:
+      override: optional
+    addressLine2:
+      override: optional
+    postalCode:
+      override: optional
+    locality:
+      override: optional
+    administrativeArea:
+      override: optional
+  fields: {  }
+field_type: address

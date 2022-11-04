@@ -1,0 +1,9 @@
+uuid: cf137d39-a917-4fb8-b425-672f09d41a71
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_entity_type.packages
+name: Package
+type: package
+description: ''

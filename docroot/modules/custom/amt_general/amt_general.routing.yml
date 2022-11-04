@@ -1,0 +1,23 @@
+amt_general.insturctor_sort_update:
+  path: '/amt_general/insturctor_sort_update'
+  defaults:
+    _controller: '\Drupal\amt_general\Controller\amtGeneralController::insturctorSortUpdate'
+    _title: 'Updated instructor sorting.'
+  requirements:
+    _permission: 'access content'
+
+amt_general.get_lessontype_length:
+  path: '/amt_general/get_lessontype_length'
+  defaults:
+    _controller: '\Drupal\amt_general\Controller\amtGeneralController::getLessonTypeLength'
+    _title: 'Get the selected lesson type length.'
+  requirements:
+    _permission: 'access content'
+
+amt_general.reschedule:
+  path: '/amt_general/event_update'
+  defaults:
+    _controller: '\Drupal\amt_general\Controller\amtGeneralController::event_update'
+    _title: 'General ajax func to udpate an event, like Set the new schedule date submitted in Cancel/RS popup.'
+  requirements:
+    _permission: 'Day View Page'

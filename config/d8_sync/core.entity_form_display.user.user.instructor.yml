@@ -1,0 +1,94 @@
+uuid: 9214361b-bc30-4123-a436-d30619585d06
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.user.instructor
+    - field.field.user.user.feeds_item
+    - field.field.user.user.field_ami_id
+    - field.field.user.user.field_availability
+    - field.field.user.user.field_first_name
+    - field.field.user.user.field_last_name
+    - field.field.user.user.field_legacy_id
+    - field.field.user.user.field_lesson_types
+    - field.field.user.user.field_phone_number
+    - field.field.user.user.field_teacher_category
+    - field.field.user.user.user_picture
+  module:
+    - office_hours
+    - user
+_core:
+  default_config_hash: K-1rBM8mTIkFp9RqOC2tMRUukOQ1xbRCfSKK8dEddnA
+id: user.user.instructor
+targetEntityType: user
+bundle: user
+mode: instructor
+content:
+  account:
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_ami_id:
+    weight: 3
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings:
+      conditional_fields: {  }
+    type: string_textfield
+    region: content
+  field_availability:
+    weight: 8
+    settings: {  }
+    third_party_settings: {  }
+    type: office_hours_default
+    region: content
+  field_first_name:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_last_name:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_legacy_id:
+    type: string_textfield
+    weight: 4
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_lesson_types:
+    type: entity_reference_autocomplete
+    weight: 6
+    region: content
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_teacher_category:
+    weight: 5
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+hidden:
+  contact: true
+  feeds_item: true
+  field_birthday: true
+  field_hiring_date: true
+  field_phone_number: true
+  language: true
+  timezone: true
+  user_picture: true

@@ -1,0 +1,29 @@
+uuid: 2038a8cd-fbc6-4a9c-9485-b21e5b93eb99
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.day_view_settings
+    - field.storage.config_pages.field_time_zone
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.day_view_settings.field_time_zone
+field_name: field_time_zone
+entity_type: config_pages
+bundle: day_view_settings
+label: 'Time Zone'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

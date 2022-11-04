@@ -1,0 +1,23 @@
+uuid: 121fb9e4-bf48-4bee-8c4a-2d7c9ccfa4eb
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.payments.payment
+    - field.storage.payments.feeds_item
+  module:
+    - feeds
+id: payments.payment.feeds_item
+field_name: feeds_item
+entity_type: payments
+bundle: payment
+label: 'Feeds item'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:feeds_feed'
+  handler_settings: {  }
+field_type: feeds_item

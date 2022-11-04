@@ -1,0 +1,33 @@
+uuid: c78be5be-45ab-4985-8500-dfa893773904
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.field_inquiry_studen
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: student_accounts.student_account.field_inquiry_studen
+field_name: field_inquiry_studen
+entity_type: student_accounts
+bundle: student_account
+label: Inquiry
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 1
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

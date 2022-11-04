@@ -1,0 +1,29 @@
+uuid: 236da323-b095-42be-bcce-c079b0051221
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.session_start_times
+    - field.storage.config_pages.field_sunday
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.session_start_times.field_sunday
+field_name: field_sunday
+entity_type: config_pages
+bundle: session_start_times
+label: Sunday
+description: "Enter start times with a comma between each time. Example: 08:00,14:00 (Use 24h format)\r\n"
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,38 @@
+uuid: 9ca054a2-3930-4675-8425-1b446f602629
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - eck.eck_type.student_agreement.student_agreement
+    - field.storage.student_agreement.field_student
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: student_agreement.student_agreement.field_student
+field_name: field_student
+entity_type: student_agreement
+bundle: student_agreement
+label: Student
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:student_accounts'
+  handler_settings:
+    target_bundles:
+      student_account: student_account
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

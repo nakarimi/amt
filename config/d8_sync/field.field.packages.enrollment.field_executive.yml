@@ -1,0 +1,45 @@
+uuid: 680bcf8b-5b1e-417f-adba-19249d644243
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.field_executive
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: packages.enrollment.field_executive
+field_name: field_executive
+entity_type: packages
+bundle: enrollment
+label: Executive
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:user'
+  handler_settings:
+    include_anonymous: true
+    filter:
+      type: role
+      role:
+        executive: executive
+        administrator: '0'
+        studio_director: '0'
+        studio_manager: '0'
+        instructor: '0'
+        developer: '0'
+    target_bundles: null
+    sort:
+      field: _none
+    auto_create: false
+field_type: entity_reference

@@ -1,0 +1,32 @@
+uuid: ff1aac0d-d54d-48e4-8285-e5d69ce4e39f
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.set_default_event_length
+    - field.storage.config_pages.field_lessons_length
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.set_default_event_length.field_lessons_length
+field_name: field_lessons_length
+entity_type: config_pages
+bundle: set_default_event_length
+label: 'Lessons Length'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 45
+default_value_callback: ''
+settings: {  }
+field_type: list_integer

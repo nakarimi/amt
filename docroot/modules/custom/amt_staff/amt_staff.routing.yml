@@ -1,0 +1,9 @@
+amt_staff.page:
+  path: '/ami-staff-performance'
+  defaults:
+    _controller: '\Drupal\amt_staff\Controller\AmtStaffPerformanceController::basePageCallback'
+    _title: 'Staff Performance Report'
+  requirements:
+    _permission: 'AMI Staff Performance Page'
+  options:
+    no_cache: 'TRUE'

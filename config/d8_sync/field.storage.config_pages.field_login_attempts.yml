@@ -1,0 +1,20 @@
+uuid: 6b52b57a-406e-4576-bc71-08d88b7eb64f
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+id: config_pages.field_login_attempts
+field_name: field_login_attempts
+entity_type: config_pages
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

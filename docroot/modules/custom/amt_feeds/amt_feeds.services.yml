@@ -1,0 +1,5 @@
+services:
+  amt_feeds.subscriber:
+    class: Drupal\amt_feeds\EventSubscriber\AmtFeedsEventsSubscriber
+    tags:
+      - {name: event_subscriber}

@@ -1,0 +1,3 @@
+administer duplicate role:
+  title: 'Administer Duplicate Role'
+  restrict access: TRUE

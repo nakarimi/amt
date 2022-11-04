@@ -1,0 +1,11 @@
+uuid: bb907d70-4563-469d-8736-62c6b54c2519
+langcode: en
+status: true
+dependencies:
+  module:
+    - structure_sync
+id: config_sync.module.structure_sync
+snapshotSet: config_sync
+extensionType: module
+extensionName: structure_sync
+items: {  }

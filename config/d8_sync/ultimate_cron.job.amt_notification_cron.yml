@@ -1,0 +1,30 @@
+uuid: 30773df5-5b16-457d-9c1e-8c9d6a26bee1
+langcode: en
+status: false
+dependencies:
+  module:
+    - amt_notification
+title: 'Default cron handler'
+id: amt_notification_cron
+weight: 0
+module: amt_notification
+callback: amt_notification_cron
+scheduler:
+  id: crontab
+  configuration:
+    rules:
+      - '0 7 * * *'
+    catch_up: 0
+launcher:
+  id: serial
+  configuration:
+    timeouts:
+      lock_timeout: 3600
+    launcher:
+      thread: 0
+logger:
+  id: database
+  configuration:
+    method: '3'
+    expire: 1209600
+    retain: 1000

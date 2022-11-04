@@ -1,0 +1,10 @@
+services:
+
+  amt_autocomplete.route_subscriber:
+    class: Drupal\amt_autocomplete\Routing\AutocompleteRouteSubscriber
+    tags:
+      - { name: event_subscriber }
+
+  amt_autocomplete.autocomplete_matcher:
+    class: Drupal\amt_autocomplete\EntityAutocompleteMatcher
+    arguments: ['@plugin.manager.entity_reference_selection']

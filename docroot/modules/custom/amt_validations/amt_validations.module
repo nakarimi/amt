@@ -1,0 +1,2424 @@
+<?php
+
+/**
+ * @file
+ * Provides Validation functionality and alterations for AMT AMI.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\user\Entity\User;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Symfony\Component\HttpFoundation\Session\Session;
+
+/**
+ * Get Enrolment list From Students Type.
+ *
+ * This function is taking a student ID
+ * and searches the enrollments for that particular student
+ * whose enrollment total paid field is not less than the total price
+ * and then load them as options of enrollment in payment update.
+ *
+ * @param int $students
+ *   Student type ID.
+ *
+ * @return array
+ *   Return an array the list of enrollment in list options style.
+ */
+function amt_validations_get_and_filter_student_enrolment_list($students)
+{
+  $connection = \Drupal::database();
+  // Selecting the Package field data table.
+  $query = $connection->select('packages_field_data', 'p');
+  // Joining the upper table with field total paid table.
+  $query->leftjoin('packages__field_total_paid', 't', 't.entity_id = p.id');
+  // Joinging the upper join with field enrollment total price table.
+  $query->leftjoin('packages__field_enrollment_total_price', 'e', 'e.entity_id = p.id');
+  // Joining the upper join with the field student table.
+  $query->rightjoin('packages__field_student', 's', 's.entity_id = p.id');
+  // Getting the Id and Title of the enrollment from Package field data table.
+  $query->fields('p', ['id', 'title']);
+  $query->fields('t', ['field_total_paid_value']);
+  $query->fields('e', ['field_enrollment_total_price_value']);
+  $query->fields('s', ['field_student_target_id']);
+  // Applying the condition of total paid lesser than total price.
+  $query->where('t.field_total_paid_value < e.field_enrollment_total_price_value');
+  // Applying condition of student target id should be equal to one
+  // comming from the form.
+  $query->where('s.field_student_target_id = ' . (int) $students);
+  // Fetch results.
+  $eventList = $query->execute()->fetchAll();
+  return $eventList;
+}
+
+/**
+ * Implements callback_form_ajax().
+ *
+ * Loading enrollment list and sending them back to form.
+ *
+ * This function is called when the data in "Student Name" Field
+ * in the view is changed. This function loads the current state
+ * of the form, Gets the student account ID and passes
+ * them to another function that queries
+ * the database and returns the list of desired enrollments.
+ * When the list of enrollment is returned to this function, it passes
+ * the list back to view, assigning them in Enrollment list select box.
+ */
+function amt_validations_filter_enrollment_list(array &$form, FormStateInterface $form_state)
+{
+  // Getting the student account id from the current update form.
+  $studentId = $form['field_student_name']['widget'][0]['target_id']['#value'];
+  // Extracing the ID form the combination of name and ID of student account.
+  if ($studentId != '') {
+    // Extract the id from terms.
+    $studentId = explode(')', explode('(', $studentId)[1])[0];
+  }
+  // Getting all the enrollments based on student ID.
+  $enrollments = amt_validations_get_and_filter_student_enrolment_list($studentId);
+  $optionsList = '';
+  // Make a Option List For Select Element form Database data.
+  foreach ($enrollments as $enrollments) {
+    $optionsList .= '<option value="' . $enrollments->id . '">' . $enrollments->title . '</option>';
+  }
+  // Creating an ajax Response object for sending the data back to view.
+  $response = new AjaxResponse();
+  // Saving the data in response object of ajax call.
+  $response->addCommand(new HtmlCommand('select[data-drupal-selector="edit-field-enrollment-name"]', $optionsList));
+  return $response;
+}
+
+/**
+ * Loading enrollment list and sending them back to form.
+ *
+ * This function is called when the form is being loaded for
+ * the first time. This function is called on payment edit and
+ * as expected, there must be a student account selected so that
+ * we can narrow down the list of enrollments to be loaded, because
+ * we don't need to load all the enrollments in the system.
+ * Here we load all the enrollments for the account and then reset the
+ * default enrollment options and replace them with the new list
+ * of enrollments.
+ *
+ * @param int &$form
+ *   Data inside the form.
+ */
+function amt_validations_limit_enrollments_on_load(&$form)
+{
+  // Getting the student account id from the current update form.
+  if ($form['field_student_name']['widget'][0]['target_id']['#default_value'] != NULL) {
+    $studentId = $form['field_student_name']['widget'][0]['target_id']['#default_value']->id();
+  }
+  // Recieving the list of the enrollments.
+  $enrollments = amt_validations_get_and_filter_student_enrolment_list($studentId);
+  // Deleting all the current enrollments on the list if exists.
+  unset($form['field_enrollment_name']['widget']['#options']);
+  // Adding the first option in the enrollment list.
+  $form['field_enrollment_name']['widget']['#options']['_none'] = '- None -';
+  // Looping through new enrollments and adding them to the list.
+  foreach ($enrollments as $enrollment) {
+    $form['field_enrollment_name']['widget']['#options'][$enrollment->id] = $enrollment->title;
+  }
+}
+
+/**
+ * Loading the package values.
+ *
+ * This function is callback function that loads the entity of
+ * the package selected in enrollment edit and creation page,
+ * to get the lesson count, price and total price of the package
+ * and populate the respective rows in the form.
+ */
+function amt_validation_load_package_info($form, FormStateInterface $formState, $formId)
+{
+  $response = new AjaxResponse();
+  // Get the id of the selected package name.
+  $packageId = $formState->getValue('field_enrollment_package_name')[0]['target_id'];
+  // Load the entity of the selected package name.
+  $packageEntity = \Drupal::entityManager()->getStorage('packages')->load($packageId);
+  // Getting the values from the reterived package.
+  $lessonPrice = ($packageEntity->field_lesson_price->value != NULL) ? $packageEntity->field_lesson_price->value : 0.00;
+  $lessonCount = ($packageEntity->field_lesson_count->value != NULL) ? $packageEntity->field_lesson_count->value : 0;
+  $totalPrice = ($packageEntity->field_total_price->value != NULL) ? $packageEntity->field_total_price->value : 0.00;
+  // The parts of the selectors that are similar.
+  $selector = '[data-drupal-selector="edit-field-enrollment-';
+  // Setting the lesson price value.
+  $response->addCommand(new InvokeCommand($selector . 'lesson-price-0-value"]', 'val', [$lessonPrice]));
+  // Setting the lesson count value.
+  $response->addCommand(new InvokeCommand($selector . 'lesson-count-0-value"]', 'val', [$lessonCount]));
+  // Setting the total price value.
+  $response->addCommand(new InvokeCommand($selector . 'total-price-0-value"]', 'val', [$totalPrice]));
+  // Returning the response.
+  return $response;
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function amt_validations_views_query_alter(Drupal\views\ViewExecutable $view, Drupal\views\Plugin\views\query\Sql $query)
+{
+
+  // Instructor field filter change data from full name to id.
+  if ($view->storage->id() == 'lessons_list') {
+    // This one for instructor field in lesson list.
+    amt_validations_change_view_filter_data('users_field_data_events__field_instructor.uid', $query);
+  } elseif ($view->storage->id() == 'enrollment') {
+    // This one for instructor field in enrollment list.
+    amt_validations_change_view_filter_data('users_field_data_packages__field_instructor.uid', $query);
+  } elseif ($view->storage->id() == 'inquiry') {
+    // This one for inquiry taker field in inquiry list.
+    amt_validations_change_view_filter_data('users_field_data_student_accounts__field_inquiry_taker.uid', $query);
+    // This one for inquiry taker field in inquiry list.
+    amt_validations_change_view_filter_data('users_field_data_student_accounts__field_teacher.uid', $query);
+  }
+}
+
+/**
+ * Change the view filter field value on view query alter.
+ *
+ * This one is for change full name and id of filter data to id and
+ * it to query the id of that field.
+ *
+ * @param string $fieldName
+ *   The name of the field that we want to change data.
+ * @param object $query
+ *   The reference of view query alter data.
+ */
+function amt_validations_change_view_filter_data($fieldName, &$query)
+{
+
+  // Search inside the filter field for specific field.
+  foreach ($query->where[1]['conditions'] as $key => $value) {
+    if ($value['field'] == $fieldName) {
+      // Get the id of filter field and set it as value.
+      $instructorId = explode(')', explode('(', $value['value'])[1])[0];
+      if ($instructorId != '') {
+        $query->where[1]['conditions'][$key]['value'] = (int) $instructorId;
+      }
+      break;
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function amt_validations_form_alter(&$form, FormStateInterface $formState, $formId)
+{
+
+  // When the field of next scheduled date exist attach this library
+  // this file attach in enrollment.
+  if (isset($form['field_next_scheduled_payment']) && $form['field_next_scheduled_payment'] != NULL) {
+    $form['#attached']['library'][] = 'amt_validations/amt_scripts';
+  }
+
+  if ($formId == 'views_exposed_form') {
+    $form['#attached']['library'][] = 'amt_validations/amt_view_filter_autocomplete';
+    $form['#attached']['library'][] = 'amt_validations/amt_view_filter_collapse';
+  }
+  // When the field of availability exist attach this library
+  // this file attach in user registration.
+
+  // Load amt_available_office_hours library only
+  // on regisration form, not on edit form.
+  if (!isset($form['actions']['delete'])) {
+    if (isset($form['field_availability']) && $form['field_availability'] != NULL) {
+      $form['#attached']['library'][] = 'amt_validations/amt_available_office_hours';
+    }
+  }
+
+  // When the field of field total price of package exist attach this library
+  // this file attach in package form.
+  if (isset($form['field_total_price']) && $form['field_total_price'] != NULL) {
+    $form['#attached']['library'][] = 'amt_validations/amt_package_total_price';
+  }
+
+  // Make executive name full in Add Services form.
+  if ($formId == 'events_services_form' || $formId == 'events_services_edit_form') {
+    $form['field_executive']['widget']['#options'] = _amt_validation_replace_username_with_fullname_in_form('executive');
+  }
+
+  // Make instructor name full in Add Schedules form.
+  if ($formId == 'events_schedules_form' || $formId == 'events_schedules_edit_form') {
+    $form['field_schedule_instructor']['widget']['#options'] = _amt_validation_replace_username_with_fullname_in_form('instructor');
+  }
+
+  /*
+   * If the form is enrollment add or edit form,
+   * the drop date and drop amount fields are
+   * hided from the view as for dropping we have a specific view.
+   */
+  if ($formId == "packages_enrollment_edit_form" || $formId == "packages_enrollment_form") {
+    // Setting an ajax function on package name to load some values.
+    $form['field_enrollment_package_name']['widget'][0]['target_id']['#ajax'] = [
+      'callback' => 'amt_validation_load_package_info',
+      'event' => 'autocompleteclose',
+    ];
+
+    $executives_list = _amt_validation_replace_username_with_fullname_in_form('executive');
+    $form['field_executive']['widget']['#options'] = $executives_list;
+    $form['field_junior_executive']['widget']['#options'] = _amt_validation_replace_username_with_fullname_in_form('executive', false, true);
+    $form['field_instructor']['widget']['#options'] = _amt_validation_replace_username_with_fullname_in_form('instructor', true);
+    _amt_validation_modify_form_redirection($form, $formId);
+    _amt_package_form_package_hide_terms($form, 'field_category', 'enrollment_type');
+  }
+
+  if ($formId == 'attendees_attendance_form' || $formId == 'attendees_attendance_edit_form') {
+    $form['#attached']['library'] = [
+      'amt_validations/amt_enrollmentattendee',
+      'amt_general/couple_inline_entity',
+    ];
+
+    // Auto Populate Students from Students accounts.
+    $form['field_student_account']['widget']['target_id']['#ajax'] = [
+      'callback' => 'amt_validations_student_account_attendees',
+      'event' => 'autocompleteclose',
+    ];
+  }
+
+  // Checking if the this update form is the Payment update form
+  // or it's the payment creation form.
+  if ($formId == 'payments_payment_edit_form' || $formId == 'payments_payment_form') {
+
+    $form['#attached']['library'][] = 'amt_validations/amt_enrollmentLoad';
+
+    // Set student and enrollments.
+    _amt_general_lesson_fill_attendance($form);
+
+    $isStudentAvailable = ($form['field_student_name']['widget'][0]['target_id']['#default_value'] != NULL);
+    // Apply only when it's payment edit form.
+    if ($formId == 'payments_payment_edit_form' || $isStudentAvailable) {
+
+      // Getting the student account id to loaded
+      // related enrollments on form load.
+      // Updating enrollment list in the form data.
+      if ($form['field_student_name']['widget'][0]['target_id']['#default_value'] != NULL) {
+        $studentIdOnFormLoad = $form['field_student_name']['widget'][0]['target_id']['#default_value'];
+        amt_validations_limit_enrollments_on_load($form);
+      }
+    }
+    $form['actions']['submit']['#submit'][] = 'amt_validations_fill_payment_date';
+
+    $formIDValue = &$form['field_payment_id']['widget'][0]['value'];
+
+    // Checking If the payment ID is not set yet.
+    if (!$formIDValue['#default_value'] && !$formIDValue['#value'] && !$formState->get('field_payment_id')) {
+      // Generating a unique ID field.
+      $newKey = amt_validations_generate_random_string();
+      // Setting the id value to the payment id field.
+      $formIDValue['#value'] = $newKey;
+      $formIDValue['#default_value'] = $newKey;
+      $formState->set('field_payment_id', $newKey);
+    }
+
+    // There will already be some validate handlers added so you need to add to the
+    // array rather than overwrite it.
+    $form['#validate'][] = '_amt_validations_payments_refund_form';
+  }
+  // Array List of Forms we want to add callback.
+  $eckFormsEvents = [
+    'events_lesson_form',
+    'events_lesson_edit_form',
+    'events_group_lesson_form',
+    'events_group_lesson_edit_form',
+    'events_services_form',
+    'events_services_edit_form',
+    'events_schedules_form',
+    'events_schedules_edit_form'
+  ];
+
+  $addTimeslotToForm = [
+    'student_accounts_student_account_form',
+    'student_accounts_student_account_edit_form'
+  ];
+
+  if (in_array($formId, $addTimeslotToForm)) {
+    // Time slot JS file added to the form.
+    $form['#attached']['library'][] = 'amt_validations/timeslot_check';
+  }
+  // Check if $formId is one $eckFormsEvents List.
+  if (in_array($formId, $eckFormsEvents)) {
+
+    // Add validation Function to the forms.
+    $form['#validate'][] = '_amt_validations_event_on_validate';
+
+    // The field to store instructors to.
+    $field = _amt_validation_get_correct_field($form);
+
+    // $options += _amt_validation_instructor_to_options(
+    //   $form[$field]['widget']['#default_value'], $formId
+    // );
+
+    // Time slot JS file added to the form.
+    $form['#attached']['library'][] = 'amt_validations/timeslot_check';
+    // Change the time field type from time to text.
+    $form['field_date_and_time']['widget'][0]['value']['#date_time_element'] = 'text';
+    $form['field_date_and_time']['widget'][0]['value']['#date_time_format'] = 'h:i A';
+    // Setting suffix for date and time field for showing message.
+    $form['field_date_and_time']['#suffix'] = '<div id="date-and-time-error"></div>';
+
+    // Services are requested to show all active instructors
+    // TODO: Should be changed to auto-complete (instead of Select-list).
+    if (in_array($formId, ['events_services_form', 'events_services_edit_form'])) {
+
+      // When inquiry is built from dayview then student will be built programatically on events_presave section.
+      if (isset($_SESSION['_sf2_attributes']['student_account'])) {
+
+        // Load student account to get title.
+        $studentAccount = \Drupal::entityTypeManager()->getStorage('student_accounts')->load($_SESSION['_sf2_attributes']['student_account']);
+
+        // Load list of all teachers.
+        $instructor = User::load($_SESSION['_sf2_attributes']['executive']);
+
+        $form['field_executive']['widget']['#options'] = [$instructor->uid->value => $instructor->name->value];
+
+        $form['field_student'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Student'),
+          '#default_value' => $studentAccount->title->value,
+          '#weight' => 10,
+          '#attributes' => [
+            'disabled' => 'disabled'
+          ]
+        );
+
+        // Check if date is provided, logically is date is provided it will contain more than 10 index.
+        if (isset($_SESSION['_sf2_attributes']['lesson_date'][5])) {
+          amt_validations_set_event_date($form, $_SESSION['_sf2_attributes']['lesson_date']);
+        }
+
+        $form['multiple_event'] = [
+          '#type' => 'checkbox',
+          '#title' => 'Multiple service?',
+          '#weight'      => 20,
+          '#attributes' => [
+            'id' => 'multiple_event',
+            'class' => 'd-none'
+          ]
+        ];
+      }
+    }
+
+    // Filter of instructor is only for lesson events, not any other types (group lesson, schedules or services).
+    $type = in_array($formId, ['events_lesson_form', 'events_lesson_edit_form']) ? $_POST['field_type'] : NULL;
+    // Include currently selected instructor (Even if Blocked, for edit)
+    $options = &$form[$field]['widget']['#options'];
+    $options += _amt_validation_instructor_to_options(
+      _amt_validation_instructor_from_type($type),
+      $formId
+    );
+
+    if (!empty(\Drupal::request()->get('type'))) {
+      // $form[$field]['widget']['#options'] = ['_none' => '- Select a value -'];
+      amt_validations_set_event_instructor_date_time_interval($options, $form);
+    } elseif (!empty(\Drupal::request()->get('popup'))) {
+      amt_validations_set_event_date($form);
+    }
+
+    // Add Ajax Callback Function to field_type with change event.
+    $form['field_type']['widget']['#ajax'] = [
+      'callback' => '_amt_validations_event_on_type_change',
+      'event' => 'change',
+      'wrapper' => 'field-instructor-container',
+    ];
+
+    if (!is_null($form['field_instructor'])) {
+      $form['field_instructor']['#prefix'] = '<div id="field-instructor-container">';
+      $form['field_instructor']['#suffix'] = '</div>';
+    }
+
+    // With "field_type_backup" workarounds "field_type" value being cleared
+    // (while using Inline-entity-form, and clicking add-new)
+    if ($formState->hasValue('field_type')) {
+      $lessonType = $formState->getValue('field_type')[0]['target_id'];
+    } else {
+      $lessonType = $formState->get('field_type_backup');
+      if (empty($lessonType)) {
+        $lessonType = reset($form['field_type']['widget']['#default_value']);
+      }
+    }
+    $formState->set('field_type_backup', $lessonType);
+
+    // Adds instructor field's options
+    // (since EmptySelectWidget is empty by default)
+    if (!empty($lessonType) && empty(\Drupal::request()->get('type')) && in_array($formId, ['events_lesson_form', 'events_lesson_edit_form'])) {
+      $options = array_replace($options, _amt_validation_instructor_to_options(
+        _amt_validation_instructor_from_type($lessonType)
+      ));
+    }
+
+    // This one is for creating event from day view. Also filter should be applied for lessons only.
+    if (!empty(\Drupal::request()->get('type')) && in_array($formId, ['events_lesson_form', 'events_lesson_edit_form'])) {
+
+      $instructorId = amt_validations_set_event_instructor_date_time_interval($options, $form);
+
+      // Loud user and get the lesson type of that user.
+      $userEntity = User::load($instructorId);
+      $items['_none'] = '- Select Lesson Type -';
+      if ($userEntity) {
+        if ($formId == "events_lesson_form" || $formId == 'events_lesson_edit_form') {
+          $vid = "lesson_type";
+        } else {
+          $vid = "group_lesson_types";
+        }
+        $lessonTypes = $userEntity->field_lesson_types->referencedEntities();
+        foreach ($lessonTypes as $key => $lessonType) {
+          // The hidden lesson types should not be loaded.
+          if ($lessonType->field_hide->value != 1 && $lessonType->vid->getString() == $vid) {
+            $items[$lessonType->tid->value] = $lessonType->name->value;
+          }
+        }
+      }
+
+      // Set lesson type in field.
+      $form['field_type']['widget']['#options'] = $items;
+    } elseif (!empty(\Drupal::request()->get('popup'))) {
+      amt_validations_set_event_date($form);
+    }
+    if ($formId == 'events_lesson_edit_form' || $formId == 'events_group_lesson_edit_form') {
+      // Function for adding status select box in inline entity forms.
+      amt_validations_add_status_inline_entity_form($form);
+    }
+
+    _amt_validation_modify_form_redirection($form, $formId);
+  } elseif (
+    $formId == 'events_lesson_continuous_appointment_form'
+    || $formId == 'events_group_lesson_continuous_appointment_form'
+  ) {
+    $form['#validate'][] = '_amt_validations_event_on_validate';
+  }
+
+  // Changing the teacher  and inquiry taker select from username to full name.
+  if ($formId == 'student_accounts_student_account_form' || $formId == 'student_accounts_student_account_edit_form') {
+    $form['field_inquiry_taker']['widget']['#options'] = _amt_validation_replace_username_with_fullname_in_form('executive');
+    $form['field_teacher']['widget']['#options'] = _amt_validation_replace_username_with_fullname_in_form('instructor');
+  }
+
+  // This section is for modifying submit function of events lesson on dayview.
+  if ($formId == 'events_lesson_form') {
+    // This field act as flag, so that we decide the next action.
+    $form['schedule_lesson'] = [
+      '#type' => 'checkbox',
+      '#title' => 'This field check if user want to schedule new lesson along with this inquiry creation. It is a matter of next action, which is auto load of lesson popup.',
+      '#weight'      => 20,
+      '#attributes' => [
+        'id' => 'schedule_lesson'
+      ]
+    ];
+  }
+
+  // This section is for modifying submit function of inquiry form on dayview.
+  if ($formId == 'student_accounts_student_account_form' && isset($_GET['display'])) {
+    $form['#attached']['library'][] = 'amt_validations/timeslot_check_inquery';
+    $form['lesson_type'] = [
+      '#title' => t('Lesson Type'),
+      '#type'         => 'select',
+      '#options'      => _amt_dayview_load_all_lesson_types($realID = true, $defaultValue = 'Dance Evaluation (DE)'),
+      '#multiple'     => FALSE,
+      '#weight'      => 20,
+    ];
+
+    // Change the time field type from time to text.
+    $form['lesson_date'] = [
+      '#type' => 'datetime',
+      '#title' => 'Requested Date and Time',
+      // '#default_value' => DrupalDateTime::createFromTimestamp(time()),
+      '#weight'      => 20,
+      '#date_time_format' => 'h:i A',
+      '#date_time_element' => 'text',
+    ];
+    // This field act as flag, so that we decide the next action.
+    $form['schedule_event'] = [
+      '#type' => 'checkbox',
+      '#title' => 'This field check if user want to schedule new service along with this inquiry creation. It is a matter of next action, which is auto load of service popup.',
+      '#weight'      => 20,
+      '#attributes' => [
+        'id' => 'schedule_event'
+      ]
+    ];
+
+    _amt_validation_modify_form_redirection($form, $formId);
+  }
+
+  // for autofill the student and enrollment on student agreement form
+  if ($formId == 'student_agreement_student_agreement_form') {
+    $session = new Session();
+    $student_id = $session->get('field_student');
+    $enrollment_id = $session->get('field_enrollment');
+    if (isset($student_id)) {
+      $studentAccount = \Drupal::entityTypeManager()->getStorage('student_accounts')->load($student_id);
+      $form['field_student']['widget'][0]['target_id']['#default_value'] = $studentAccount;
+    }
+    if (isset($enrollment_id)) {
+      $enrollment = \Drupal::entityTypeManager()->getStorage('packages')->load($enrollment_id);
+      $form['field_enrollment']['widget'][0]['target_id']['#default_value'] = $enrollment;
+    }
+  }
+
+  // Add custom validations for package create and edit forms.
+  // @see _amt_validations_package_form() function to see how custom validations are.
+  if ($formId == 'packages_package_edit_form' || $formId == 'packages_package_form') {
+    $form['#validate'][] = '_amt_validations_packages_form';
+  }
+}
+
+/**
+ * Custom payment validation callback.
+ *
+ * The function makes sure the payment amount is in the acceptance range of values.
+ */
+function _amt_validations_payments_refund_form($form, &$form_state)
+{
+  $enr_id = $form_state->getValue('field_enrollment_name');
+  $paymentAmount = $form_state->getValue('field_gross_tuition');
+  if ($paymentAmount) {
+    $paymentAmount = $paymentAmount[0]['value'];
+  }
+
+  // Get the selected enrollment as it is the base of payment values.
+  if ($enr_id) {
+    $enr_id = reset($enr_id);
+    if ($enr_id['target_id'] != "Select Enrollment") {
+      $enr = \Drupal::entityTypeManager()->getStorage('packages')->load($enr_id['target_id']);
+      // If paymentAmount is negative then it is a refund so it should check
+      // that the value is in the proper range of values. 
+      // This value should be validated to be less or equal than lesson available * lesson price.
+      if ($paymentAmount < 0) {
+        $lesson_price = $enr->field_enrollment_lesson_price->getString();
+        $lesson_used = $enr->field_lesson_used->getString();
+        $total_paid = $enr->field_total_paid->getString();
+        $priceOfUsedLesson = $lesson_price * $lesson_used;
+        $maxRefund = $total_paid - $priceOfUsedLesson;
+        if (abs(floatval($paymentAmount)) > floatval($maxRefund)) {
+          if ($maxRefund == 0) {
+            $message = t('There is no lesson avaiable on selected enrollment to refund for.');
+          } else {
+            $message = t('Payment Amount to refund should be between 0 and -@maxRefund.', ['@maxRefund' => $maxRefund]);
+          }
+          $form_state->setErrorByName('field_gross_tuition', $message);
+        }
+      } else {
+        // If it is a regular payment than it should check that the new paid value will be less or equal than total_price.
+        $total_price = $enr->field_enrollment_total_price->getString();
+        $total_paid = $enr->field_total_paid->getString();
+        $maxPayAble = floatval($total_price) - floatval($total_paid);
+        if ($maxPayAble < $paymentAmount) {
+          $form_state->setErrorByName('field_gross_tuition', t('Payment Amount must be less or equal than @max.', ['@max' => $maxPayAble]));
+        }
+      }
+    }
+  } else {
+    $form_state->setErrorByName('field_enrollment_name', t('Enrollment is required.'));
+  }
+}
+
+/**
+ * Get Full Name Array of all the teachers.
+ *
+ * This function is used to return an array of
+ * all the teachers' Full Name. The full name can be used, anywher
+ * in the forms and elsewhere. e.g: It's used in Student account
+ * creation form to replace username.
+ */
+function _amt_validation_replace_username_with_fullname_in_form($role, $excludedTeachers = FALSE, $isJuniorExecutive = FALSE)
+{
+
+  // Load list of all teachers.
+  $teachers_list = \Drupal::entityManager()->getStorage('user')->loadByProperties(['status' => 1]);
+
+  $new_options = ['' => 'Select Instructor'];
+
+  // Override the placeholder label.
+  if ($role == 'executive') {
+    $new_options = ['' => 'Select Executive'];
+  }
+
+  // Loop through all the teachers.
+  foreach ($teachers_list as $key => $user) {
+
+    if ($isJuniorExecutive && count($new_options) <= 1) {
+      unset($new_options['']);
+      $new_options['_none'] = '- None -';
+    }
+
+    // If role provided, include users with certian roles.
+    if ($role != '' && !$user->hasRole($role)) {
+      continue;
+    }
+
+    // If teacher had first name or last name or both.
+    if ($user->field_first_name->value || $user->field_last_name->value) {
+      $new_options[$key] = $user->field_first_name->value . ' ' . $user->field_last_name->value;
+    }
+
+    // If teacher had only username.
+    else if ($user->name->value) {
+      $new_options[$key] = $user->name->value;
+    }
+
+    // If teacher had no username, first name or last name.
+    else {
+      $new_options[$key] = 'none';
+    }
+  }
+
+  return $new_options;
+}
+
+/**
+ * Get Instructor Id, Start and End date and set as default value.
+ *
+ * @param object $options
+ *   Get Reference of default value of instructor.
+ * @param object $form
+ *   Get the event for we Alter it.
+ *
+ * @return int
+ *   Return the instructor Id that we selected.
+ */
+function amt_validations_set_event_instructor_date_time_interval(&$options, &$form)
+{
+  // Get the information of start and end of date and instructor id from cookie.
+  $getData = $_COOKIE['ajax-modal-data'];
+  $getData = explode(',', $getData);
+
+  // Get the start of date and time for event creation.
+  $dateAndTime = date_create($getData[0]);
+
+  // Get different of start and end date.
+  $duration = date_diff(date_create($getData[1]), $dateAndTime);
+
+  // Get instructor id from cookie or current instructor.
+  $instructorId = ($getData[2] == 'null') ? \Drupal::currentUser()->id() : $getData[2];
+
+  // Set instructor by id that we want create event for that.
+  // @todo: is this needed?
+  // $options = array_replace($options, _amt_validation_instructor_to_options([0 => $instructorId]));
+
+  $field = _amt_validation_get_correct_field($form);
+
+  // Set instructor id as default value of instructor.
+  $form[$field]['widget']['#default_value'] = $instructorId;
+
+  // Create a new drupal date and time object.
+  $dateAndTime = new DrupalDateTime($dateAndTime->format('Y-m-d\TH:i:s'), 'UTC');
+
+  // Set date and time as default value of date and time field.
+  $form["field_date_and_time"]['widget'][0]['value']['#default_value'] = $dateAndTime;
+
+  // Set interval from different of start and end date and time.
+  $form['field_duration']['widget']['#default_value'][0] = $duration->format('%H:%I');
+  return $instructorId;
+}
+
+/**
+ * Get date and set as default value of date field.
+ *
+ * @param object $form
+ *   Get the event for we Alter it.
+ */
+function amt_validations_set_event_date(&$form, $date = null)
+{
+
+  // Get the information of start and end of date and instructor id from cookie.
+  $ajax_date =  explode(',', $_COOKIE['ajax-modal-data']);
+  $dateAndTime = (is_null($date)) ? $ajax_date[0] : $date;
+
+  // Create a new drupal date and time object.
+  $dateAndTime = new DrupalDateTime(date_create($dateAndTime)->format('Y-m-d\TH:i:s'), 'UTC');
+
+  // Set date and time as default value of date and time field.
+  $form["field_date_and_time"]['widget'][0]['value']['#default_value'] = $dateAndTime;
+}
+
+/**
+ * Implements hook_inline_entity_form_entity_form_alter().
+ */
+function amt_validations_inline_entity_form_entity_form_alter(&$entity_form, &$form_state, $form_id)
+{
+
+  if (strpos($entity_form['#id'], 'field-student-form-inline-entity-form') !== FALSE or strpos($entity_form['#id'], 'field-students-form-inline-entity-form') !== FALSE) {
+    if ($entity_form['#bundle'] == "attendance") {
+      // if ($entity_formId == 'attendees_attendance_form' || $entity_formId == 'attendees_attendance_edit_form') {
+      // $entity_form['#attached']['library'][] = 'amt_validations/amt_enrollmentattendee';
+      $entity_form['#attached']['library'][] = 'amt_general/couple_inline_entity';
+      // Auto Populate Students from Students accounts.
+      $entity_form['field_student_account']['widget']['target_id']['#ajax'] = [
+        'callback' => 'amt_validations_student_account_attendees',
+        'event' => 'autocompleteclose',
+      ];
+      // dd($entity_form['field_student_account']['widget']['target_id']);
+
+    }
+    $entity_form['#attached']['library'][] = 'amt_validations/amt_enrollmentinline';
+    // Add Box after field_enrollment for upcomming Message.
+    $entity_form['field_enrollment']['#suffix'] = "<div id='enrollmentError'></div>";
+    // Add Ajax Callback to student_account with autocompleteclose event.
+    $entity_form['field_student_account']['widget']['target_id']['#ajax'] = [
+      'callback' => 'amt_validations_student_account',
+      'event' => 'autocompleteclose',
+    ];
+  }
+}
+
+/**
+ * Update Enrollment Next scheduled Payment.
+ *
+ * Based on Current payment.
+ *
+ * This functions adds a Add Days To Current Time
+ * based on Interval passed to Selected
+ * Enrollment and update the Enrollment NExt Payment.
+ */
+function amt_validations_fill_payment_date(array &$form, FormStateInterface $form_state)
+{
+  $enrollmentID = $form_state->getValue('field_enrollment_name')[0]['target_id'];
+  $currentPaymentDate = date('Y-m-d', strtotime($form_state->getValue('field_date_and_time')[0]['value']));
+  if ((!empty($enrollmentID) or $enrollmentID != NULL) or (!empty($currentPaymentDate) or $currentPaymentDate != NULL)) {
+    // Load Enrollment Information.
+    $loadEnrollment = \Drupal::entityManager()->getStorage('packages')->load($enrollmentID);
+    $intervalPayment = $loadEnrollment->field_payment_interval->getString();
+    // Check the Interval Time.
+    $days = '+7 day';
+    switch ($intervalPayment) {
+      case '1 week/month':
+        $days = '+1 week';
+        break;
+
+      case '2 week/month':
+        $days = '+2 week';
+        break;
+
+      case '3 week/month':
+        $days = '+3 week';
+        break;
+
+      case '4 week/month':
+        $days = '+1 month';
+        break;
+    }
+    // Add Days to Current Payment Date.
+    $enrollmentDate = strtotime($days, strtotime($currentPaymentDate));
+    // Set New Value for Next scheduled Payment for Enrollment.
+    $loadEnrollment->field_next_scheduled_payment->value = date('Y-m-d', $enrollmentDate);
+    $loadEnrollment->save();
+  }
+}
+
+/**
+ * Implements callback_form_ajax().
+ *
+ * Provides new values based on the Type-field.
+ *
+ * This callback will occur **after** the form has been altered.
+ * So, the form should contain the right values for
+ * Instructor-field and we just need to return them.
+ */
+function _amt_validations_event_on_type_change(array &$form, FormStateInterface $form_state)
+{
+
+  if (isset($form['field_schedule_instructor'])) {
+    return $form['field_schedule_instructor'];
+  } else if (isset($form['field_executive'])) {
+    return $form['field_executive'];
+  } else {
+    return $form['field_instructor'];
+  }
+}
+
+function _amt_validations_duration_addsub($date, $duration, $type = 'add')
+{
+  $duration = explode(':', $duration);
+  $dateAndTime = date_create($date);
+  if ($type == 'add') {
+    date_add($dateAndTime, date_interval_create_from_date_string($duration[0] . ' hours + ' . $duration[1] . ' mins'));
+  } else {
+    date_sub($dateAndTime, date_interval_create_from_date_string($duration[0] . ' hours + ' . ($duration[1] - 15) . ' mins'));
+  }
+  return $dateAndTime;
+}
+
+function _amt_validations_time_format($time)
+{
+  if (!strstr($time, ':')) {
+    $time = substr('0000' . $time, -4);
+    $hour = substr($time, 0, -2);
+    $min = substr($time, -2);
+    $time = $hour . ':' . $min;
+  }
+  $date = new DrupalDateTime($time);
+  $formatted_time = $date->format('h:i A');
+  return $formatted_time;
+}
+
+/**
+ * Implements callback_form_ajax().
+ *
+ * Provides new values based on the Type-field.
+ *
+ * This callback will occur **after** the form has been altered.
+ * So, the form should contain the right values for
+ * Instructor-field and we just need to return them.
+ */
+function _amt_validations_check_available_time($instructor, $duration, $date, $time)
+{
+  // Get instructor field availability with instructor id.
+  $availableHours = User::load($instructor)->field_availability->getValue();
+  // Create date object from date and time.
+  $time = explode(' ', $time);
+  $time = $time[0] . ':00 ' . $time[1];
+
+  $dateAndTime = date('Y-m-d h:i:s A', strtotime($date . ' ' . $time));
+
+  // create date object of the date and time from start of event.
+  $eventStartDate = date_create($dateAndTime);
+  // create date object of end date of the event.
+  $eventEndDate = _amt_validations_duration_addsub($dateAndTime, $duration);
+  // Getting this date instructor Available Hours.
+
+  $thisDayAvailableHour = [];
+  // Get the numeric day name from date and time.
+  $weekDay = date('w', strtotime($dateAndTime));
+  if ($availableHours != NULL) {
+    foreach ($availableHours as $key => $value) {
+      if ($value['day'] == $weekDay) {
+        $thisDayAvailableHour[] = $value;
+      }
+    }
+  }
+  // Check the conflict of the event with available time.
+  $availableFlag = FALSE;
+  $availableMessage = '';
+  foreach ($thisDayAvailableHour as $key => $value) {
+    if ($eventStartDate->format('Hi') >= $value['starthours'] && $eventEndDate->format('Hi') <= $value['endhours']) {
+      // Set Flag to True.
+      $availableFlag = TRUE;
+    }
+    $hours = _amt_validations_time_format($value['starthours']) . ' => ' . _amt_validations_time_format($value['endhours']);
+    if (strpos($availableMessage, $hours) == false) {
+      $availableMessage .= '<li>' . $hours . '</li>';
+    }
+  }
+  if ($thisDayAvailableHour == NULL) {
+    $message = "Available time not set for this instructor!";
+  } elseif (!$availableFlag) {
+    $messageTitle = "<p>Instructor only available at the following time interval:</p>";
+    $message = $availableMessage;
+  }
+  if (_amt_validations_check_instuctor_lessons($instructor, $duration, $date, $time)) {
+    $messageDanger = '<div class="alert alert-danger alert-dismissible available_time_warning" style="top: 10px;position: relative;" role="alert" aria-label="Warning message"><button type="button" role="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button><h2 class="sr-only">Warning message</h2>Instructor has lesson booked on this date and item.</div>';
+  }
+  // make the prefix and suffix of the message.
+  $messagePrefix = '<div id="available_time_warning" class="alert alert-warning alert-dismissible available_time_warning" style="top: 10px;position: relative;" role="alert" aria-label="Warning message"><button type="button" role="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button><h2 class="sr-only">Warning message</h2>' . $messageTitle . '<ul class="item-list item-list--messages">';
+  $messagesuffix = '</ul></div>';
+  if ($message != '') {
+    $warningMessage = $messagePrefix . $message . $messagesuffix;
+  }
+  if ($messageDanger) {
+    $warningMessage = $messageDanger . $warningMessage;
+  }
+  // Return message
+  return $warningMessage;
+}
+
+function _amt_validations_check_instuctor_lessons($instructor, $duration, $date, $time)
+{
+  $start = $date . ' ' . $time;
+  $duration = explode(':', $duration);
+  $mins = $duration[0] * 60 + $duration[1];
+  $end = date('Y-m-d\TH:i:s',  strtotime($start . ' + ' . $mins . ' minute'));
+  $start = date('Y-m-d\TH:i:s',  strtotime($start));
+
+  $queryEvent = \Drupal::entityQuery('events')
+    ->condition('type', 'lesson')
+    ->condition('field_date_and_time', [$start, $end], 'BETWEEN')
+    ->condition('field_instructor', $instructor, '=');
+  $eventListItems = $queryEvent->execute();
+  return (count($eventListItems) > 0) ? TRUE : FALSE;
+}
+
+/**
+ * Implements callback_form_ajax().
+ *
+ * Provides new values based on the Type-field.
+ *
+ * This callback will occur **after** the form has been altered.
+ * So, the form should contain the right values for
+ * Instructor-field and we just need to return them.
+ */
+function _amt_validations_events_timeslot_conflict($instructor, $duration, $date)
+{
+  $eventBookedDate = [];
+  // Get the events with filter of date and instructor.
+  $queryEvent = \Drupal::entityQuery('events')
+    ->condition('field_date_and_time', $date . '%', 'LIKE')
+    ->condition('field_instructor', $instructor, '=');
+  $eventListItems = $queryEvent->execute();
+
+  $eventList = \Drupal::entityTypeManager()->getStorage('events')
+    ->loadMultiple($eventListItems);
+  // For each events of instructor check the conflict.
+  foreach ($eventList as $key => $value) {
+    if ($value->field_student->target_id != NULL) {
+      $attendStatus = $value->field_student->entity->field_status->entity->name->value;
+      if ($attendStatus == 'Cancelled') {
+        continue;
+      }
+    } elseif (isset($value->field_students) && $value->field_students->target_id != NULL) {
+      $statusFlag = FALSE;
+      $attendeesIds = $value->field_students->getValue();
+      foreach ($attendeesIds as $key => $attendeesId) {
+        $attendeesEntity = \Drupal::entityTypeManager()->getStorage('attendees')
+          ->load($attendeesId['target_id']);
+        $attendStatus = $attendeesEntity->field_status->entity->name->value;
+        if ($attendStatus != 'Cancelled') {
+          $statusFlag = TRUE;
+        }
+      }
+      // If all the status set as Cancelled it not added to the event conflict.
+      if (!$statusFlag) {
+        continue;
+      }
+    }
+    $tempDate = $value->field_date_and_time->value;
+    $event = [];
+    $minDate = date_create($tempDate)->format('Y-m-d');
+    $minDate = date_create(date('Y-m-d h:i:s A', strtotime($minDate . ' 12:00:00am')));
+    $eventStart = _amt_validations_duration_addsub($tempDate, $duration, 'sub');
+    if ($minDate >= $eventStart) {
+      $eventStart = $minDate;
+    }
+    $event[] = $eventStart->format('h:ia');
+    $event[] = _amt_validations_duration_addsub($tempDate, $value->field_duration->value)->format('h:ia');
+    $eventBookedDate[] = $event;
+  }
+  // TODO: This lines make all times disabled, what was its purpose?
+  // $eventBookedDate[] = [
+  //   _amt_validations_duration_addsub($date . '12:00:00 am', $duration, 'sub')->format('h:ia'),
+  //   '11:59pm',
+  // ];
+  return $eventBookedDate;
+}
+
+/**
+ * Implements callback_form_ajax().
+ *
+ * Add a Ajax Callback Function (HtmlCommand).
+ *
+ * This functions adds a Ajax callback when Field Students Account is Changed
+ * this Functions changes the Options list of Enrollments based
+ * on Students Account Selected.
+ */
+function amt_validations_student_account(array &$form, FormStateInterface $form_state)
+{
+  $response = new AjaxResponse();
+  // Check if Field Students is Set (it should be in Lesson Group)
+  // but in lesson and services it's Student without s at the end.
+  if (isset($form_state->getValue('field_students')['form']['inline_entity_form'])) {
+    if (isset($form_state->getValue('field_students')['form']['inline_entity_form']['field_student_account']['target_id'][0])) {
+      $valueOfStudentAccount = $form_state->getValue('field_students')['form']['inline_entity_form']['field_student_account']['target_id'][0];
+    } elseif (isset($form_state->getValue('field_students')['form']['inline_entity_form']['entities'])) {
+      $key = array_key_first($form_state->getValue('field_students')['form']['inline_entity_form']['entities']);
+      $valueOfStudentAccount = $form_state->getValue('field_students')['form']['inline_entity_form']['entities'][$key]['form']['field_student_account']['target_id'][0];
+    }
+  } else {
+    if (isset($form_state->getValue('field_student')['form']['inline_entity_form']['field_student_account']['target_id'][0])) {
+      $valueOfStudentAccount = $form_state->getValue('field_student')['form']['inline_entity_form']['field_student_account']['target_id'][0];
+    } elseif (isset($form_state->getValue('field_student')['form']['inline_entity_form']['entities'][0]['form']['field_student_account']['target_id'][0])) {
+      $valueOfStudentAccount = $form_state->getValue('field_student')['form']['inline_entity_form']['entities'][0]['form']['field_student_account']['target_id'][0]['target_id'];
+    }
+  }
+
+  if ($valueOfStudentAccount != NULL) {
+    if (is_array($valueOfStudentAccount)) {
+      $valueOfStudentAccount = $valueOfStudentAccount['target_id'];
+    }
+    // Load the student recoreds based on student account ID.
+    $studentRecords = _amt_validations_attendance_auto_data($valueOfStudentAccount);
+    $response->addCommand(new InvokeCommand('[data-drupal-selector*="form-field-students-target-id"]', 'val', [$studentRecords]));
+    $response->addCommand(new InvokeCommand('[id*="field-students-wrapper"', 'addCoupleCheckbox', [explode(", ", $studentRecords)]));
+    return $response;
+  }
+  return $response;
+}
+
+/**
+ * Implements callback_form_ajax().
+ *
+ * Add a Ajax Callback Function (InvokeCommand).
+ *
+ * This functions adds a Ajax callback when Field Students Account is Changed
+ * this Functions changes the Options list of Enrollments based
+ * on Students Account Selected in attendees forms.
+ */
+function amt_validations_student_account_attendees(array &$form, FormStateInterface $form_state)
+{
+  $response = new AjaxResponse();
+  // Check if Field Students is Set (it should be in Lesson Group)
+  // but in lesson and services it's Student without s at the end.
+  $valueOfStudentAccount = $form_state->getValue('field_student_account')['target_id'][0]['target_id'];
+
+  if ($valueOfStudentAccount != NULL || !empty($valueOfStudentAccount)) {
+    if (is_array($valueOfStudentAccount)) {
+      $valueOfStudentAccount = $valueOfStudentAccount['target_id'];
+    }
+    // Load the student recoreds based on student account ID.
+    $studentRecords = _amt_validations_attendance_auto_data($valueOfStudentAccount);
+
+    $response->addCommand(new InvokeCommand('[data-drupal-selector*="field-students-target-id"]', 'val', [$studentRecords]));
+    $response->addCommand(new InvokeCommand('[id*="field-students-wrapper"]', 'addCoupleCheckbox', [explode(", ", $studentRecords)]));
+    return $response;
+  }
+  return $response;
+}
+
+/**
+ * Implements callback_form_ajax().
+ *
+ * Add a Ajax Callback Function (HtmlCommand) to Field Students.
+ *
+ * This functions adds a Ajax callback when Enrollment is Changed
+ * this Functions Checks for Available Lesson Number and Lesson type
+ * that should match with Enrollment, Package Lessontype (if applicable)
+ */
+function amt_validations_check_enrollment($lessonTypeID, $studentAccountID, $enrollmentID)
+{
+
+  // If lessontype not set ignore this message.
+  // Used for attendees Main forms.
+  if ($lessonTypeID == 'notset') {
+    $lessonType = FALSE;
+  } else {
+    $lessonType = (amt_validations_enrollment_lesson_type($enrollmentID) == $lessonTypeID ? FALSE : TRUE);
+  }
+  // Get the Enrollments Lesson available Value via below function.
+  $numbersLessons = amt_validations_enrollments_available_lessons($enrollmentID);
+  $threshold = amt_validations_threshold($enrollmentID, $studentAccountID);
+  // Create a box for Message.
+  $messagePrefix = '<div id="subEnrollmentError" class="alert alert-warning alert-dismissible" role="alert" aria-label="Warning message"><button type="button" role="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button><h2 class="sr-only">Warning message</h2><ul class="item-list item-list--messages">';
+  $messagesuffix = '</ul></div>';
+  $message = "";
+  // If lessonType is not matched with Enrollment, Package Lesson type.
+  if ($lessonType) {
+    $message .= '<li class="item item--message">This lesson Type is not matched with this Enrollment</li>';
+  }
+  // If number of lessons availble is 0 in a select enrollment.
+  if ($numbersLessons == 0) {
+    $message .= '<li class="item item--message">This Enrollment has no Available Lessons</li>';
+  }
+  // Message for showing the student threshold is more than lesson available.
+  if ($threshold) {
+    $message .= '<li class="item item--message">The Enrollment\'s Available Lessons Count is less then the Student\'s Threshold</li>';
+  }
+  // If there are messages, create the message with Prefix and suffix.
+  if (!empty($message)) {
+    $message = $messagePrefix . $message . $messagesuffix;
+  }
+  return $message;
+}
+
+/**
+ * Load the students account contacts and return contacts title with id.
+ *
+ * @param string $studentId
+ *   The Id of student account.
+ *
+ * @return string
+ *   Return a set of name in stirng format.
+ */
+function _amt_validations_attendance_auto_data($studentId)
+{
+  $generatedContacts = '';
+  // Load all contacts that an account has.
+  $accountsContacts = \Drupal::entityManager()->getStorage('student_accounts')->load($studentId)->field_contacts;
+
+  // Loop on all contacts of the account.
+  foreach ($accountsContacts as $key => $value) {
+    // Get the title and Id of the contacts.
+    $contactsId = $value->getValue()['target_id'];
+    $contactsTitle = \Drupal::entityManager()->getStorage('contacts')->load($contactsId)->title->getString();
+    // Set the delimiter that if it was first item or not.
+    $del = ($generatedContacts != '') ? ', ' : '';
+    // Generate the account contacts by title and id.
+    $generatedContacts = $generatedContacts . $del . $contactsTitle . ' (' . $contactsId . ')';
+  }
+
+  return $generatedContacts;
+}
+
+/**
+ * Getting Instructor ids from Lesson-type.
+ *
+ * Load Instructor filtered by lesson type
+ * fill up an option list for a select elemtent
+ * Like: <option value="id">label</option>
+ *
+ * @param mixed $lessonType
+ *   Lesson-type ID.
+ *
+ * @return array
+ *   Array of user ids.
+ */
+function _amt_validation_instructor_from_type($lessonType)
+{
+
+  // Query Instructor User-list.
+  $query = Drupal::entityQuery('user')->condition('roles', 'instructor')
+    ->sort('field_first_name')
+    ->sort('field_last_name');
+
+  if (!empty($lessonType)) {
+    $group = $query->orConditionGroup()
+      ->condition('field_lesson_types', $lessonType, '=');
+    $query->condition($group);
+  }
+
+  // Includes only Active instructors (according to "9.1. Archive Staff"):
+  $query->condition('status', 1);
+
+  return $query->execute();
+}
+
+/**
+ * Generate Form values from instructor ids.
+ *
+ * @param mixed $instructorUserIds
+ *   Instructor ids.
+ *
+ * @return array
+ *   Option array.
+ */
+function _amt_validation_instructor_to_options($instructorUserIds, $formId = false)
+{
+  // Sometimes the single id is passed, so we make sure that it is casted to array.
+  $instructorUserIds = is_array($instructorUserIds) ? $instructorUserIds : (array)$instructorUserIds;
+  $users = User::loadMultiple($instructorUserIds);
+
+  $eckFormsEvents = [
+    'events_lesson_form',
+    'events_lesson_edit_form',
+    'events_group_lesson_form',
+    'events_group_lesson_edit_form',
+  ];
+
+  // On lesson forms the label is needed.
+  $label = (count($instructorUserIds) > 0) ? 'Select Instructor' : 'N/A';
+  $items = ($formId && in_array($formId, $eckFormsEvents)) ? ['_none' => $label] : [];
+
+  foreach ($users as $key => $instructor) {
+    $items[$key] = _amt_validation_instructor_to_title($instructor);
+  }
+
+  return $items;
+}
+
+/**
+ * Generate title from instructor.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $instructor
+ *   Instructor entity.
+ *
+ * @return string
+ *   Instructor title.
+ */
+function _amt_validation_instructor_to_title(EntityInterface $instructor)
+{
+  return $instructor->field_first_name->value
+    . ' ' . $instructor->field_last_name->value
+    . ' (' . $instructor->name->value
+    . ' ' . $instructor->uid->value
+    . ')';
+}
+
+/**
+ * Get Available Lessons from Enrollments.
+ *
+ * @param int $enrollmentID
+ *   Enrollment ID.
+ *
+ * @return int
+ *   Value of Lessons Available if it's null return 0
+ */
+function amt_validations_enrollments_available_lessons($enrollmentID)
+{
+  // Get The Number of Available Lessons and Use it as Integer value;.
+  $enrollmentEntity = \Drupal::entityTypeManager()->getStorage('packages')->load($enrollmentID);
+  if (isset($enrollmentEntity)) {
+    return (int) $enrollmentEntity->field_lesson_available->getString();
+  } else {
+    return 0;
+  }
+}
+
+/**
+ * Get the compare of available lesson and student threshold.
+ *
+ * @param int $enrollmentID
+ *   Enrollment ID.
+ * @param object $studentAccountId
+ *   Studnet Account ID.
+ *
+ * @return bool
+ *   Value of Lessons Available if it's null return 0
+ */
+function amt_validations_threshold($enrollmentID, $studentAccountId)
+{
+  // Check the student id is exist.
+  if ($studentAccountId != "") {
+    // Load the enrollemnt by id.
+    $enrollmentEntity = \Drupal::entityTypeManager()->getStorage('packages')->load($enrollmentID);
+    // Load the student account by id.
+    $studentAccountEntity = \Drupal::entityTypeManager()->getStorage('student_accounts')->load($studentAccountId);
+    if (isset($studentAccountEntity->field_low_lesson_threshold)) {
+      $threshold = (int) $studentAccountEntity->field_low_lesson_threshold->getString();
+    }
+    if (isset($enrollmentEntity->field_lesson_available)) {
+      $availbleLesson = (int) $enrollmentEntity->field_lesson_available->getString();
+    }
+    // Check if the threshold and lesson available is exist and
+    // threshold is more then lesson available.
+    if (isset($threshold) && isset($availbleLesson) && $threshold > $availbleLesson && $availbleLesson > 0) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+  return FALSE;
+}
+
+/**
+ * Get Lesson Type of Package from Enrollments.
+ *
+ * It gets ID of package name from Enrollment then
+ * it searchs for lesson type id from that package name.
+ *
+ * @param int $enrollmentID
+ *   Enrollment ID.
+ *
+ * @return int
+ *   Value of lesson type if it's null return 0
+ */
+function amt_validations_enrollment_lesson_type($enrollmentID)
+{
+  // Load PackageName ID from the Enrollments with $enrollmentID id.
+  $enrollmentEntity = \Drupal::entityTypeManager()->getStorage('packages')->load($enrollmentID);
+  // Get The Field Value and Use it as Integer value;.
+  if ($enrollmentEntity != NULL) {
+    $packageEntity = $enrollmentEntity->field_enrollment_package_name->referencedEntities()[0];
+    if ($packageEntity != NULL) {
+      return ($packageEntity->field_lesson_type->getString());
+    }
+    return -1;
+  }
+  return -1;
+}
+
+/**
+ * Getting Time Instructor Data for Events.
+ *
+ * Load Events where (all types) then join Lesson,
+ * group lesson and services Data and time Instructor Informaion
+ * gets the date and times and duration of events for this instuctor
+ * it compare them if there is any conflict with current timeing and duration.
+ * if it finds any conflict return trule else return false.
+ * if $currentNodeID is passed it will ignore the that id.
+ *
+ * @param string $instructorID
+ *   Event Date {int}.
+ * @param string $startEventDate
+ *   Current Event Time Linux Time.
+ * @param string $endEventDate
+ *   Current Event End Time Linux Time.
+ * @param string|null $ignoredEventID
+ *   Current Node ID if it's an edit.
+ *
+ * @return bool
+ *   true if there is any conflict.
+ */
+function _amt_validations_instructor_is_busy($instructorID, $startEventDate, $endEventDate, $ignoredEventID)
+{
+
+  $eventDateFormated = date("Y-m-d", $startEventDate);
+  $currentStartTime = ($startEventDate);
+  // Add Duration to start time to get the End time.
+  $currentEndTime = $endEventDate;
+
+  // Filter and Convert the Date to MySQL Date.
+  // Convert the String $startEventDate to phptime (linux time)
+  $query = \Drupal::entityQuery('events')
+    ->condition('field_date_and_time', ($eventDateFormated) . "%", 'LIKE')
+    ->condition('field_instructor', ($instructorID), '=');
+  if ($ignoredEventID) {
+    $query->condition('id', $ignoredEventID, '<>')
+      ->condition('field_parent', ($ignoredEventID), '<>');
+  }
+  $eventListItems = $query->execute();
+  $conflicts = [];
+  $eventList = \Drupal::entityTypeManager()->getStorage('events')
+    ->loadMultiple($eventListItems);
+  foreach ($eventList as $event) {
+
+    // Load Each Event and Check if they have proper date/time and duration.
+    if (!empty($event->field_date_and_time->getString()) and !empty($event->field_duration->getString())) {
+      // Convert the String to phptime (linux time)
+      $dbStartTime = strtotime($event->field_date_and_time->getString());
+      // Add Duration to start time to get the End time.
+      $dbEndTime = amt_validations_add_to_time($event->field_date_and_time->getString(), $event->field_duration->getString());
+      // Check if there is any conflict.
+      if (($currentStartTime >= $dbStartTime and $currentStartTime < $dbEndTime) or ($dbStartTime >= $currentStartTime and $dbStartTime < $currentEndTime)  or (($dbStartTime == $currentStartTime) and ($dbEndTime == $currentEndTime))) {
+        $conflicts[] = $event->id();
+      }
+    }
+  }
+  return $conflicts;
+}
+
+/**
+ * Simple functions to add minutes to a time.
+ *
+ * It gets a time with date and time hours and minutes
+ * it converts the hours and minutes to minutes then
+ * it adds that extraced minutes to the date and time.
+ *
+ * @param string $time
+ *   date and Time like {Y-m-d H:i}.
+ * @param string $hours
+ *   Hours and minutes to add {H:i}.
+ *
+ * @return int
+ *   number of minutes.
+ */
+function amt_validations_add_to_time(string $time, string $hours)
+{
+  $hoursToMin = amt_validations_hours_to_minutes($hours);
+  $time = new DateTime($time);
+  $time->add(new DateInterval('PT' . $hoursToMin . 'M'));
+  return $time->format('U');
+}
+
+/**
+ * This is a gets a hours sperate it from.
+ *
+ * And then multiply the first part with 60
+ * and add minutes to the value
+ * to minutes Exmp. (1:20 returns as 80).
+ *
+ * @param string $hours
+ *   hours like {H:i}.
+ *
+ * @return int
+ *   number of minutes.
+ */
+function amt_validations_hours_to_minutes(string $hours)
+{
+  $minutes = 0;
+  if (strpos($hours, ':') !== FALSE) {
+    // Split hours and minutes.
+    list($hours, $minutes) = explode(':', $hours);
+  }
+  return $hours * 60 + $minutes;
+}
+
+/**
+ * Implements callback_form_ajax().
+ *
+ * Form Alter of services to set error if .
+ *
+ * There is any conflict with current passed timing and data from database.
+ */
+function _amt_validations_event_on_validate(&$form, FormStateInterface $form_state)
+{
+  $event = $form_state->getformObject()->getEntity();
+  $lastInstructorID = $event->field_instructor->target_id;
+  $instructorID = NULL;
+
+  if ($event->bundle() == 'services') {
+    // Services don't need instructor, only need executive.
+    return;
+  }
+
+  // Find instructor-id:
+  if ($form_state->hasValue('field_instructor')) {
+    $instructorID = $form_state->getValue('field_instructor')[0]['target_id'];
+  } else {
+    $routeName = \Drupal::routeMatch()->getRouteName();
+    if (
+      $routeName == 'amt_appointment.edit_continuous'
+      || $routeName == 'entity.events.edit_form.continuous_appointment'
+    ) {
+      $instructorID = $lastInstructorID;
+    }
+  }
+
+  $instructor = $instructorID ? User::load($instructorID) : NULL;
+  if (
+    is_null($instructor)
+    // Prevents disabled instructor (only when changed):
+    || ($instructorID != $lastInstructorID && $instructor->isBlocked())
+  ) {
+    // Also make sure this is not checked for schedules, since they don't use/have instructor.
+    if (!$form_state->hasValue('field_schedule_instructor')) {
+      $form_state->setErrorByName(
+        'field_instructor',
+        t('Please set valid Instructor')
+      );
+      return;
+    }
+  }
+
+  $eventDate = $form_state->getValue('field_date_and_time')[0]['value'];
+  $duration = $form_state->getValue('field_duration')[0]['value'];
+  if (
+    !is_object($eventDate) && empty($duration)
+  ) {
+    // Drupal already warns about "field_date_and_time" field, but anyway:
+    $form_state->setErrorByName(
+      'field_duration',
+      t('Please add information for both "Duration" and "Date and Time" fields!')
+    );
+  }
+}
+
+/**
+ * Get Enrolment list From Students Type.
+ *
+ * It gets ID of students Type
+ * it searchs for Enrollments id from that packages.
+ *
+ * @param int $students
+ *   Student type ID.
+ * @param int $isEvent
+ *   This value makes possible to detect events page from other.
+ * @param int $isPayment
+ * 	 This value makes possible to detect payment page from other.
+ *
+ * @return array
+ *   return an array list with Enrolment ID and title
+ */
+function amt_validations_get_student_enrolment_list($students, $isEvent = -1, $isPayment = false)
+{
+  // Getting the ID of the 'Miscellaneous', 'DOR', 'Party Time', 'Showcase/Medal Ball' Enrollment types.
+  $queryEnrollmentCategory = \Drupal::entityQuery('taxonomy_term')
+    ->condition('vid', 'enrollment_type')
+    ->condition('name', ['Miscellaneous', 'DOR', 'Party Time', 'Showcase/Medal Ball'], 'IN')
+    ->execute();
+
+  // Get only ids of these category.
+  $queryEnrollmentCategory = array_keys($queryEnrollmentCategory);
+
+  $eventListItems = \Drupal::entityQuery('packages')
+    ->condition('field_student', ($students), '=')
+    ->execute();
+  $eventList = \Drupal::entityTypeManager()->getStorage('packages')->loadMultiple($eventListItems);
+  // Make a Option List For Select Element form Database data.
+  $optionsList = [];
+  foreach ($eventList as $key => $event) {
+
+    // Ignore hidden enrollments
+    if ($event->field_visibility->value) {
+      continue;
+    }
+
+    $eventId = $event->id->value;
+    // Check if the request come from add events page,
+    // and does this enrollment has valid available lesson field.
+    // and "$isEvent == -1" is from dayview page.
+    if ($isPayment == false && ($isEvent >= 0 || $isEvent == -1)) {
+      $enrLessonAvailable = $event->field_enrollment_lesson_count->value - $event->field_lesson_used->value;
+      if ($enrLessonAvailable > 0) {
+        // Add package name to enrollment select list.
+        $package = \Drupal::entityTypeManager()
+          ->getStorage('packages')
+          ->load($event->field_enrollment_package_name->getString());
+        // Concatnate available lesson to enrollment list items.
+        $optionsList[$eventId] = $event->title->getString();
+        $optionsList[$eventId] .= ' - ' . $enrLessonAvailable;
+        if ($event->field_enrollment_package_name->getString() != '') {
+
+          // Get enrollment lesson type abbrivation to show on select list.
+          $abbrivationTerm = Term::load($package->field_lesson_type->target_id);
+          if ($abbrivationTerm != NULL) {
+            $optionsList[$eventId] .= ' - ' . $abbrivationTerm->field_abbreviation->getString();
+          } else {
+            // If package not have lesson abbreviation.
+            $optionsList[$eventId] .= ' - N/A';
+          }
+        } else {
+          // If the enrollment not has package.
+          $optionsList[$eventId] .= ' - N/A';
+        }
+      }
+
+      // Load all the 'Miscellaneous', 'DOR', 'Party Time', 'Showcase/Medal Ball' enrollments regardless of their lessons avaiblibility.
+      else if (in_array($event->field_category->target_id, $queryEnrollmentCategory)) {
+        $optionsList[$eventId] = $event->title->getString();
+      }
+    } elseif ($isPayment != false) {
+      // If it is payment, then just load enrollment that has remaining balance to pay.
+      if ($_GET['refund'] === "true") {
+        // Refund those enrollment that has lesson price and lesson available.
+        $amount = $event->field_enrollment_lesson_price->value * $event->field_lesson_available->value;
+        if ($event->field_lesson_available->value != 0 && $amount > 0) {
+          $optionsList[$eventId] = $event->title->getString() . ' (RF= $' . ($amount) . ')';
+        }
+      } else {
+        if (($event->field_enrollment_total_price->value - $event->field_total_paid->value) != 0) {
+          $optionsList[$eventId] = $event->title->getString() . ' ($' . ($event->field_total_paid->value - $event->field_enrollment_total_price->value) . ')';
+        }
+      }
+    } else {
+      // Concatenate available lesson to enrollment list items.
+      $optionsList[$eventId] = $event->title->getString();
+    }
+  }
+  return $optionsList;
+}
+
+/**
+ * Check Instructor Time table and compare it with passed time.
+ *
+ * Checks if it's inside the time table of instcrutor.
+ *
+ * @param int $instructorID
+ *   ID of Instructor.
+ * @param string $currentStartTime
+ *   Passed time from form.
+ * @param string $currentEndTime
+ *   Passed End time.
+ *
+ * @return booloan
+ *   it returns true if time pass is insdie Instruor time.
+ */
+function check_instuctor_time_table($instructorID, $currentStartTime, $currentEndTime)
+{
+  // Load Instructor TimeTable.
+  $instructorInfo = User::load($instructorID);
+  $weekDay = date("N", ($currentStartTime));
+  // Get that Specific Day TimeTable Like : Tuesday = 3.
+  // 0 = Saterday, 1 = Sunday, 2 = Monday.
+  // 3 = Tuesday, 4 = Wendsday, 5 = Thursday, 6 = Friday.
+  $timeTable = $instructorInfo->get("field_availability")->getValue()[$weekDay];
+  // Convert Time to Hours.
+  $currentStartTime = strtotime(date("H:i", ($currentStartTime)));
+  $currentEndTime = strtotime(date("H:i", ($currentEndTime)));
+  // Clean Time Table Form.
+  $timeTableStart = strtotime(clean_time_table($timeTable['starthours']));
+  $timeTableEnd = strtotime(clean_time_table($timeTable['endhours']));
+  // Check if the Current Time is inside the timetable.
+  if ($currentStartTime >= $timeTableStart and $currentEndTime <= $timeTableEnd) {
+    return TRUE;
+  } else {
+    return FALSE;
+  }
+}
+
+/**
+ * Clean Time From Instructor Timetable.
+ *
+ * Sometimes, hours comes like 630 which should be 0630
+ * this functions checks if it's a 3 charecter and add a 0
+ * befor the string and return.
+ *
+ * @param string $time
+ *   Time from Timetable.
+ *
+ * @return string
+ *   Return the like 700 0700.
+ */
+function clean_time_table($time)
+{
+  if (strlen($time) != 4) {
+    $time = '0' . $time;
+  }
+  return $time;
+}
+
+/**
+ * Implemets hook_Form_ID_alter().
+ */
+function amt_validations_form_packages_enrollment_form_alter(array &$attachments)
+{
+  // Attach js files for the packages_enrollment_form.
+  $attachments['#attached']['library'][] = 'amt_validations/amt_scripts';
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function amt_validations_events_insert($entity)
+{
+  amt_validations_events_standing_check($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ *
+ * If events just updated without any changes don't do anything.
+ *
+ * If event status changed in attendance just update it, childs will not change.
+ *
+ * Do nothing when just the instactor of main event changed.
+ *
+ * If just the time field changed on parent event, don't change the childs.
+ *
+ * If other fields changed, delete old childs and create new ones.
+ */
+function amt_validations_events_update($entity)
+{
+  $needApplyToAll = FALSE;
+
+  // List of feilds that can be change on lessons, services and group Lessons.
+  if ($entity->field_parent->value == 0) {
+    $fieldsName = [
+      'field_duration',
+      'field_expiration_date',
+      'field_repetition_frequency',
+      'field_repetition_units',
+      'field_date_and_time',
+    ];
+
+    // Check that which one of fields changed.
+    foreach ($fieldsName as $field) {
+      if ($entity->original->get($field)->value != $entity->get($field)->value) {
+        $needApplyToAll = TRUE;
+        if ($field == 'field_date_and_time') {
+          if (date('Y-m-d', strtotime($entity->original->get($field)->value)) == date('Y-m-d', strtotime($entity->get($field)->value))) {
+            $needApplyToAll = FALSE;
+          }
+        }
+        break;
+      }
+    }
+    if ($entity->original->field_type->target_id != $entity->field_type->target_id) {
+      $needApplyToAll = TRUE;
+    }
+
+    if ($entity->field_student->target_id) {
+      $attendanceId = $entity->field_student->target_id;
+    } else {
+      $attendanceId = $entity->field_students->target_id;
+    }
+    // Get event_status_updated session that created during update attendance.
+    // If it is set so the status updated and it shouldn't affect the childs.
+    // Other wise it will remove old attendace and create new based on new data.
+    $session = new Session();
+    $attendanceStatusUpdated = $session->get('event_status_updated_' . $attendanceId);
+    // If any data except instructor and time changed.
+    // Then update all childs.
+    if ($needApplyToAll == TRUE) {
+      amt_validations_events_standing_check($entity, TRUE);
+    }
+    // Check as well the attendace status that updated or not.
+    elseif ($attendanceStatusUpdated === FALSE) {
+      amt_validations_events_standing_check($entity, TRUE);
+    }
+
+    // Check if the event_status_updated_id exist.
+    // Remove the related sesstion to prevent any conflicts.
+    if ($attendanceStatusUpdated !== NULL) {
+      $session->remove('event_status_updated_' . $attendanceId);
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_predelete().
+ */
+function amt_validations_events_predelete($entity)
+{
+  amt_validations_deletefutureevents($entity->id());
+}
+
+/**
+ * Delete Sub Events from Parent.
+ *
+ * This function Deletes all sub events of the giveing event ID.
+ * it check events that has current ID Parent id.
+ * Also a secondary purpose for this function is to only delete future events.
+ *
+ * @param int $parentID
+ *   Event ID.
+ * @param boolean $onlyRemoveFuture
+ *   Flag to apply the specific condition.
+ * @param boolean $childEventId
+ *   The event id which is clicked that carries date to which we identify future child events.
+ */
+function amt_validations_deletefutureevents($parentID, $onlyRemoveFuture = false, $childEventId = false)
+{
+
+  // Load all the child event of the given parent.
+  $loadEventsQuery = \Drupal::entityQuery("events")
+    ->condition('field_parent', $parentID, '=');
+
+  if ($onlyRemoveFuture) {
+
+    // Load the target entity.
+    $entity = \Drupal::entityTypeManager()->getStorage('events')->load($childEventId);
+
+    // Get the curent event date to identify the future child events.
+    $date = date('Y-m-d', strtotime($entity->field_date_and_time->value));
+
+    // Consider only future child events.
+    $loadEventsQuery = $loadEventsQuery->condition('field_date_and_time', $date, '>');
+  }
+
+  // Get Ids based on provided condtions.
+  $result = $loadEventsQuery->execute();
+
+  // load the needed entity be deleted.
+  $storage_handler = \Drupal::entityTypeManager()->getStorage("events");
+
+  // Delete attendance with event.
+  $entities = $storage_handler->loadMultiple($result);
+  foreach ($entities as $entity) {
+    // Here is diffrent field name (student & students).
+    if ($entity->bundle() == 'group_lesson') {
+      if (isset($entity->field_students)) {
+        $collectionAttendees = $entity->field_students->referencedEntities();
+        foreach ($collectionAttendees as $attendees) {
+          $attendees->delete();
+        }
+      }
+    } else {
+      // If the entity type is lesson or service.
+      if (isset($entity->field_student)) {
+        $collectionAttendees = $entity->field_student->referencedEntities();
+        foreach ($collectionAttendees as $attendees) {
+          $attendees->delete();
+        }
+      }
+    }
+  }
+  // Delete the event after deletion the attendees.
+  $storage_handler->delete($entities);
+}
+
+/**
+ * Add Curent Entity ID into Queue.
+ *
+ * This function checks if current Enitity (event) has Standing Appointment,
+ * if it has it adds a queue to create New Sub Events,
+ * new sub events will be created on Cron Run.
+ *
+ * @param object $entity
+ *   Entity Object.
+ */
+function amt_validations_events_standing_check($entity, $isUpdate = FALSE)
+{
+  // Check if has engough value for standing Appointment.
+  if (!empty($entity->field_expiration_date->value) && !empty($entity->field_repetition_frequency->value) && !empty($entity->field_repetition_units->value)) {
+    // Creating A Queue item for this proccess.
+    $data['id'] = $entity->id();
+    $queue = \Drupal::queue('events_standing');
+    $queue->createQueue();
+    $id = $queue->createItem($data);
+    // Delete Perviuse item if exists.
+    if ($isUpdate) {
+      // Remove Childs If there is any.
+      // When user Remove Standing information from an Existing Event.
+      amt_validations_deletefutureevents($entity->id());
+    }
+    // Create Child Events.
+    amt_validations_duplicate_events($entity->id());
+    // Delete perviuse Created Queue Item.
+    $queueID = (object) ['item_id' => $id];
+    $queue->deleteItem($queueID);
+  } else {
+    if ($isUpdate) {
+      // Remove Childs If there is any.
+      // When user Remove Standing information from an Existing Event.
+      amt_validations_deletefutureevents($entity->id());
+    }
+  }
+}
+
+/**
+ * Main replicator based on passed attendance.
+ *
+ * @param object $entityAttendees
+ *   The data of attendacne that will duplicate.
+ *
+ * @return int
+ *   The id of duplicated attendance.
+ */
+function amt_validations_replicate_attendace($entityAttendees)
+{
+  // Replicate attendance before create main event.
+  $mainTitle = $entityAttendees->title->value;
+  $clonedEntityAttendance = $entityAttendees->createDuplicate();
+  $clonedEntityAttendance->save();
+  $attendeesId = $clonedEntityAttendance->id();
+  // Load the assigned attendance and update it to have the it on title.
+  $clonedEntityAttendance->set('title', $mainTitle . ' (' . $attendeesId . ')');
+  $clonedEntityAttendance->save();
+  // Save changed attendance.
+  return $attendeesId;
+}
+
+/**
+ * Standing events will replicated based on the expiration date.
+ *
+ * This for both lesson and group lesson.
+ *
+ * @param int $id
+ *   The Entity id will passed by queue.
+ */
+function amt_validations_duplicate_events($id)
+{
+
+  $result = TRUE;
+  $event = \Drupal::entityManager()->getStorage('events')->load($id);
+  // Get Required Values/.
+  $currentDate = $event->field_date_and_time->value;
+  $expiryDate = ($event->field_expiration_date->value);
+  $num = ($event->field_repetition_frequency->value);
+  $unit = ($event->field_repetition_units->value);
+  $parentID = $event->field_parent->value;
+  if (!empty($currentDate) && !empty($expiryDate) && !empty($unit) && $parentID == 0) {
+    switch ($unit) {
+      case 'Days':
+        $unit = 'day';
+        break;
+
+      case 'Weeks':
+        $unit = 'week';
+        break;
+
+      case 'Months':
+        $unit = 'month';
+        break;
+    }
+    // Create PHP + Time for date.
+    $addedUnits = ' +' . $num . ' ' . $unit;
+    // Clean Dates and Times.
+    $currentTime = date('H:i', strtotime($currentDate));
+    $currentDate = date('Y-m-d', strtotime($currentDate));
+    // Creates New Events while Current Date is Smaller than Expirey date.
+    while (strtotime($currentDate) < strtotime($expiryDate)) {
+
+      // Create a New Date Object from Current Date.
+      $newdate = new \DateTime($currentDate);
+
+      // Adds New Day/week/month to current date.
+      $newdate->modify($addedUnits);
+
+      // Create A String format from New Date.
+      $nextDate = $newdate->format('Y-m-d');
+
+      // If below condition is true it seems to be a problem so break it.
+      if ($nextDate == $currentDate || $expiryDate < $nextDate) {
+        break;
+      }
+
+      // Create a Clone from Current Event.
+      $nodeDuplicate = $event->createDuplicate();
+
+      // Add Date and Time For Cloned Event.
+      $newNodedate = date('Y-m-d\TH:i:s', strtotime($nextDate . ' ' . $currentTime));
+      $nodeDuplicate->field_date_and_time->value = $newNodedate;
+
+      // Add Current Event ID as parent to Newly Cloned Event.
+      $nodeDuplicate->field_parent->value = $id;
+
+      // Replicate the Attendance of this event.
+      if ($event->bundle() == 'group_lesson') {
+        $studentList = $event->field_students->referencedEntities();
+
+        foreach ($studentList as $key => $entityAttendees) {
+          // Assign recent created attendance to event.
+          $nodeDuplicate->field_students[$key]->target_id = amt_validations_replicate_attendace($entityAttendees);
+        }
+      } else {
+        if ($event->hasField('field_student')) {
+          // Check if event has any student field, since schedules don't have this field (schedules are only for teachers)
+          $studentList = $event->field_student->referencedEntities();
+          foreach ($studentList as $key => $entityAttendees) {
+            // Assign recent created attendance to event.
+            $nodeDuplicate->field_student[$key]->target_id = amt_validations_replicate_attendace($entityAttendees);
+          }
+        }
+      }
+
+      // Save the new Entity.
+      $nodeDuplicate->save();
+      $currentDate = $nextDate;
+    }
+  } else {
+    $result = FALSE;
+  }
+  return $result;
+}
+
+/**
+ * Generating a unique ID for payment ID.
+ *
+ * This is a recursive function that generates
+ * and Id for when payment form is openned. After the key generation
+ * it will check the key if the key is already assigned to any
+ * payment before, if so, the function calls itself again and
+ * againto finally generate a unique 32 bit ID.
+ */
+function amt_validations_generate_random_string()
+{
+
+  // Get last payment.
+  $lastGeneratedId = '';
+  // Check if last payment id is an integer: (Sincec old payment already have different type of ids like 32 bit character, which was the old process).
+  // Querying the payments entity.
+  $lastPaymentId = Drupal::entityQuery('payments')
+    ->sort('id', 'DESC')
+    ->range(0, 1)->execute();
+
+  // If there were payments for this enrollment.
+  if ($lastPaymentId != null) {
+    // Load the payments entity.
+    $paymentsObjects = \Drupal::entityTypeManager()->getStorage('payments')->load(array_shift($lastPaymentId));
+    if ($paymentsObjects != null) {
+      $lastGeneratedId = $paymentsObjects->field_payment_id->value;
+    }
+  }
+
+  // 1. increment if it was an integer.
+  if (is_numeric($lastGeneratedId)) {
+    return ++$lastGeneratedId;
+  }
+
+  // 2. create a random 8 digit integer if there was'nt any.
+  // Setting the characters interval.
+  $characters = '0918270036450098712003654';
+
+  $charactersLength = strlen($characters);
+  $randomInitialNumber = '';
+  // Creating an 8 bit length ID.
+
+  while (strlen($randomInitialNumber) < 9) {
+    $char = $characters[rand(0, $charactersLength - 1)];
+
+    // Don't start number with 0.
+    if (strlen($randomInitialNumber) == 0 && $char == '0')
+      continue;
+    $randomInitialNumber .= $char;
+  }
+
+  // THIS PART IS COOMETED DUE TO CHANGE IN PROCESS OF GENERATED THE PAYMENT CODE. NOW WE ARE GENERATING INCREMENTAL DIGITS.
+  // // Querying the payments entity.
+  // $checkPaymentId = Drupal::entityQuery('payments');
+  // // Setting the condition to check the payment id.
+  // $checkPaymentId->condition('field_payment_id', $randomString);
+
+  // // Executing the query and saving the value is a variable.
+  // $resutl = $checkPaymentId->execute();
+
+  // Checking if some data is returned from the query.-white
+  // If so, it means that the generated ID is already taken.
+  // if ($resutl != NULL) {
+  //   // Calling this function again by it self to generate another ID.
+  //   amt_validations_generate_random_string();
+  // }
+  // If query returned empty, it means the ID is not yet reserved.
+  // else {
+  //   // Reutrn the ID the hook function where it is called.
+  //   return $randomString;
+  // }
+
+  return $randomInitialNumber;
+}
+
+/**
+ * Identify the bundle of the event.
+ *
+ * This is a function called for identifying
+ * the bundle of event either being lesson or group lesson.
+ * This function is only going to return a value either
+ * being field_student or field_students so that we know
+ * how to access the attendance in this event.
+ * @param object $form
+ *    The entire form data is here.
+ *
+ */
+function amt_validations_event_bundle_indicator($form)
+{
+  // Set field_student as default.
+  // Meaning the default bunlde is lesson.
+  $bundleIndicator = 'field_student';
+  // If form has field_students.
+  // Means the bundle is group lesson.
+  if (isset($form['field_students'])) {
+    $bundleIndicator = 'field_students';
+  }
+  return $bundleIndicator;
+}
+
+/**
+ * Change attendance status in inline entity form.
+ *
+ * This is a callback function that is going to update
+ * status of all the attendees in this event that is being
+ * editted, whether, it's lesson or group lesson.
+ */
+function amt_validations_add_status_inline_entity_form(&$form)
+{
+  // Load the list of statuses for events.
+  $values = amt_validations_load_event_statuses();
+  // Identify the event bundle.
+  $bundleIndicator = amt_validations_event_bundle_indicator($form);
+  // A simple counter for loop and to avoid entities that are not attendance.
+  $counter = 0;
+  // Loop through each entity.
+  foreach ($form[$bundleIndicator]['widget']['entities'] as $key => $value) {
+
+    // If the $key is actually a number either being 0 or more.
+    if ($key === $counter) {
+      if ($form[$bundleIndicator]['widget']['entities'][$counter]['actions']) {
+        // Find the pre-selected status for this attendance.
+        $selectedStatusForThisStudent = $form[$bundleIndicator]['widget']['entities'][$counter]['#entity']->field_status->target_id;
+        // Add the status select box to this attendance.
+
+        // Get PA of this student.
+        $attendeesEntity = $form[$bundleIndicator]['widget']['entities'][$counter]['#entity'];
+        $student_id = $attendeesEntity->field_students->target_id;
+        $lessonAvailableAndUsed = amt_dashboard_total_lessons_paid_ahead_taken($student_id);
+
+        $description = 'Select Status';
+        $attributes = [];
+
+        $form[$bundleIndicator]['widget']['entities'][$counter]['actions']['status'] = [
+          '#title' => t('Status'),
+          '#type' => 'select',
+          '#description' => 'Change is only possible from day-view.',
+          '#options' => $values,
+          '#default_value' => $selectedStatusForThisStudent,
+          '#attributes' => array('disabled' => 'disabled'), // Avoid status change from this form. If this is needed then the count feature should be imporoved as well.
+        ];
+
+        // Set the selected item of this select box to the option already chosen.
+        $form['actions']['submit']['#submit'][] = '::submitForm';
+        $form['actions']['submit']['#submit'][] = '::save';
+        $form['actions']['submit']['#submit'][] = 'amt_reports_check_conflictedtime';
+      }
+      $counter++;
+    }
+  }
+}
+
+/**
+ * Loading list of all statuses for events.
+ *
+ * This is loading the list of all statuses for attendees which
+ * are for lesson and group lesson and are used to be displayed in select box
+ * in inline entity form when a lesson or group lesson is being edited.
+ */
+function amt_validations_load_event_statuses()
+{
+  // Empty array for holding the final list.
+  $values = [];
+  // Query the taxonomy terms to load the IDs of the attendees statuses.
+  $query = \Drupal::entityQuery('taxonomy_term')
+    ->condition('vid', "lesson_status", '=');
+  $eventStatusIds = $query->execute();
+  // Load all the statuses of attendees.
+  $loadStatusTaxonomy = \Drupal::entityManager()->getStorage('taxonomy_term')->loadMultiple($eventStatusIds, 'vid');
+  foreach ($loadStatusTaxonomy as $statusKey => $statusValue) {
+    // Saving each in an array with status IDs as their keys.
+    $values[$statusKey] = $statusValue->name->value;
+  }
+  return $values;
+}
+
+/**
+ * Getting Correct filed name based on provided instructor or executive.
+ *
+ * Since there are differenct field names for lessons, services, schedules 
+ * so we need to get correct field name for auto full purposes.
+ * 
+ * @param $form
+ * This param is carrying the the needed element for checking the logic.
+ */
+function _amt_validation_get_correct_field($form)
+{
+
+  // The field to store instructors to.
+  $field = 'field_instructor';
+
+  if (isset($form['field_schedule_instructor']) && !is_null($form['field_schedule_instructor'])) {
+    // Schedule instructor filed has this name (field_schedule_instructor).
+    $field = 'field_schedule_instructor';
+  } else if (isset($form['field_executive']) && !is_null($form['field_executive']) && (!isset($form['field_instructor']) || is_null($form['field_instructor']))) {
+    // services are going for executives.
+    $field = 'field_executive';
+  }
+
+  return $field;
+}
+
+/**
+ * Getting Correct filed name based on provided instructor or executive.
+ *
+ * Since there are differenct field names for lessons, services, schedules 
+ * so we need to get correct field name for auto full purposes.
+ * 
+ * @param $form
+ * This param is carrying the the needed element for checking the logic.
+ */
+function _amt_validation_modify_form_redirection(&$form, $formId)
+{
+
+  // Get the Current Url.
+  $current_url = $_SERVER['REQUEST_URI'];
+  $destination = $title =  $title2 =  $id =  $onClick = '';
+  $submit_2 = false;
+  $sub_btn_class1 = "pull-left";
+  $sub_btn_class2 = "pull-right";
+
+
+  // Check if the Url has the 'day-view' value.
+  if (strpos($current_url, 'day-view') !== FALSE) {
+    $destination = "_amt_general_redirect_to_dayview";
+  } else if (strpos($current_url, 'week-view') !== FALSE) {
+    $destination = "_amt_general_redirect_to_week_view";
+  }
+
+  if ($formId == 'events_lesson_form') {
+
+    $title = 'Save and Exit';
+    $title2 = 'Save and Add Lesson';
+    $id = 'submit_inquiry_form';
+    $onClick = 'document.getElementById("schedule_lesson").checked = true; document.getElementById("submit_inquiry_form").click(); return false';
+    $submit_2 = true;
+    $sub_btn_class1 = "pull-right";
+    $sub_btn_class2 = "pull-left";
+  } else if ($formId == 'student_accounts_student_account_form' && isset($_GET['display'])) {
+
+    // This section is for modifying submit function of inquiry form on dayview.
+    $title = 'Save info';
+    $title2 = 'Save and Schedule Service';
+    $id = 'submit_inquiry_form';
+    $onClick = 'document.getElementById("schedule_event").checked = true; document.getElementById("submit_inquiry_form").click(); return false';
+    $submit_2 = true;
+  } else if (in_array($formId, ['events_services_form', 'events_services_edit_form'])) {
+
+    $title = 'Save';
+    $id = 'submit_service_form';
+
+    // When inquiry is built from dayview then student will be built programatically on events_presave section.
+    if (isset($_SESSION['_sf2_attributes']['student_account'])) {
+      $title2 = 'Save and Add';
+      $onClick = 'document.getElementById("multiple_event").checked = true; document.getElementById("submit_service_form").click(); return false';
+      $submit_2 = true;
+    }
+  } else if ($formId == "packages_enrollment_edit_form" || $formId == "packages_enrollment_form") {
+    $title = 'Save';
+    // $source_link = $_SERVER['HTTP_REFERER'];
+    // $form['#source_link'][] = $source_link;
+    $destination = "_amt_general_redirect_back";
+  } else {
+    $title = 'Save';
+    $id = '';
+  }
+
+  // Adding the button to the form.
+  $form['actions']['submit'] = [
+    '#type'        => 'submit',
+    "#button_type" => "success",
+    '#value'       => t($title),
+    '#weight'      => 5,
+    '#submit'      => [
+      0 => "::submitForm",
+      1 => "::save",
+      2 => $destination,
+    ],
+    '#attributes' => [
+      'id' => $id,
+      'class' => [
+        $sub_btn_class1
+      ],
+    ]
+  ];
+
+  if ($submit_2) {
+    // Adding the button to the form.
+    $form['actions']['submit_2'] = [
+      '#type'        => 'button',
+      '#value'       => t($title2),
+      '#weight'      => 6,
+      '#submit'      => [
+        0 => "",
+      ],
+      '#attributes' => [
+        'class' => [
+          'btn-info',
+          $sub_btn_class2
+        ],
+        'onclick' => $onClick,
+
+        'style' => [
+          'margin-left: 5px'
+        ],
+      ],
+    ];
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * This hook is going to avoid enrollment delete
+ * if it has lessons connected to it already.
+ */
+function amt_validations_form_packages_enrollment_delete_form_alter(&$form, &$form_state, $form_id)
+{
+
+  // Load entity from form object.
+  $entity = $form_state->getFormObject()->getEntity();
+
+  $attendeeIds = _amt_studio_load_attendees([$entity->id()]);
+
+  $attendeesCount = count($attendeeIds);
+  $eventsIds = [];
+
+  // Check if there is any attendees.
+  if ($attendeesCount) {
+    $eventsIds = amt_dashboard_get_events_by_attendance($attendeeIds);
+  }
+
+  // This means the enrollment is attached to some lessons. So disable deleting it.
+  if (count($eventsIds) > 0) {
+
+    $eventList = \Drupal::entityTypeManager()->getStorage('events')->loadMultiple($eventsIds);
+
+    // Header of the table.
+    $contents = "<table class='responsive-enabled table table-hover dataTable no-footer'>
+      <thead>
+        <tr role='row'>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Service</th>
+          <th>Teacher</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+    <tbody>";
+
+    $rows = '';
+    foreach ($eventList as $key => $lesson) {
+
+      $timeStamp = strtotime($lesson->field_date_and_time->value);
+      $date = date('m-d-Y', $timeStamp);
+      $time = date('h:i A', $timeStamp);
+
+      // Getting the type of the lesson.
+      $service = 'Not Assigned';
+      if ($lesson->field_type->target_id != NULL && Term::load($lesson->field_type->target_id) != NULL) {
+        $service = Term::load($lesson->field_type->target_id)->getName();
+      }
+
+      $teacher = 'Not Assigned';
+      // Getting the instructor for the event.
+      if ($lesson->field_instructor->target_id != NULL) {
+        $matchedUser = User::load($lesson->field_instructor->target_id);
+        if ($matchedUser != NULL) {
+          $teacher = $matchedUser->getAccountName();
+        }
+      }
+
+      $status = 'No Status';
+      if ($lesson->field_student && $lesson->field_student->entity->field_status && $lesson->field_student->entity->field_status->target_id != NULL) {
+        // Getting the status of this lesson.
+        $statusTerm = Term::load($lesson->field_student->entity->field_status->target_id);
+
+        // If the status Id matches any Lesson Status term.
+        if ($statusTerm != NULL) {
+          // Get the Name of the status.
+          $status = $statusTerm->getName();
+        }
+      }
+
+      // Delete link.
+      $actions = "
+        <a href='/events/" . $lesson->id() . "/delete'>
+          <button class='button btn-danger btn btn-sm'>Delete</button>
+        </a>
+      ";
+
+      $rows .= "
+        <tr role='row'>
+          <td>$date</td>
+          <td>$time</td>
+          <td>$service</td>
+          <td>$teacher</td>
+          <td>$status</td>
+          <td>$actions</td>
+        </tr>
+      ";
+    }
+
+    // Closing table.
+    $tableEnding = "
+        </tbody>
+      </table>
+    ";
+
+    // Concatenate all peices.
+    $contents .= $rows . $tableEnding;
+
+    // Display information message.
+    \Drupal::messenger()->addError(t("This enrollment is connected to <b>$attendeesCount</b> lessons. <b>Delete them first!</b>"));
+
+    // Display lesson list.
+    \Drupal::messenger()->addMessage(t($contents));
+
+    $form['#title'] = '';
+
+    // Disable form actions as well.
+    unset($form['actions']);
+    unset($form['description']);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * This hook is going to avoid standing update of a parent event
+ * which is older than today.
+ *
+ */
+function amt_validations_form_events_lesson_continuous_appointment_form_alter(&$form, &$form_state, $form_id)
+{
+
+  // Load entity from form object.
+  $entity = $form_state->getFormObject()->getEntity();
+
+  // Check if this is a parent event and is standing and is in the past.
+  $isStanding = ($entity->field_expiration_date->value != null); // Check if this is an standing event.
+  $isParent = ($entity->field_parent->value == 0);
+  $isOld = ($entity->field_date_and_time->value < date('Y-m-d H:i:s'));
+
+  // This means the enrollment is attached to some lessons. So disable deleting it.
+  if ($isParent && $isStanding && $isOld) {
+
+    // Display information message.
+    \Drupal::messenger()->addError(t("You can not update a parent lesson that it's child has been processed!"));
+
+    // Disable form actions as well.
+    unset($form['actions']);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * This hook is going to avoid status update front the attendee form.
+ *
+ */
+function amt_validations_form_attendees_attendance_edit_form_alter(&$form, &$form_state, $form_id)
+{  
+  
+  $form['field_status']['widget']['#description'] = t('Change is only possible from day-view.');
+  $form['field_status']['widget']['#required'] = false;
+  $form['field_status']['#disabled'] = TRUE;
+
+  return $form;
+}

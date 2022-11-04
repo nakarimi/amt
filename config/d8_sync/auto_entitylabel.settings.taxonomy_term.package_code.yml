@@ -1,0 +1,7 @@
+status: 1
+pattern: '[term:field_package_label]'
+php: false
+escape: false
+dependencies:
+  config:
+    - taxonomy.vocabulary.package_code

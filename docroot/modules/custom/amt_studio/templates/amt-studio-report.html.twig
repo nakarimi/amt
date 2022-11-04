@@ -1,0 +1,28 @@
+
+<!-- this for adding the fillter of staff performace report view -->
+{% include "@amt_studio/amt-studio-report_filter.html.twig" %}
+
+<!-- this HIDDEN table is here just to make this similar to other reports, so that our scripts gets the date and move it next to page title. -->
+<div class="view-tables table-headers rprt_table hidden">
+  <table data-striping="1" class="table table-hover table-striped">
+    <tbody>
+      <tr class="odd">
+          <td>{{date_range}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+{% if studio_content_table %}
+  <div class="view-tables">
+    {{ studio_content_table }}
+  </div>
+{% endif %}
+
+{% if table_empty %}
+
+  <div class="show-empty-message">
+    {{ empty_text }}
+  </div>
+
+{% endif %}

@@ -1,0 +1,8 @@
+uuid: b0f9311a-0178-44ac-8bef-415975e33167
+langcode: en
+status: true
+dependencies: {  }
+name: 'Teacher Category'
+vid: teacher_category
+description: ''
+weight: 0

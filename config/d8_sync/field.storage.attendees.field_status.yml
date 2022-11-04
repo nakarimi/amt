@@ -1,0 +1,20 @@
+uuid: 8d7dbba6-af1d-4c40-b240-25107a7be79f
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - taxonomy
+id: attendees.field_status
+field_name: field_status
+entity_type: attendees
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

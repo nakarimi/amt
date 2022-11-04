@@ -1,0 +1,34 @@
+From 013dc46fb24c43b768e8809fa4066723aa0b2602 Mon Sep 17 00:00:00 2001
+From: Nasser Karimi <n.karimi@pomtech.com>
+Date: Sun, 16 Jun 2019 13:38:57 +0430
+Subject: [PATCH] Feeds patch to solve ECK import
+
+---
+ .../patched/feeds/src/Feeds/Processor/EntityProcessorBase.php | 11 -----------
+ 1 file changed, 11 deletions(-)
+
+diff --git a/docroot/modules/patched/feeds/src/Feeds/Processor/EntityProcessorBase.php b/docroot/modules/patched/feeds/src/Feeds/Processor/EntityProcessorBase.php
+index 07b1c6d1..71c3471a 100644
+--- a/docroot/modules/patched/feeds/src/Feeds/Processor/EntityProcessorBase.php
++++ b/docroot/modules/patched/feeds/src/Feeds/Processor/EntityProcessorBase.php
+@@ -497,17 +497,6 @@ protected function entitySaveAccess(EntityInterface $entity)
+             return;
+         }
+ 
+-      // If the uid was mapped directly, rather than by email or username, it
+-      // could be invalid.
+-        if (!$account = $entity->getOwner()) {
+-            throw new EntityAccessException($this->t('Invalid user mapped to %label.', ['%label' => $entity->label()]));
+-        }
+-
+-      // // We don't check access for anonymous users.
+-        if ($account->isAnonymous()) {
+-            return;
+-        }
+-
+         $op = $entity->isNew() ? 'create' : 'update';
+ 
+       // Access granted.
+-- 
+2.15.1.windows.2
+

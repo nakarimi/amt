@@ -1,0 +1,19 @@
+uuid: 4907f536-b960-44cc-8a53-38d76e73f94e
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.package
+    - field.storage.packages.field_package_name
+id: packages.package.field_package_name
+field_name: field_package_name
+entity_type: packages
+bundle: package
+label: Name
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

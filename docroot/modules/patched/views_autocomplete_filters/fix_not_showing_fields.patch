@@ -1,0 +1,18 @@
+diff --git a/src/Plugin/views/filter/ViewsAutocompleteFiltersTrait.php b/src/Plugin/views/filter/ViewsAutocompleteFiltersTrait.php
+index 2f93af5..9e2ac6c 100644
+--- a/src/Plugin/views/filter/ViewsAutocompleteFiltersTrait.php
++++ b/src/Plugin/views/filter/ViewsAutocompleteFiltersTrait.php
+@@ -41,8 +41,12 @@ trait ViewsAutocompleteFiltersTrait {
+       // Limit options to fields with the same name.
+       /** @var \Drupal\views\Plugin\views\field\FieldHandlerInterface $handler */
+       foreach ($this->view->display_handler->getHandlers('field') as $id => $handler) {
+-        if ($handler->realField == $this->realField) {
++        if ($handler->field == $this->realField) {
+           $field_options[$id] = $field_options_all[$id];
++        } else if ($handler->field . '_value' == $this->realField) {
++          $field_options[$id] = $field_options_all[$id];
++        } else if ($handler->realField . '_value' == $this->realField) {
++           $field_options[$id] = $field_options_all[$id];
+         }
+       }
+       if (empty($field_options)) {

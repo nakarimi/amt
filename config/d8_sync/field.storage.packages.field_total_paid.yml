@@ -1,0 +1,20 @@
+uuid: 4aeef19f-9010-4fc9-a9b2-5c9e42143031
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: packages.field_total_paid
+field_name: field_total_paid
+entity_type: packages
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

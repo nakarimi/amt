@@ -1,0 +1,38 @@
+uuid: 7002e1a3-ac66-492d-815f-2d01dfa4a806
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.attendees.attendance
+    - eck.eck_type.packages.enrollment
+    - field.storage.attendees.field_enrollment
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: attendees.attendance.field_enrollment
+field_name: field_enrollment
+entity_type: attendees
+bundle: attendance
+label: Enrollment
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:packages'
+  handler_settings:
+    target_bundles:
+      enrollment: enrollment
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

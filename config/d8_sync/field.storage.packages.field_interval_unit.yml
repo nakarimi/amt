@@ -1,0 +1,30 @@
+uuid: 93621d96-35cd-4266-b23c-c0946c0d1d70
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - options
+id: packages.field_interval_unit
+field_name: field_interval_unit
+entity_type: packages
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: Days
+      label: Days
+    -
+      value: Weeks
+      label: Weeks
+    -
+      value: Months
+      label: Months
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

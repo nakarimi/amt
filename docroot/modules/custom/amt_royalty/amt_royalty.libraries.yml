@@ -1,0 +1,6 @@
+amt_filters:
+  version: 1.x
+  js:
+    assets/js/amt_royalty.js: {}
+  dependencies:
+    - core/jquery

@@ -1,0 +1,20 @@
+uuid: 69d666ba-230d-4153-975c-f497da8acfca
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: student_accounts.field_low_lesson_threshold
+field_name: field_low_lesson_threshold
+entity_type: student_accounts
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

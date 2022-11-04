@@ -1,0 +1,32 @@
+uuid: e31a7a73-29ac-48b6-b6aa-e6b647fd4ada
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.lesson
+    - field.storage.events.field_duration
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.lesson.field_duration
+field_name: field_duration
+entity_type: events
+bundle: lesson
+label: Duration
+description: ''
+required: true
+translatable: true
+default_value:
+  -
+    value: '00:45'
+default_value_callback: ''
+settings: {  }
+field_type: list_string

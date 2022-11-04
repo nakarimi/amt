@@ -1,0 +1,35 @@
+uuid: 6a393862-8ab1-4164-bd70-b7f616b38844
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.package
+    - field.storage.packages.field_package_code
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: packages.package.field_package_code
+field_name: field_package_code
+entity_type: packages
+bundle: package
+label: 'Package Code'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: views
+  handler_settings:
+    view:
+      view_name: active_package_codes
+      display_name: entity_reference_1
+      arguments: {  }
+field_type: entity_reference

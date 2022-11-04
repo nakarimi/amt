@@ -1,0 +1,33 @@
+uuid: d4ce92ce-6630-49f7-b7ef-66c50309e699
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - options
+id: contacts.field_notification_preference
+field_name: field_notification_preference
+entity_type: contacts
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: call
+      label: 'Phone Call'
+    -
+      value: SMS
+      label: Text
+    -
+      value: Email
+      label: Email
+    -
+      value: Both
+      label: Both
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

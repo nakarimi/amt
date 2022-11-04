@@ -1,0 +1,11 @@
+uuid: 97747b09-f7d6-4e2f-8702-2da0cbd0606c
+langcode: en
+status: true
+dependencies:
+  module:
+    - amt_staff
+id: config_sync.module.amt_staff
+snapshotSet: config_sync
+extensionType: module
+extensionName: amt_staff
+items: {  }

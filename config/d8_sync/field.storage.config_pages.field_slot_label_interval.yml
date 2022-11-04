@@ -1,0 +1,21 @@
+uuid: 8cca5770-07ba-471d-ab29-a5b99be6ff77
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+id: config_pages.field_slot_label_interval
+field_name: field_slot_label_interval
+entity_type: config_pages
+type: string
+settings:
+  max_length: 255
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

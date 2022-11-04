@@ -1,0 +1,9 @@
+uuid: 8d555298-16e9-49cd-abc4-50c7a7535b2c
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_entity_type.events
+name: 'Group Lesson'
+type: group_lesson
+description: ''

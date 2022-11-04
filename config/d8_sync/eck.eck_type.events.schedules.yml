@@ -1,0 +1,9 @@
+uuid: 41f819db-6ee4-4701-a246-8c41c9a96d76
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_entity_type.events
+name: Schedules
+type: schedules
+description: 'Scheduling is exactly what it sounds like, scheduled stuff for the studio mainly meal breaks, meetings, etc.'

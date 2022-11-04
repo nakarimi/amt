@@ -1,0 +1,16 @@
+uuid: 9fb2f861-b93d-48cb-a53c-0532b07ef074
+langcode: en
+status: true
+dependencies:
+  module:
+    - adminimal_admin_toolbar
+id: config_sync.module.adminimal_admin_toolbar
+snapshotSet: config_sync
+extensionType: module
+extensionName: adminimal_admin_toolbar
+items:
+  -
+    collection: ''
+    name: adminimal_admin_toolbar.settings
+    data:
+      avoid_custom_font: false

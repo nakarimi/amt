@@ -1,0 +1,21 @@
+uuid: e4908601-2ecf-4ab0-9fcb-3a93d77ce319
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.field_next_scheduled_payment
+  module:
+    - datetime
+id: packages.enrollment.field_next_scheduled_payment
+field_name: field_next_scheduled_payment
+entity_type: packages
+bundle: enrollment
+label: 'Next Scheduled Payment'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

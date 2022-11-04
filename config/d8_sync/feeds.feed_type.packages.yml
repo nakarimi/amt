@@ -1,0 +1,154 @@
+uuid: 231c4c90-6576-4c8b-a3d0-a2bc60fa9f40
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.package
+    - field.field.packages.package.field_abbreviation
+    - field.field.packages.package.field_additional_notes
+    - field.field.packages.package.field_lesson_type
+    - field.field.packages.package.field_package_code
+    - field.field.packages.package.field_package_name
+    - field.field.packages.package.field_sps_code
+    - field.field.packages.package.field_total_price
+  module:
+    - eck
+label: Packages
+id: packages
+description: ''
+import_period: -1
+fetcher: upload
+fetcher_configuration:
+  allowed_extensions: 'txt csv tsv xml opml'
+  directory: 'private://feeds'
+parser: csv
+parser_configuration:
+  delimiter: ','
+  no_headers: false
+  line_limit: 100
+processor: 'entity:packages'
+processor_configuration:
+  update_existing: 2
+  update_non_existent: _keep
+  expire: -1
+  owner_feed_author: false
+  owner_id: 0
+  authorize: true
+  skip_hash_check: true
+  values:
+    type: package
+custom_sources:
+  additional_notes:
+    label: 'Additional Notes'
+    value: 'Additional Notes'
+    machine_name: additional_notes
+  lesson_count:
+    label: 'Lesson Count'
+    value: 'Lesson Count'
+    machine_name: lesson_count
+  lesson_price:
+    label: 'Lesson Price'
+    value: 'Lesson Price'
+    machine_name: lesson_price
+  lesson_type:
+    label: 'Lesson Type'
+    value: 'Lesson Type'
+    machine_name: lesson_type
+  name:
+    label: Name
+    value: Name
+    machine_name: name
+  sps_code:
+    label: 'SPS Code'
+    value: 'SPS Code'
+    machine_name: sps_code
+  title:
+    label: Title
+    value: Title
+    machine_name: title
+  total_price:
+    label: 'Total Price'
+    value: 'Total Price'
+    machine_name: total_price
+  abbreviatio:
+    label: Abbreviation
+    value: Abbreviation
+    machine_name: abbreviation
+  abbreviation:
+    label: Abbreviation
+    value: Abbreviation
+    machine_name: abbreviation
+  code:
+    label: code
+    value: code
+    machine_name: code
+  salecode:
+    label: salecode
+    value: salecode
+    machine_name: salecode
+  salevalue:
+    label: salevalue
+    value: salevalue
+    machine_name: salevalue
+  comments:
+    label: comments
+    value: comments
+    machine_name: comments
+  _name:
+    label: name
+    value: name
+    machine_name: _name
+  packagecode:
+    label: packagecode
+    value: packagecode
+    machine_name: packagecode
+  lessontype:
+    label: lessontype
+    value: lessontype
+    machine_name: lessontype
+mappings:
+  -
+    target: field_abbreviation
+    map:
+      value: code
+    unique:
+      value: '1'
+  -
+    target: field_package_name
+    map:
+      value: _name
+    unique: {  }
+  -
+    target: field_sps_code
+    map:
+      target_id: salecode
+    settings:
+      reference_by: name
+      autocreate: '1'
+  -
+    target: field_total_price
+    map:
+      value: salevalue
+  -
+    target: field_additional_notes
+    map:
+      value: comments
+  -
+    target: title
+    map:
+      value: _name
+    unique: {  }
+  -
+    target: field_package_code
+    map:
+      target_id: packagecode
+    settings:
+      reference_by: name
+      autocreate: false
+  -
+    target: field_lesson_type
+    map:
+      target_id: lessontype
+    settings:
+      reference_by: name
+      autocreate: '1'

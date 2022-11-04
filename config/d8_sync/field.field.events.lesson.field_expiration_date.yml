@@ -1,0 +1,21 @@
+uuid: 2bdad3d8-5007-4207-bab6-9fff551e7fe3
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.lesson
+    - field.storage.events.field_expiration_date
+  module:
+    - datetime
+id: events.lesson.field_expiration_date
+field_name: field_expiration_date
+entity_type: events
+bundle: lesson
+label: 'Expiration Date'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

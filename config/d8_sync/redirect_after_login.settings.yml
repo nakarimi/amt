@@ -1,0 +1,11 @@
+login_redirection:
+  anonymous: null
+  authenticated: /
+  administrator: /dashboard
+  studio_director: /dashboard
+  studio_manager: /dashboard
+  instructor: /day-view
+  developer: /dashboard
+  site_admin: /dashboard
+  executive: /day-view
+exclude_urls: ''

@@ -1,0 +1,27 @@
+uuid: 6f48aaae-1e1c-4244-a02f-91c9fe9b41c7
+langcode: en
+status: false
+dependencies:
+  config:
+    - system.menu.main
+  module:
+    - system
+  theme:
+    - amt
+_core:
+  default_config_hash: GT_zYl7I9VAILH8OxMRe-VDvFadCDHxRcnmBc5xEmf0
+id: amt_main_menu
+theme: amt
+region: navigation_collapsible
+weight: -5
+provider: null
+plugin: 'system_menu_block:main'
+settings:
+  id: 'system_menu_block:main'
+  label: 'Main navigation'
+  provider: system
+  label_display: '0'
+  level: 1
+  depth: 2
+  expand_all_items: false
+visibility: {  }

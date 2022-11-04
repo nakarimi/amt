@@ -1,0 +1,109 @@
+uuid: a1feafb9-9aea-4e61-8753-378ec2bccf0e
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.user.full
+    - field.field.user.user.feeds_item
+    - field.field.user.user.field_ami_id
+    - field.field.user.user.field_availability
+    - field.field.user.user.field_first_name
+    - field.field.user.user.field_last_name
+    - field.field.user.user.field_legacy_id
+    - field.field.user.user.field_lesson_types
+    - field.field.user.user.field_teacher_category
+    - field.field.user.user.user_picture
+  module:
+    - office_hours
+    - user
+_core:
+  default_config_hash: V51QPCKkgNREKtSmB9Iu2wmAMEpktVpnzklWaZV8UYo
+id: user.user.full
+targetEntityType: user
+bundle: user
+mode: full
+content:
+  field_ami_id:
+    weight: 2
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_availability:
+    type: office_hours_table
+    weight: 5
+    region: content
+    label: above
+    settings:
+      day_format: long
+      time_format: G
+      compress: false
+      grouped: false
+      show_closed: all
+      closed_format: Closed
+      separator:
+        days: '<br />'
+        grouped_days: ' - '
+        day_hours: ': '
+        hours_hours: '-'
+        more_hours: ', '
+      current_status:
+        position: ''
+        open_text: 'Currently open!'
+        closed_text: 'Currently closed'
+      schema:
+        enabled: false
+      timezone_field: ''
+      office_hours_first_day: ''
+    third_party_settings: {  }
+  field_first_name:
+    weight: 0
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_last_name:
+    weight: 1
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_legacy_id:
+    type: string
+    weight: 3
+    region: content
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+  field_lesson_types:
+    type: entity_reference_label
+    weight: 6
+    region: content
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+  field_teacher_category:
+    type: entity_reference_label
+    weight: 4
+    region: content
+    label: above
+    settings:
+      link: false
+    third_party_settings: {  }
+hidden:
+  feeds_item: true
+  field_birthday: true
+  field_hide: true
+  field_hiring_date: true
+  field_phone_number: true
+  member_for: true
+  profile_studio_director: true
+  user_picture: true

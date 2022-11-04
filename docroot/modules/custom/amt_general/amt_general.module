@@ -1,0 +1,1845 @@
+<?php
+
+/**
+ * @file
+ * Provides general functionality and alterations for AMT site functionality.
+ */
+
+use Drupal\Core\Url;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\entityqueue\Entity\EntitySubqueue;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\config_pages\Entity\ConfigPages;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * This hook is going to alter the enrollment drop form and add
+ * a DROP button to it that is facilitated with the confirmation
+ * dialog box. We are also attaching a callback function to the
+ * submit button to set a redirect route when the submission of
+ * the form is successfully done.
+ */
+function amt_general_form_packages_enrollment_enrollment_drop_mode_form_alter(&$form, &$form_state, $form_id)
+{
+  // Getting the most recent payment done for this enrollment.
+  $queryPayments = \Drupal::entityQuery('payments')
+    ->condition('field_enrollment_name', $form_state->getformObject()->getEntity()->id())
+    ->sort('id', 'DESC')
+    ->condition('field_status', 'Paid')
+    ->range(0, 1)
+    ->execute();
+  // Loading the selected payment.
+  $loadPayments = \Drupal::entityTypeManager()->getStorage('payments')->loadMultiple($queryPayments);
+  // Checking if the payment is not empty.
+  if (!empty($loadPayments)) {
+    foreach ($loadPayments as $payment) {
+      // Change the default date of the dropped date to the payment date.
+      $newDefaultDate = $payment->field_date_and_time->value;
+    }
+  }
+  // If the payment is empty.
+  else {
+    // Set the change of the droppped date to null.
+    $newDefaultDate = NULL;
+  }
+  if ($newDefaultDate != NULL) {
+    // Creating a date object to be used in the input field value.
+    $newDate = DrupalDateTime::createFromTimestamp(strtotime($newDefaultDate));
+    // Changing the default value of the form date to the date object of above.
+    $form['field_dropped_date']['widget'][0]['value']['#default_value'] = $newDate;
+  } else {
+    // Set the default date to null to prevent
+    // the previous dropped date to be here.
+    $form['field_dropped_date']['widget'][0]['value']['#default_value'] = NULL;
+  }
+  // Getting the total paid of the enrllment.
+  $totalPaid = $form_state->getformObject()->getEntity()->field_total_paid->value;
+
+  // Getting the total price of the enrllment.
+  $totalPrice = $form_state->getformObject()->getEntity()->field_enrollment_total_price->value;
+
+  // Getting the total price of the enrllment which is dropped already.
+  $totalDropped = $form_state->getformObject()->getEntity()->field_drop->value;
+
+  // If both total price and total paid are not empty.
+  if ($totalPaid != NULL && $totalPrice != NULL) {
+    // Set the default value of the drop ammount field to their subtraction.
+    $totalPrice = $totalPrice - $totalPaid - $totalDropped;
+  }
+  // If only Total price is available.
+  elseif ($totalPrice != NULL) {
+    // The default value is set to the total price.
+    $totalPrice = $totalPrice;
+  }
+  // If neither are available.
+  else {
+    // Set the default value to be empty.
+    $totalPrice = "";
+  }
+
+  $form['field_drop']['widget'][0]['value']['#default_value'] = $totalPrice;
+  $form['field_drop']['widget'][0]['value']['#attributes']['max'] = $totalPrice;
+  $form['field_drop']['widget'][0]['value']['#attributes']['min'] = $totalPrice;
+  $form['field_drop']['widget'][0]['value']['#attributes']['title'] = "The minimum and maximum of this drop field is set to the remaining amount of this enrollment, since Drop can be applied only ONCE!";
+
+  // If the amount was dropped already.
+  if ($totalDropped) {
+    // Show an informational message.
+    drupal_set_message('This enrollment has alraedy been Dropped. So there is no money due to Drop!', 'warning');
+
+    // Disable fields.
+    $form['field_drop']['widget'][0]['value']['#attributes']['disabled'] = 'disabled';
+    $form['field_dropped_date']['widget'][0]['value']['#attributes']['disabled'] = 'disabled';
+
+    // Disable form actions as well.
+    unset($form['actions']);
+  } else {
+    // Adding the button to the form.
+    $form['actions']['submit'] = [
+      '#type'        => 'submit',
+      "#button_type" => "danger",
+      '#value'       => t('Drop Enrollment'),
+      '#weight'      => 5,
+      '#submit'      => [
+        0 => "::submitForm",
+        1 => "::save",
+        2 => '_amt_general_redirect_to_ami_report',
+      ],
+      '#attributes' => ['onclick' => 'if(!confirm("Are you sure you wish to drop this amount?")){return false;}'],
+    ];
+    // Removing the Default Delete button in the form.
+    unset($form['actions']['delete']);
+  }
+}
+
+/**
+ * Redirecting the user after form submit.
+ *
+ * This callback function used to redirect
+ * the user after enrollment is dropped successfuly.
+ */
+function _amt_general_redirect_to_ami_report(array &$form, FormStateInterface &$formStat)
+{
+  // Getting the month from the drop field.
+  $week = date('W', strtotime($form['field_dropped_date']['widget']['0']['value']['#value']['date']));
+  // Getting the year from the drop field.
+  $year = date('Y', strtotime($form['field_dropped_date']['widget']['0']['value']['#value']['date']));
+  // Redirecting the user to the AMI report.
+  $formStat->setRedirect('amt_staff.page', [
+    'year' => $year,
+    'week' => $week,
+    'drop' => 'yes',
+  ]);
+}
+
+
+/**
+ * Implements hook_entity_view_alter().
+ */
+function amt_general_entity_view_alter(array &$build, Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {
+
+  // Altering entrollment view:
+  if ($entity->bundle() == 'enrollment') {
+
+    // 1- Showing Student Agreement for the enrollment.
+    // Check if the agreement already exists.
+    $student_id = $entity->get('field_student')->getValue()[0]['target_id'];
+    $enrollment_id = $entity->id();
+
+
+    $agreements = \Drupal::entityTypeManager()->getStorage('student_agreement')->loadByProperties(['field_student' => $student_id, 'field_enrollment' => $enrollment_id]);
+
+    $request = \Drupal::request();
+    if (count($agreements) > 0) {
+
+      $agreement_id = array_key_first($agreements);
+      $view_builder = \Drupal::entityManager()->getViewBuilder('student_agreement');
+      $view_output = $view_builder->view($agreements[$agreement_id], 'full');
+      $agreement_markup = '<div id="student-agreement-wrapper">' . \Drupal::service('renderer')->render($view_output) . '<div id="agreement-back-side">Federal Guidlines ....</div></div>';
+      // Show agreement.
+      $build['student_agreement'] = [
+        '#markup' => $agreement_markup,
+        '#weight' => 30,
+      ];
+
+      $btn_text = 'Edit Student Agreement';
+      $btn_link = "/student_agreement/$agreement_id/edit";
+      $extra_buttons = '
+        <!-- <a type="button" id="email-student-agreement" class="btn btn-success">Email Agreement</a> -->
+        <a type="button" id="print-student-agreement" class="btn btn-warning">Print Agreement</a>
+      ';
+    }
+    else {
+      // Autofill student and enrollment ids in agreement form.
+      $btn_text = 'Add Studnent Agreement';
+      $btn_link = '/admin/content/student_agreement/add/student_agreement';
+      $extra_buttons = '';
+      $session = $request->getSession();
+      $session->set('field_student', $student_id);
+      $session->set('field_enrollment', $enrollment_id);
+    }
+
+    // Show agreement add or edit button.
+    $build['student_agreement_button'] = [
+      '#markup' =>
+      '<div class ="col-sm-12 Student_Agreement_div">
+          <a data-dialog-type="modal" href="' . $btn_link . '?destination=' . $request->getRequestUri() . '" class =" use-ajax btn btn-info" data-dialog-options="{&quot;width&quot;:&quot;68%&quot;}">
+            ' . $btn_text . ' 
+          </a>
+          ' . $extra_buttons . '
+        </div>',
+      '#weight' => 40,
+    ];
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function amt_general_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+  if ($form_id == 'payments_payment_form') {
+    if (isset($_GET['autofill_enrollment'])) {
+      $form['field_enrollment_name']['widget']['0']['target_id']['#default_value'] = $_SESSION['hm_enrollment'];
+      $form['field_student_name']['widget']['0']['target_id']['#default_value'] = $_SESSION['hm_student'];
+    }
+  }
+
+  // Check if this is a package form page.
+  if ($form_id == 'packages_package_form' || $form_id == "packages_package_edit_form") {
+    // If is a package form manipulate the package code list.
+    _amt_package_form_package_code_change_label($form);
+    _amt_package_form_package_hide_terms($form, 'field_lesson_type', 'lesson_type');
+  }
+
+  // Attach js to Lesson and Group Lesson forms.
+  // The js is used to collapse the Standings tab in above forms.
+  $forms = [
+    'events_lesson_edit_form',
+    // 'events_group_lesson_form',
+    // 'events_group_lesson_edit_form',
+    'events_lesson_form',
+  ];
+  if (in_array($form_id, $forms)) {
+    $form['#attached']['library'][] = 'amt_general/collapsible_fields';
+    if ($form_id == 'events_lesson_form') {
+      _amt_general_modify_lesson_form($form, $form_state, $form_id);
+    }
+  }
+
+  if ($form_id == 'events_services_form') {
+    _amt_general_modify_service_form($form, $form_state, $form_id);
+  }
+
+  // Change the type of date filter in payment list.
+  if ($form["#id"] == 'views-exposed-form-payment-reports-page-1') {
+    $form['field_date_and_time_value']['min']['#type'] = 'date';
+    $form['field_date_and_time_value']['max']['#type'] = 'date';
+    // Change max date title to "Through".
+    $form['field_date_and_time_value']['max']['#title'] = 'Through';
+  }
+
+  // Adding another Save / New button to redirect the user back
+  // to the form after submission.
+  if ($form_id == 'packages_enrollment_form' || $form_id == 'payments_payment_form') {
+    // Adding the button to the form.
+    $form['actions']['submit_2'] = [
+      '#type'        => 'submit',
+      '#value'       => t('Save / New'),
+      '#weight'      => 6,
+      '#submit'      => [
+        0 => "::submitForm",
+        1 => "::save",
+        2 => '_amt_general_direct_to_new_enrollment_payment',
+      ],
+      '#attributes' => [
+        'class' => [
+          'btn-info'
+        ],
+        'style' => [
+          'margin-left: 5px'
+        ],
+      ],
+    ];
+
+    if ($form_id == 'packages_enrollment_form') {
+      // Adding the "Save & Pay" button to the form.
+      $form['actions']['submit_3'] = [
+        '#type'        => 'submit',
+        '#value'       => t('Save & Pay'),
+        '#weight'      => 7,
+        '#submit'      => [
+          0 => "::submitForm",
+          1 => "::save",
+          2 => '_amt_general_redirect_to_new_payment_form',
+        ],
+        '#attributes' => [
+          'class' => [
+            'btn-warning'
+          ],
+          'style' => [
+            'margin-left: 5px'
+          ],
+        ],
+      ];
+    }
+  }
+}
+
+/**
+ * Redirecting the user after form submit.
+ *
+ * This callback function used to redirect
+ * the user to dayview page if user came from that.
+ */
+function _amt_general_redirect_to_dayview(array &$form, FormStateInterface $form_state)
+{
+  if (empty($_GET['destination'])) {
+    // Set base path.
+    global $base_url;
+
+    $dateFieldData = $form['field_date_and_time']['widget'][0]['value']['date']['#value'];
+
+    $params = "date=" . $dateFieldData;
+
+    // initialing needed params.
+    $student = $date_and_time = $executive = '';
+
+    // Load entity from form object.
+    $entity = $form_state->getFormObject()->getEntity();
+
+    $student_account = $entity->id();
+
+    if ($form['#form_id'] == 'student_accounts_student_account_form') {
+      $executive = $entity->get('field_inquiry_taker')->getValue()[0]['target_id'];
+      $student = $entity->get('field_contacts')->getValue();
+      $date_and_time = $form['lesson_date']['#value']['date'] . ' ' . $form['lesson_date']['#value']['time'];
+    }
+
+    // Check if date is provided from inquiry form, logically is date is provided it will contain more than 10 index.
+    if ($form['#form_id'] == 'student_accounts_student_account_form' && isset($date_and_time[5])) {
+
+      $instructor = $entity->get('field_teacher')->getValue()[0]['target_id'];
+      $lessonTypeId = $form['lesson_type']['#value'];
+
+      // Create first DE lesson.
+      _amt_general_create_lesson($student, $student_account, $date_and_time, $instructor, $lessonTypeId);
+    }
+
+    if (isset($form['schedule_event']) && $form['schedule_event']['#value'] == 1) {
+
+      // These are for creating events from inquiry popup. 
+      $request = \Drupal::request();
+      $session = $request->getSession();
+      $session->set('executive', $executive); // services will go for executives.
+      $session->set('student_account', $student_account);
+      $session->set('student', $student);
+      $session->set('lesson_date', $date_and_time);
+
+      // Flag for day-view.
+      $params .= "&action=schedule_event";
+    } elseif (isset($form['schedule_lesson'])) {
+
+      // These are for creating lessons from lesson popup itself. 
+      $request = \Drupal::request();
+      $session = $request->getSession();
+      $session->set('instructor', $entity->get('field_type')->getValue()[0]['target_id']);
+      $session->set('field_date_and_time', $entity->get('field_date_and_time')->getValue()[0]['value']);
+
+      if ($form['schedule_lesson']['#value'] == 1) {
+        //Flag for day-view.
+        $params .= "&action=schedule_lesson";
+      }
+    } elseif (isset($form['multiple_event'])) {
+
+      // Flag for multple events.
+      if ($form['multiple_event']['#value'] == 1) {
+        $params .= "&action=schedule_event";
+      } else {
+        // Here we unset the old sessions being used on dayview, to not coflict with normal process.
+        unset($_SESSION['_sf2_attributes']['executive']);
+        unset($_SESSION['_sf2_attributes']['student_account']);
+        unset($_SESSION['_sf2_attributes']['student']);
+        unset($_SESSION['_sf2_attributes']['lesson_date']);
+      }
+    }
+
+    // Set Url.
+    $response = new RedirectResponse($base_url . "/day-view?" . $params);
+    $response->send();
+  }
+}
+
+/**
+ * Redirecting the user after form submit.
+ *
+ * This callback function used to redirect
+ * the user to week view page if user came from that.
+ */
+function _amt_general_redirect_to_week_view(array &$form, FormStateInterface $form_state)
+{
+  if (empty($_GET['destination'])) {
+
+    // Set base path.
+    global $base_url;
+    $dateFieldData = isset($form['field_date_and_time']) ? $form['field_date_and_time']['widget'][0]['value']['date']['#value'] : '';
+    // Set Url.
+
+    $instructor = _amt_general_get_instructor_from_event($form_state);
+    
+    $response = new RedirectResponse($base_url . "/week-view?date=" . $dateFieldData . "&instructor=" . $instructor);
+    $response->send();
+  }
+}
+
+function _amt_general_redirect_back(array &$form, FormStateInterface $form_state)
+{
+  // Set base path.
+  global $base_url;
+  // Set Url.
+  $response = new RedirectResponse($base_url . $_GET['destination']);
+  $response->send();
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Update the user registeration form based on user role.
+ */
+function amt_general_form_user_form_alter(&$form, &$form_state, $form_id)
+{
+  _amt_general_default_role($form_id, $form);
+}
+
+/**
+ * Change the default role option according to user type.
+ *
+ * @param string $form_id
+ *   Describes the user type.
+ * @param object &$form
+ *   Alter the form role options selected.
+ */
+function _amt_general_default_role($form_id, &$form)
+{
+  // Extract the user role from form id.
+  preg_match('~user_(.*?)_form~', $form_id, $role);
+  // Check if user role exist then set it as default.
+  if (array_key_exists($role[1], $form['account']['roles']['#options'])) {
+    // Set default role according to the form ID.
+    foreach ($form['account']['roles']['#options'] as $key => $systemRole) {
+      // If role is not executive make it unaccessible.
+      // User will just be able to select executive.
+      if ($key != 'executive') {
+        $form['account']['roles'][$key]['#access'] = FALSE;
+      }
+      // Make the default role selected according to selected role.
+      if ($key == $role[1]) {
+        $form['account']['roles'][$key]['#default_value'] = TRUE;
+        $form['account']['roles'][$key]['#disabled'] = TRUE;
+        $form['account']['roles'][$key]['#access'] = TRUE;
+      }
+    }
+  }
+}
+
+/**
+ * Change the default role option according to user type.
+ *
+ * @param FeedsSource $source
+ *   Describes the user type.
+ * @param FeedsParserResult $result
+ *   Alter the form role options selected.
+ */
+function amt_general_feeds_after_parse(FeedsSource $source, FeedsParserResult $result)
+{
+  // Example 1: only make adjustments for the myimporter importer.
+  foreach ($result->items as $item) {
+    // If the item has a title, prepend it with 'Drupal_'.
+    if (!empty($item->title)) {
+      $item->title = 'Drupal_' . $item->title;
+    }
+  }
+
+  // Example 2: only make adjustments for feed node 90 (importer is attached to
+  // a content type).
+  if ($source->feed_nid == 90) {
+    foreach ($result->items as $item) {
+      // If the item has a title, prepend it with 'Drupal_'.
+      if (!empty($item->title)) {
+        $item->title = 'Drupal_' . $item->title;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert() for Payment ECK.
+ */
+function amt_general_payments_insert(EntityInterface $entity)
+{
+  // Check that the current boundle type.
+  if ($entity->bundle() == 'payment') {
+    if ($entity->field_status->value == 'Paid') {
+      // Get the value of Gross Tuition to add to enrollment Total Paid.
+      $newGrossTuition = $entity->field_gross_tuition->value;
+      amt_general_enrollment_total_paid($entity, $newGrossTuition);
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert() for Packages ECK.
+ *
+ * This function manipulate the student account available lesson field
+ * when the enrollment inserted and recalculate the lesson available
+ * of the students.
+ *
+ * The first part of this function is seprated and it going to add the
+ * id to the beggining of the enrollment title. We could not add the id
+ * to the title in presave, because that time the enrollment would not
+ * have any Id yet. So we had to do it here.
+ */
+function amt_general_packages_insert($entity)
+{
+  // Check that the current bundle type.
+  if ($entity->bundle() == 'enrollment') {
+    if ($entity->field_enrollment_lesson_price == NULL || $entity->field_enrollment_lesson_price->value == 0) {
+      if (($entity->field_enrollment_lesson_count) && $entity->field_enrollment_lesson_count->value != 0) {
+        $entity->field_lesson_available->value = $entity->field_enrollment_lesson_count->value;
+      }
+    }
+    // Checking if the id is not present in the enrollment title.
+    if (!strpos($entity->title->value, $entity->id())) {
+      // Calling the save function to overide the title.
+      $entity->save();
+    }
+    // Get student and update the lesson available field.
+    $student = $entity->field_student->referencedEntities()[0];
+    if ($student != NULL) {
+      // Getting IDs of free enrollments which are Sundy and Uncategorized.
+      $enrollmentTypesIds = amt_general_load_nuteral_enrollments();
+      $student->field_lesson_available->value = amt_general_total_lessons_available($student->id(), $enrollmentTypesIds);
+      $student->save();
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_update() for Packages ECK.
+ *
+ * This function manipulate the student account available lesson field
+ * when the enrollment updated and recalculate the lesson available
+ * of the students.
+ */
+function amt_general_packages_update($entity)
+{
+  // Check that the current bundle type.
+  if ($entity->bundle() == 'enrollment') {
+    // Load the new student account entity.
+    $newStudent = $entity->field_student->referencedEntities()[0];
+    // Loading the old student account entity.
+    $oldStudent = $entity->original->field_student->referencedEntities()[0];
+
+    // Getting IDs of free enrollments which are Sundy and Uncategorized.
+    $enrollmentTypesIds = amt_general_load_nuteral_enrollments();
+
+    // If the student is the same calculate the student lesson available
+    // one times.
+    if ($newStudent != NULL && $oldStudent != NULL && $newStudent->id() == $oldStudent->id()) {
+      $newStudent->field_lesson_available->value = amt_general_total_lessons_available($oldStudent->id(), $enrollmentTypesIds);
+      $newStudent->save();
+    }
+    // This case the new and old student recalculate the lesson available.
+    else {
+      if ($newStudent != NULL) {
+        $newStudent->field_lesson_available->value = amt_general_total_lessons_available($newStudent->id(), $enrollmentTypesIds);
+        $newStudent->save();
+      }
+      if ($oldStudent != NULL) {
+        $oldStudent->field_lesson_available->value = amt_general_total_lessons_available($oldStudent->id(), $enrollmentTypesIds);
+        $oldStudent->save();
+      }
+    }
+  }
+}
+
+/**
+ * Calculate the total of lesson Available.
+ *
+ * This function get student account id and join some enrollment
+ * table and filter it by student id and calculate the total
+ * number of lesson available from enrollment ECK.
+ * Here we are also taking action to exclude the Sundry
+ * and Uncategorized enrollment types from calculating
+ * their lessons available.
+ *
+ * @param int $studentAccountId
+ *   The student account id.
+ *
+ * @return array
+ *   Return the total of lesson available & lesson used of enrollment.
+ */
+function amt_general_total_lessons_available($studentAccountId, $enrollmentTypesIds)
+{
+  $connection = \Drupal::database();
+  // Select the student of enrollments.
+  $lessontAvailable = db_select('packages__field_student', 'pack_st');
+  // Filter the enrollment by student id.
+  $lessontAvailable->condition('pack_st.field_student_target_id', $studentAccountId, 'IN');
+  // Join the lesson available table with student enrollment table.
+  $lessontAvailable->leftjoin('packages__field_lesson_available', 'pack_ava', 'pack_ava.entity_id = pack_st.entity_id');
+  // Joining the package category to exclude the Sunry and Uncategorized categories.
+  $lessontAvailable->leftjoin('packages__field_category', 'pack_cat', 'pack_cat.entity_id = pack_st.entity_id');
+  // Excluding the Sundry and uncategorized from being calculated.
+  $lessontAvailable->condition('pack_cat.field_category_target_id', $enrollmentTypesIds, 'NOT IN');
+  // Add expression for calculate the sum of lesson available of student.
+  $lessontAvailable->addExpression('SUM(pack_ava.field_lesson_available_value)', 'total_ava');
+  $totalAvailable = $connection->select($lessontAvailable);
+  $totalAvailable->fields(NULL, ['total_ava']);
+  // Return the number of student account in private lesson.
+  $totalLessonAvailable = $totalAvailable->execute()->fetchCol()[0];
+  if ($totalLessonAvailable == NULL) {
+    $totalLessonAvailable = 0;
+  }
+  return $totalLessonAvailable;
+}
+
+/**
+ * Implements hook_entity_update() for Payment ECK.
+ *
+ * This hook runs after the payments is updated, and checks
+ * if the status for both old and new version are Paid, then
+ * the difference should be saved in enrollment. if original one is
+ * "Not Paid" and the new one is "Paid", then the inserted money
+ * should be added to the current amount of enrollment. if, the original
+ * one is Paid and the update is Not Paid, then the amount of the original
+ * payment should be deducted from the enrollment total paid field, because
+ * this amount has already been calculated when the status for the original
+ * payment was changed to Paid.
+ * If the original doesn't have any status, which means the status is "None",
+ * then the new amount should be added to the enrollment.
+ */
+function amt_general_payments_update($entity)
+{
+  // Check that the current boundle type.
+  if ($entity->bundle() == 'payment') {
+    // If the payment was previosly assigned to an enrollment.
+    if ($entity->original->field_enrollment_name->target_id != NULL) {
+      // Checking if the enrollment is changed.
+      if ($entity->original->field_enrollment_name->target_id != $entity->field_enrollment_name->target_id) {
+        if ($entity->original->field_status->value) {
+          // If thes status for both of them are "Paid".
+          if ($entity->original->field_status->value == 'Paid' && $entity->field_status->value == 'Paid') {
+            // This amount will be added to the newly selected enrollment.
+            $new = (float) $entity->field_gross_tuition->value;
+            // This amount will be subtracted from the old enrollment.
+            $old = (float) $entity->original->field_gross_tuition->value;
+            amt_general_new_enrollment_total_paid($entity, $new, $old);
+          }
+          // If Original is "Not Paid", but new one is "Paid".
+          elseif ($entity->original->field_status->value == 'Not Paid' && $entity->field_status->value == 'Paid') {
+            // This amount will be added to the newly selected enrollment.
+            $new = (float) $entity->field_gross_tuition->value;
+            // This amount will be subtracted from the old enrollment.
+            $old = 0;
+            amt_general_new_enrollment_total_paid($entity, $new, $old);
+          }
+          // If original is "Paid", but new one is "Not Paid".
+          elseif ($entity->original->field_status->value == 'Paid' && $entity->field_status->value == 'Not Paid') {
+            // This amount will be added to the newly selected enrollment.
+            $new = 0;
+            // This amount will be subtracted from the old enrollment.
+            $old = (float) $entity->original->field_gross_tuition->value;
+            amt_general_new_enrollment_total_paid($entity, $new, $old);
+          }
+        }
+      }
+      // If the enrollments is still the old one.
+      elseif ($entity->original->field_enrollment_name->target_id == $entity->field_enrollment_name->target_id) {
+        // In the Original payment's status in not 'None'.
+        if ($entity->original->field_status->value) {
+          // If the status for both of them are "Paid".
+          if ($entity->original->field_status->value == 'Paid' && $entity->field_status->value == 'Paid') {
+
+            $newGrossTuition = (float) $entity->field_gross_tuition->value - $entity->original->field_gross_tuition->value;
+            amt_general_enrollment_total_paid($entity, $newGrossTuition);
+          }
+          // If Original is "Not Paid", but new one is "Paid".
+          elseif ($entity->original->field_status->value == 'Not Paid' && $entity->field_status->value == 'Paid') {
+            // Get the value of Gross Tuition to add to enrollment Total Paid.
+            $newGrossTuition = $entity->field_gross_tuition->value;
+            amt_general_enrollment_total_paid($entity, $newGrossTuition);
+          }
+          // If original is "Paid", but new one is "Not Paid".
+          elseif ($entity->original->field_status->value == 'Paid' && ($entity->field_status->value == 'Not Paid' || !isset($entity->field_status->value))) {
+            $newGrossTuition = -$entity->original->field_gross_tuition->value;
+            amt_general_enrollment_total_paid($entity, $newGrossTuition);
+          }
+        }
+        // If the original does not have a status which means "None".
+        else {
+          // If the new one's status is "Paid".
+          if ($entity->field_status->value == 'Paid') {
+            // Get the value of Gross Tuition to add to enrollment Total Paid.
+            $newGrossTuition = $entity->field_gross_tuition->value;
+            amt_general_enrollment_total_paid($entity, $newGrossTuition);
+          }
+        }
+      }
+    }
+    // If the payment was not assigned to any enrollment before.
+    else {
+      if ($entity->field_enrollment_name->target_id != NULL) {
+        // If the status is "Paid".
+        if ($entity->field_status->value == 'Paid') {
+          // Get the value of Gross Tuition to add to enrollment Total Paid.
+          $newGrossTuition = $entity->field_gross_tuition->value;
+          amt_general_enrollment_total_paid($entity, $newGrossTuition);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Total Paid value should be set by system automatically to enrollment.
+ *
+ * Total Paid will increment based on Payment Gross Tuition
+ * for assigned enrollment.
+ *
+ * The increment will done just on edit and once for each payment.
+ *
+ * @param object $entity
+ *   Payment entity to get its Gross Tuition.
+ */
+function amt_general_enrollment_total_paid($entity, $grossTuition)
+{
+  $enrollment = $entity->field_enrollment_name->referencedEntities()[0];
+  // If there is an enrollment attached to this payment.
+  if ($enrollment != NULL) {
+    // Adding the new value to Total Paid and save it.
+    $enrollment->field_total_paid->value = $enrollment->field_total_paid->value + $grossTuition;
+    $lessonPaid = 0;
+    if ($enrollment->field_enrollment_total_price->value != 0) {
+      $lessonPaid = (float) ($enrollment->field_total_paid->value * $enrollment->field_enrollment_lesson_count->value) / $enrollment->field_enrollment_total_price->value;
+    }
+    // Update the lesson paid value in enrollment.
+    $enrollment->field_lessons_paid->value = floor($lessonPaid);
+    // Update the lesson available in enrollment.
+    $enrollment->field_lesson_available->value = (int) $lessonPaid - $enrollment->field_lesson_used->value;
+    // Adding the new value to Total Paid and save it.
+    $enrollment->save();
+  }
+}
+
+/**
+ * Updating new and old enrollments.
+ *
+ * This function is called when a payment is updated and
+ * the enrollment is changed for that payment. This function
+ * is going to add the new amount to the new enrollment and
+ * subtract the old amount from the old enrollment.
+ *
+ * @param object $entity
+ *   Payment entity to get its Gross Tuition.
+ * @param int $new
+ *   Amount to be added to the new enrollment.
+ * @param int $old
+ *   Amount to be subtracted from the old enrollment.
+ */
+function amt_general_new_enrollment_total_paid($entity, int $new, int $old)
+{
+  // Loading the new selected enrollment entity.
+  $newEnrollment = $entity->field_enrollment_name->referencedEntities()[0];
+  // Loading the old enrollment entity.
+  $oldEnrollment = $entity->original->field_enrollment_name->referencedEntities()[0];
+  // Adding the new amount to the new enrollment selected.
+  $newEnrollment->field_total_paid->value += $new;
+  // Subtracting the old amount from the old enrollment.
+  $oldEnrollment->field_total_paid->value -= $old;
+  // Recalculating the lesson paids.
+  amt_general_recalculating_lesson_paid($newEnrollment);
+  amt_general_recalculating_lesson_paid($oldEnrollment);
+}
+
+/**
+ * Updating lesson paid for enrollment.
+ *
+ * This function is is called when an enrollment's
+ * total paid is updated. This is going to recalculate
+ * the lesson paid based on the new total paid amount.
+ *
+ * @param object $enrollment
+ *   Enrollment Object.
+ */
+function amt_general_recalculating_lesson_paid(&$enrollment)
+{
+  $lessonPaid = 0;
+  if ($enrollment->field_enrollment_total_price->value != 0) {
+    $lessonPaid = (float) ($enrollment->field_total_paid->value * $enrollment->field_enrollment_lesson_count->value) / $enrollment->field_enrollment_total_price->value;
+  }
+  // Update the lesson paid value in enrollment.
+  $enrollment->field_lessons_paid->value = floor($lessonPaid);
+  // Update the lesson available in enrollment.
+  $enrollment->field_lesson_available->value = (int) $lessonPaid - $enrollment->field_lesson_used->value;
+  // Adding the new value to Total Paid and save it.
+  $enrollment->save();
+}
+
+/**
+ * Implements hook_entity_presave() for events ECK.
+ */
+function amt_general_attendees_presave($entity)
+{
+  // @TODO: This should be commented or ignored while importing data from Feed.
+  _amt_general_lesson_count_update($entity);
+
+  $studentAccountEntity = $entity->field_student_account->entity;
+  // Counter is used to determine the first loop.
+  $counter = 1;
+  $newTitleForAttendees = '';
+  foreach ($studentAccountEntity->field_contacts as $contactId) {
+    if ($counter != 1) {
+      $newTitleForAttendees = $newTitleForAttendees . ', ';
+    }
+
+    $newTitleForAttendees = $newTitleForAttendees . $contactId->entity->field_first_name->value . ' ' . $contactId->entity->field_last_name->value;
+    $counter = 2;
+  }
+  // Assigning the string as the attendees title.
+  $entity->title->value = $newTitleForAttendees;
+
+}
+
+/**
+ * Implements hook_entity_delete() for events ECK.
+ *
+ * After deleting the events eck every
+ * related attendance also removed.
+ */
+function amt_general_events_delete($entity)
+{
+  if ($entity->bundle() == 'group_lesson') {
+    $attendanceEntity = $entity->field_students->referencedEntities();
+    foreach ($attendanceEntity as $key => $value) {
+      $deleted = $value->delete();
+    }
+  } else if ($entity->bundle() == 'schedules') {
+    return;
+  } else {
+
+    // We can't use attendee_delete hook, since while deleting attendee the lesson is already deleted.
+    $attendanceEntity = isset($entity->field_student->referencedEntities()[0]) ? $entity->field_student->referencedEntities()[0] : NULL;
+    if ($attendanceEntity != NULL) {
+      $lessonType = $entity->field_type->entity->name->value;
+      // Checking if the lesson type chosen is not among the free lesson types.
+      if ($lessonType != NULL && !in_array($lessonType, $freeLessons)) {
+        // If Previous status is Showed and
+        // The new status is Not Showed Not Charged.
+        $attendeeStatus = $attendanceEntity->field_status->entity->name->value;
+        if ($attendeeStatus == "Showed" || $attendeeStatus == "No Showed, Charged") {
+          // Load attendees based on the given id.
+          $enrollEntity = $attendanceEntity->field_enrollment->entity;
+          if ($enrollEntity != NULL) {
+            // Decrement the lesson used when the lesson deleted.
+            $enrollEntity->field_lesson_used->value--;
+            // Increment the lesson available when the lesson deleted.
+            $enrollEntity->field_lesson_available->value++;
+            $enrollEntity->save();
+          }
+        }
+      }
+      // Delete the attendance when the related events deleted.
+      $attendanceEntity->delete();
+    }
+
+    // The bellow functions is for updating the field_booked_on field of student account. The logic to set this field if this lesson is the first DE lesson and the inquiry field is checked. Or in case of delete, empty the field
+    amt_general_update_booked_field($entity, 'delete');
+  }
+}
+
+/**
+ * Implements hook_entity_presave() for events ECK.
+ */
+function amt_general_events_presave($entity)
+{
+  if ($entity->bundle() == 'lesson') {
+
+    $tempstore = \Drupal::service('user.private_tempstore')->get('amt_feeds');
+    if ($tempstore->get($entity->field_student->getString(), $entity->field_student->getString()) != NULL) {
+      // Removing the tempStore and terminate the
+      // function by returning the NULL value.
+      $tempstore->delete($entity->field_student->getString());
+      return NULL;
+    }
+
+    // Checking if the lesson type is not NULL.
+    if ($entity->field_type->target_id != NULL) {
+
+      // The bellow functions is for updating the field_booked_on field of student account. The logic to set this field if this lesson is the first DE lesson and the inquiry field is checked. Or in case of delete, empty the field
+      amt_general_update_booked_field($entity);
+
+      if ($entity->field_type->entity->name->value == "Dance Evaluation (DE)") {
+
+        // Check if this is the first lesson of the student,
+        // then set the inquiry showed date to this lesson's date.
+        _amt_general_check_and_set_inquiry_showed($entity);
+      }
+    }
+  } elseif ($entity->bundle() == 'services') {
+
+    // Here we manually create the attendee if inquiry is coming form day-view (where the sessions are set).
+    if (isset($_SESSION['_sf2_attributes']['student_account']) && isset($_SESSION['_sf2_attributes']['student'])) {
+
+      // Make Shorter params.
+      $student = $_SESSION['_sf2_attributes']['student'];
+      $student_account = $_SESSION['_sf2_attributes']['student_account'];
+
+      // Attach attendee to service.
+      $entity->field_student = _amt_general_create_new_attendee($student, $student_account);
+    }
+  }
+}
+
+/**
+ * Increment the lesson used value in events.
+ *
+ * This function increment the lesson used and decrement the lesson available
+ * while changing the status.
+ *
+ * @param object $attendanceEntity
+ *   Get the Id of the attendance.
+ */
+function amt_general_lesson_used_increment_calculation($attendanceEntity)
+{
+
+  // Check if attendees have any enrollment assigned for, assign if not
+  // And load the selected enrollment.
+  $packageEntity = amt_general_check_and_load_correct_enrollment($attendanceEntity, true);
+
+  // If package found.
+  if (is_object($packageEntity)) {
+    // If lesson used value will be null.
+    if ($packageEntity->field_lesson_used->value == NULL || $packageEntity->field_lesson_used->value == 0) {
+      // It sets the value to 1.
+      $packageEntity->set('field_lesson_used', '1');
+      // Decrement Lesson available.
+      if ($packageEntity->field_lessons_paid->value == 0 || $packageEntity->field_lessons_paid->value == NULL) {
+        $packageEntity->set('field_lesson_available', (($packageEntity->field_lesson_available->value) - 1));
+      } else {
+        $packageEntity->set('field_lesson_available', (($packageEntity->field_lessons_paid->value) - ($packageEntity->field_lesson_used->value)));
+      }
+      $packageEntity->save();
+    }
+    // If the lesson used value is not null.
+    else {
+      // Increment Lesson used.
+      $packageEntity->set('field_lesson_used', ($packageEntity->field_lesson_used->value) + 1);
+      // Decrement Lesson available.
+      if ($packageEntity->field_lessons_paid->value == 0 || $packageEntity->field_lessons_paid->value == NULL) {
+        $packageEntity->set('field_lesson_available', (($packageEntity->field_lesson_available->value) - 1));
+      } else {
+        $packageEntity->set('field_lesson_available', (($packageEntity->field_lessons_paid->value) - ($packageEntity->field_lesson_used->value)));
+      }
+      $packageEntity->save();
+    }
+  }
+
+}
+
+/**
+ * Check if attendees have any enrollment assigned for, assign if not.
+ *
+ * @param object $attendanceEntity
+ *   Get the Id of the attendance.
+ */
+function amt_general_check_and_load_correct_enrollment($attendanceEntity, $charge = false)
+{
+
+  // Getting the enrollment Id from the attendance.
+  $enrollment_id = $attendanceEntity->field_enrollment->target_id;
+
+  // If the attendance has no enrollment.
+  if ($enrollment_id == NULL) {
+    // Attach enrollment.
+    $enrollment_id = amt_general_attach_enrollment_to_attendance($attendanceEntity, $charge);
+  }
+
+  // If the attendance has enrollment but no lesson available and need to charge.
+  else if ($charge && $attendanceEntity->field_enrollment->entity->field_lesson_available->value == 0 ) {
+
+    \Drupal::logger('Update Status')->info($enrollment_id . ' Enrollment has 0 lesson available!');
+
+    // Attach enrollment.
+    $enrollment_id = amt_general_attach_enrollment_to_attendance($attendanceEntity, $charge);
+  }
+  else {
+    $typeMessage = ($charge) ? ' Charge' : ' Un-Charge';
+    \Drupal::logger('Update Status')->notice('There is an enrollment ('.$enrollment_id.') for this event.' . $typeMessage);
+  }
+
+
+
+  return \Drupal::entityManager()->getStorage('packages')->load($enrollment_id);
+
+}
+
+/**
+ * Attach the enrollment to the attendee.
+ *
+ *
+ * @param object $attendanceEntity
+ *   The attendee.
+ *
+ * @param bool $charge
+ *   Flag to consider while loading enrollments.
+ */
+function amt_general_attach_enrollment_to_attendance($attendanceEntity, $charge) {
+
+  if(isset($attendanceEntity->field_student_account)) {
+
+    // Get account id of the attendee.
+    $student_account_id = $attendanceEntity->field_student_account->target_id;
+
+    // Getting IDs of free enrollments which are Sundy and Uncategorized to exclude.
+    $enrollmentTypesIds = amt_general_load_nuteral_enrollments();
+
+    // Query enrollments using student account id.
+    $enrollmentQuery = \Drupal::entityQuery('packages')
+      ->condition('type', 'enrollment')
+      ->condition('field_student', $student_account_id, 'IN')
+    ->condition('field_category', $enrollmentTypesIds, 'NOT IN');
+
+    // If we are inreasing PA of student, when change event from showed to pending for example, then this condition is not needed. Myabe student PA is 0 and has no other enrollment, in this case we get that enrollment even with.
+    if ($charge) {
+      $enrollmentQuery->condition('field_lesson_available', '0', '>');
+    }
+    $enrollmentID = $enrollmentQuery->range(0, 1)->execute();
+
+    // If no enrollment found.
+    if (!count($enrollmentID) > 0) {
+    \Drupal::logger('Update Status')->notice('No Available Enrollments Found.');
+      return -1;
+    }
+
+    // Convert assoc array to simple value.
+    $enrollmentID = reset($enrollmentID);
+
+    // Later this is attached to attendee.
+    $_SESSION['attached_enrollment'] = $enrollmentID;
+
+    return $enrollmentID;
+  }
+}
+
+/**
+ * Decrement lesson used value for events.
+ *
+ * This function decrement the lesson used and increment the lesson available
+ * while changing the status.
+ *
+ * @param object $attendanceEntity
+ *   Get the Id of the attendance.
+ */
+function amt_general_lesson_used_decrement_calculation($attendanceEntity)
+{
+
+  // Check if attendees have any enrollment assigned for, assign if not.
+  // Load attendees based on the given id.
+  $packageEntity = amt_general_check_and_load_correct_enrollment($attendanceEntity);
+
+  // If package Entity is available.
+  if (is_object($packageEntity)) {
+
+    // Decrement Lesson used.
+    if ($packageEntity->field_lesson_used->value == NULL || $packageEntity->field_lesson_used->value == 0) {
+      $packageEntity->field_lesson_used->value = 0;
+    }
+
+    $packageEntity->set('field_lesson_used', ($packageEntity->field_lesson_used->value) - 1);
+    $packageEntity->set('field_lesson_available', (($packageEntity->field_lesson_available->value) + 1));
+    $packageEntity->save();
+
+  }
+}
+
+/**
+ * Implements hook_entity_presave().
+ *
+ * This function is going to devide the total price of
+ * enrollment by enrollment lesson count to achieve the lesson price
+ * in case of lesson price available.
+ * The first part of this function is acting separately fron
+ * the second one and is going to set the title for the enrollment
+ * if the enrollment is being editted.
+ * If the enrollment is being created, it's going to add a temporary title
+ * so that when the hook_entity_insert function is called for this
+ * entity and get to save() function, this presave function is called again
+ * the this time the enrollment will marked as Not New.
+ */
+function amt_general_packages_presave($entity)
+{
+  if ($entity->bundle() == "enrollment") {
+
+    // Prevent the lesson available not decrease to negative value.
+    if ($entity->field_lesson_available->value < 0) {
+      $entity->field_lesson_available->value = 0;
+    }
+
+    // If the enrollment is being created newly.
+    if ($entity->isNew()) {
+      // This title will be saved temporarily so that the
+      // enrollment gets saved. And when the hook_entity_insert
+      // function is called for the enrollments, the save function is called
+      // there, to set the title currectly.
+      $entity->set('title', 'temporary');
+    }
+    // If the enrollment already exists.
+    else {
+      // Changing the title.
+      amt_general_set_enrollment_title($entity);
+    }
+    if ($entity->field_enrollment_lesson_price == NULL || $entity->field_enrollment_lesson_price->value == 0) {
+      if (($entity->field_enrollment_lesson_count) && $entity->field_enrollment_lesson_count->value != 0) {
+        $entity->field_enrollment_lesson_price = $entity->field_enrollment_total_price->value / $entity->field_enrollment_lesson_count->value;
+      }
+    }
+  }
+}
+
+/**
+ * Setting the titel for an enrollment.
+ *
+ * This function is setting the right title for
+ * and enrollment when it's created or editted.
+ * The title is a combination of enrollment Id,
+ * Package Abbreviation and Enrollment Category.
+ */
+function amt_general_set_enrollment_title(&$entity)
+{
+  // Adding Id to the title.
+  $entity->title = $entity->id();
+  // If the package name was available.
+  if ($entity->field_enrollment_package_name->target_id) {
+    // Load the package entity.
+    $packageEntity = \Drupal::entityTypeManager()->getStorage('packages')->load($entity->field_enrollment_package_name->target_id);
+    // Saving the field package abbreviation
+    // to enrollment to be used in the title.
+    $packageAbbreviation = $packageEntity->field_abbreviation->value;
+    // Adding the abbreviation to the title.
+    $entity->title->value .= ' - ' . $packageAbbreviation;
+  }
+  // Adding category to the title.
+  if ($entity->field_category->target_id) {
+    $entity->title->value .= ' - ' . $entity->field_category->entity->name->value;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * This hook is going to alter the enrollment form that when it is oppening from 
+ * the appointment details popup it should have some data prefilled based on the 
+ * exist event and its assinged student.
+ */
+function amt_general_form_packages_enrollment_form_alter(&$form, FormStateInterface $form_state, $form_id)
+{
+  if ($_GET['autofill']) {
+    $event_id = $_COOKIE['ajax-modal-data-event'];
+    unset($_COOKIE['ajax-modal-data-event']);
+  }
+  if ($event_id) {
+    $event = \Drupal::entityTypeManager()->getStorage('events')->load($event_id);
+    if ($event) {
+      if (isset($event->field_student)) {
+        $att = $event->field_student->referencedEntities();
+        if (count($att) > 0) {
+          $att = reset($att);
+          $account = $att->field_student_account->referencedEntities();
+          $form['field_student']['widget'][0]['target_id']['#default_value'] = reset($account);
+          
+          // As client requested this part is disabled.
+          // https://team.pomtech.com/#/tasks/25311862
+          // $enr = reset($att->field_enrollment->referencedEntities());
+          // if ($enr) {
+          //   // Input text/number
+          //   $form['field_enrollment_lesson_count']['widget'][0]['value']['#default_value'] = $enr->field_enrollment_lesson_count->getString();
+          //   $form['field_enrollment_lesson_price']['widget'][0]['value']['#default_value'] = $enr->field_enrollment_lesson_price->getString();
+          //   $form['field_payment_amount']['widget'][0]['value']['#default_value'] = $enr->field_payment_amount->getString();
+          //   $form['field_payment_interval']['widget'][0]['value']['#default_value'] = $enr->field_payment_interval->getString();
+          //   $form['field_enrollment_total_price']['widget'][0]['value']['#default_value'] = $enr->field_enrollment_total_price->getString();
+          //   // Dropdown
+          //   $form['field_instructor']['widget']['#default_value'] = $enr->field_instructor->getString();
+          //   $form['field_executive']['widget']['#default_value'] = $enr->field_executive->getString();
+          //   $form['field_junior_executive']['widget']['#default_value'] = $enr->field_junior_executive->getString();
+          //   $form['field_category']['widget']['#default_value'] = $enr->field_category->getString();
+          //   $form['field_enrollment_status']['widget']['#default_value'] = $enr->field_enrollment_status->getString();
+          //   $form['field_interval_unit']['widget']['#default_value'] = $enr->field_interval_unit->getString();
+          //   // Autocompelete
+          //   $form['field_enrollment_package_name']['widget'][0]['target_id']['#default_value'] = reset($enr->field_enrollment_package_name->referencedEntities());
+          // }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_inline_entity_form_entity_form_alter().
+ *
+ * This hook is called for the inline entity forms to remove
+ * the %AutoEntityLabel% appearing instead of the actual label
+ * when the entity is being created.
+ * When editing the entity inside inline entity form, that entity
+ * gets the title correct. This only applies when that entity's
+ * form is accessed, even when editing.
+ */
+function amt_general_inline_entity_form_entity_form_alter(&$form, &$form_state)
+{
+  // if ($form['#bundle'] == "attendance"){
+  //   // if ($formId == 'attendees_attendance_form' || $formId == 'attendees_attendance_edit_form') {
+  //     // $form['#attached']['library'][] = 'amt_validations/amt_enrollmentattendee';
+  //     $form['#attached']['library'][] = 'amt_general/couple_inline_entity';
+  //     // Auto Populate Students from Students accounts.
+  //     $form['field_student_account']['widget']['target_id']['#ajax'] = [
+  //       'callback' => 'amt_validations_student_account_attendees',
+  //       'event' => 'autocompleteclose',
+  //     ];
+  //     dd($form['field_student_account']['widget']['target_id']);
+
+  // }
+  _amt_general_lesson_fill_attendance($form);
+  // Passing Null instead of letting %AutoEntityLabel% be passed.
+  $form['title']['widget'][0]['value']['#value'] = NULL;
+}
+
+function _amt_general_lesson_fill_attendance(&$form)
+{
+  if ($_GET['autofill']) {
+    $event_id = $_COOKIE['ajax-modal-data-event'];
+    unset($_COOKIE['ajax-modal-data-event']);
+  }
+  if ($event_id) {
+    $event = \Drupal::entityTypeManager()->getStorage('events')->load($event_id);
+    if ($event) {
+      if (isset($event->field_student)) {
+        $att = $event->field_student->referencedEntities();
+        if (count($att) > 0) {
+          $att = reset($att);
+          $account = $att->field_student_account->referencedEntities();
+          $form['field_student_account']['widget']['target_id']['#default_value'] = $account;
+          $form['field_student_name']['widget'][0]['target_id']['#default_value'] = $account[0];
+          $account = reset($account);
+          $form['field_students']['widget']['target_id']['#default_value'] = $account->field_contacts->referencedEntities();
+        }
+      }
+    }
+  }
+}
+/**
+ * Implements hook_entity_update() for attendees ECK.
+ *
+ * There are parents and childs for standing events.
+ *
+ * For Each events the independent attendance exist that has
+ * status and will update for that event.
+ *
+ * For Parent event when the attendance status changed, the other
+ * child will not change.
+ */
+function amt_general_attendees_update($entity)
+{
+  $session = new Session();
+  // If Student account doesn't change it may be an update on status.
+  if ($entity->original->field_student_account->target_id == $entity->field_student_account->target_id) {
+
+    // Check that the attendace status updated or not.
+    // If updated store it on the session for use on event update process.
+    if ($entity->original->field_status->target_id != $entity->field_status->target_id) {
+      // Set and get session attributes.
+      $session->set('event_status_updated_' . $entity->id(), TRUE);
+    }
+  } else {
+    $session->set('event_status_updated_' . $entity->id(), FALSE);
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * This function removes Admin Toolbar
+ *  for Instructor and Studio Manger roles only.
+ */
+function amt_general_page_attachments(array &$attachments)
+{
+  // Get Current user Role.
+  $roles = \Drupal::currentUser()->getRoles();
+  // Check if user has instructor or studio manager role.
+  if ((in_array("instructor", $roles) && !in_array('executive', $roles)) || in_array("studio_manager", $roles)) {
+    // Attach js file.
+    $attachments['#attached']['library'][] = 'amt_general/hide_toolbar';
+  }
+  $currentPath = \Drupal::service('path.current')->getPath();
+  // Adding the color picker to the color input. 
+  if (strpos($currentPath, 'taxonomy') > 0) {
+    $attachments['#attached']['library'][] = 'amt_general/color_picker_input';
+  }
+  // Sorting instructors on front-end with view. 
+  if (strpos($currentPath, 'instructor-reorder') > 0) {
+    $attachments['#attached']['library'][] = 'amt_general/instructor_sortable_views';
+  }
+  // adding the js to package list select.
+  if (strpos($currentPath, 'package') > 0) {
+    $attachments['#attached']['library'][] = 'amt_general/hide_show_package_code';
+    $attachments['#attached']['library'][] = 'amt_general/jquery_print';
+    $attachments['#attached']['library'][] = 'amt_general/print';
+  }
+  // adding the js to package list select.
+  if (strpos($currentPath, 'packages') > 0) {
+    $attachments['#attached']['library'][] = 'amt_general/view_display';
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function amt_general_views_query_alter(Drupal\views\ViewExecutable $view, Drupal\views\Plugin\views\query\Sql $query)
+{
+  // If is lesson list doesn't show any data on first loading without filter.
+  if ($view->id() == "lessons_list" && $_GET["instructor"] === NULL) {
+    $query->where[1]['conditions'][1]["value"] = NULL;
+  }
+}
+
+/**
+ * This function is going to load ['Sundry', 'Uncategorized'] enrollments.
+ */
+function amt_general_load_nuteral_enrollments()
+{
+  // Getting IDs of free enrollments which are Sundy and Uncategorized.
+  $queryEnrollmentTypes = \Drupal::entityQuery('taxonomy_term');
+  $queryEnrollmentTypes->condition('vid', 'enrollment_type');
+  $queryEnrollmentTypes->condition('name', ['Sundry', 'Uncategorized'], 'IN');
+  return array_values($queryEnrollmentTypes->execute());
+}
+
+/**
+ * This function is going to load provided status ids.
+ * by default ids of ['Showed', 'No Showed, Charged', 'Rescheduled'] will be returned.
+ */
+function amt_general_load_nuteral_lessons($statuses = ['Cancelled', 'No Showed Not Charged', 'Rescheduled'])
+{
+  // Getting IDs of lessons that are not being counted.
+  $queryLessons = \Drupal::entityQuery('taxonomy_term')
+    ->condition('vid', 'lesson_status')
+    ->condition('name', $statuses, 'IN');
+  return array_values($queryLessons->execute());
+}
+
+/**
+ * Set inquiry showed date for student account
+ * when the account is set to inquiry.
+ * This function works only if
+ * 1. Lesson type is Dance Evaluation (DE).
+ * 2. An attendance is attached to lesson so that we can access to student account.
+ * 3. Student account's inquiry field is true.
+ * 4. Lesson status is showed.
+ * 
+ * This function automates the inquiry showed date
+ * of any student account by putting a date on the
+ * the field_showed of student account upon the first
+ * lesson of the student which is usually Dance Evaluation (DE)
+ * with a status of Showed.
+ */
+function _amt_general_check_and_set_inquiry_showed($lesson, $new_status = false)
+{
+
+  // Get the student account entity.
+  $student_account = $lesson->field_student->entity->field_student_account->entity;
+
+  // If attendance is attached to lesson.
+  // If status of the lesson is showed.
+  // If attendees is not yet updated to the new status, but the status is passed to this function as parameter. (direct status update from dayview)
+  if (isset($lesson->field_student) && ($lesson->field_student->entity->field_status->entity->name->value == "Showed" || $new_status == "Showed")) {
+
+    // If student account is set to inquiry mode.
+    if ($student_account->field_inquiry_studen == true) {
+
+      // Set the inquiry showed date in the student account.
+      $student_account->field_showed = date('Y-m-d', strtotime($lesson->field_date_and_time->value));
+
+      // Save the changes in student account.
+      $student_account->save();
+    }
+  }
+}
+
+/**
+ * Redicting to add new enrollment or payment form.
+ * 
+ * This function is callback that is used when the user
+ * clicks on "Save / New" button on the forms of new
+ * enrollment or payment. If clicked, this function is
+ * going to redirect to a new form so that the user can
+ * add multiple enrollments or payments without being
+ * redirected elsewhere after each creation.
+ */
+function _amt_general_direct_to_new_enrollment_payment(&$form, &$form_state)
+{
+
+  // If form is for adding new enrollment.
+  if ($form['#form_id'] == 'packages_enrollment_form') {
+    $new_url = Url::fromUri('internal:/admin/content/packages/add/enrollment');
+
+    // Adding an alert message.
+    drupal_set_message('The enrollment was successfully added.');
+  }
+
+  // If form is for adding new payment.
+  if ($form['#form_id'] == 'payments_payment_form') {
+    $new_url = Url::fromUri('internal:/admin/content/payments/add/payment');
+
+    // Adding an alert message.
+    drupal_set_message('The payment was successfully added.');
+  }
+
+  // Set the redirection as appropriate.
+  if ($new_url != null) {
+    $form_state->setRedirectUrl($new_url);
+  }
+}
+
+/**
+ * Enrollment "Save & Pay" button callback.
+ *
+ * Redurects the user to the add payment form after creating an enrollment
+ * with student and enrollment field pre-filled in the payment form.
+ */
+function _amt_general_redirect_to_new_payment_form(&$form, &$form_state) {
+  drupal_set_message('Enrollment was created successfully');
+  $response = new RedirectResponse('/admin/content/payments/add/payment?autofill_enrollment=true');
+  $response->send();
+
+  return;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function amt_general_entity_insert($entity) {
+  if ($entity->getEntityTypeId() == 'packages' && $entity->bundle() == 'enrollment') {
+
+    $student = $entity->field_student->referencedEntities()[0];
+
+    $_SESSION['hm_enrollment'] = $entity;
+    $_SESSION['hm_student'] = $student;
+  }
+}
+
+/**
+ * The bellow functions is for updating the field_booked_on 
+ * field of student account. The logic to set this field if 
+ * this lesson is the first DE lesson and the inquiry field
+ * is checked. Or in case of delete, empty the field
+ */
+function amt_general_update_booked_field($entity, $type = 'insert')
+{
+  // Check if lesson type is DE. 
+  if ($entity->field_type->entity->name->value == "Dance Evaluation (DE)") {
+
+    // Load studnet Entity.
+    $studentEntity = \Drupal::entityTypeManager()->getStorage('student_accounts')->load($entity->field_student->entity->field_student_account->target_id);
+
+    // Check if inquery is checked for this student.
+    if ($studentEntity->field_inquiry_studen->value == 1) {
+
+      // Load attendace for this student in order to access it's lessons.
+      $getAttendeesIds = \Drupal::entityQuery('attendees')
+        ->condition('field_student_account', $entity->field_student->entity->field_student_account->target_id)->execute();
+      // Get id of DE lesson.
+      $danceEvaluationID = _amt_general_get_lesson_type_id('Dance Evaluation (DE)');
+
+      // Check if this is first DE lesson type.
+      $lessonCount = \Drupal::entityQuery('events')
+        ->condition('field_type', $danceEvaluationID)
+        ->condition('field_student', $getAttendeesIds, 'IN')->count()->execute();
+
+      if ($lessonCount == 0) {
+        // This means we can update the booked field now.
+        $studentEntity->field_booked_on->value = date('Y-m-d');
+        $studentEntity->save();
+      }
+
+      if ($type != 'insert') {
+        $studentEntity->field_booked_on->value = '';
+        $studentEntity->field_showed->value = '';
+        $studentEntity->save();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function amt_validations_attendees_insert($entity)
+{
+  // @TODO: This should be commented or ignored while importing data from Feed.
+  _amt_general_lesson_count_update($entity, true);
+}
+
+/**
+ * The bellow functions is to increase or decrease lesson value.
+ */
+function _amt_general_lesson_count_update($attendeesEntity, $insert = false)
+{
+
+  // Determining the free lesson types to be excluded from lesson used.
+  $freeLessons = _amt_general_get_free_lessons();
+  
+  // Check if there is an attendee, this for move operation. so that we exclude this part.
+  if ($attendeesEntity->id() > 0) {
+
+    // Load the related lesson
+    $entity = \Drupal::entityTypeManager()->getStorage('events')->loadByProperties(['field_student' => $attendeesEntity->id()]);
+
+    // If entity is available then proceed, Group lessons wont'go through this process.
+    if(!empty($entity = reset($entity))) {
+      
+      // not among the free lesson types.
+      if (!in_array($entity->field_type->entity->name->value, $freeLessons)) {
+
+        // Get Label Of Status.
+        $attendanceNewStatus = Term::load($attendeesEntity->field_status->target_id)->getName();
+
+        $shouldCharge = _amt_dayview_status_charge($attendanceNewStatus, 1);
+        if (!$insert) {
+          // Get previous status of attendees.
+          $previousStatus = Term::load($attendeesEntity->original->field_status->target_id)->getName();
+
+          // Check if status really updated. If status not updated then do nothing.
+          if ($previousStatus == $attendanceNewStatus) {
+            return;
+          }
+          
+          // Check if lesson has not be charged.
+          $isPreviouslyNotCharged = _amt_dayview_status_charge($previousStatus, 3);
+          // if lesson is not charged before and should charge now.
+          if ($isPreviouslyNotCharged && $shouldCharge) {
+              
+            amt_general_lesson_used_increment_calculation($attendeesEntity);
+            return;
+          } else if (!$isPreviouslyNotCharged && !$shouldCharge) {
+            // If lesson is charged before and should uncharge now.
+            amt_general_lesson_used_decrement_calculation($attendeesEntity);
+            return;
+          }
+        } 
+        else {
+          // For new lesson with charged status.
+          if ($shouldCharge) {
+            amt_general_lesson_used_increment_calculation($attendeesEntity);
+            return;
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert() for user.
+ */
+function amt_general_user_insert(Drupal\Core\Entity\EntityInterface $entity)
+{
+  if ($entity->get('roles')->getValue()[0]['target_id'] == 'instructor') {
+    _amt_general_queue_items($entity, 'insert');
+  }
+}
+
+/**
+ * Implements hook_entity_update() for user.
+ */
+function amt_general_user_update(Drupal\Core\Entity\EntityInterface $entity)
+{
+  if ($entity->get('roles')->getValue()[0]['target_id'] == 'instructor') {
+    _amt_general_queue_items($entity, 'update');
+  }
+}
+
+/**
+ * Implements hook_entity_delete() for user.
+ */
+function amt_general_user_delete(Drupal\Core\Entity\EntityInterface $entity)
+{
+  if ($entity->get('roles')->getValue()[0]['target_id'] == 'instructor') {
+    _amt_general_queue_items($entity, 'delete');
+  }
+}
+
+/**
+ * Update the entity queue based on the assinged teacher category to the instructor.
+ */
+function _amt_general_queue_items_update($queue, $id, $type = 'remove')
+{
+  $entity_subqueue = EntitySubqueue::load($queue);
+  $items = $entity_subqueue->get('items')->getValue();
+  if ($type == 'add') {
+    $items[] = ['target_id' => $id];
+  } else {
+    foreach ($items as $key => $item) {
+      if ($item['target_id'] == $id) {
+        unset($items[$key]);
+      }
+    }
+  }
+  $entity_subqueue->set('items', $items);
+  $entity_subqueue->save();
+}
+
+/**
+ * Define that which type of update process should be applied based on the operation acted on the instructor.
+ */
+function _amt_general_queue_items($entity, $type)
+{
+  $taxonamy_id = $entity->get('field_teacher_category')->getValue();
+  $taxonamy_id = $taxonamy_id[0]['target_id'];
+
+  if ($type == 'update') {
+    $taxonamy_id_old = $entity->original->get('field_teacher_category')->getValue();
+    $taxonamy_id_old = $taxonamy_id_old[0]['target_id'];
+
+    if ($taxonamy_id !== $taxonamy_id_old) {
+      if ($taxonamy_id == 78) {
+        $eqid_old = 'secondary_instructors';
+        $eqid_new = 'primary_instructors';
+      } else {
+        $eqid_old = 'primary_instructors';
+        $eqid_new = 'secondary_instructors';
+      }
+      _amt_general_queue_items_update($eqid_old, $entity->id());
+      _amt_general_queue_items_update($eqid_new, $entity->id(), 'add');
+    }
+  } else {
+    if ($taxonamy_id == 78) {
+      $eqid = 'primary_instructors';
+    } else {
+      $eqid = 'secondary_instructors';
+    }
+    if ($type == 'insert') {
+      _amt_general_queue_items_update($eqid, $entity->id(), 'add');
+    } elseif ($type == 'delete') {
+      _amt_general_queue_items_update($eqid, $entity->id());
+    }
+  }
+}
+
+/**
+ * Change the package code list to use the label instead of the default label if exist.
+ */
+function _amt_package_form_package_code_change_label(&$form)
+{
+  foreach ($form['field_package_code']['widget']['#options'] as $key => &$value) {
+    if (is_numeric($key)) {
+      $term = \Drupal::entityTypeManager()
+        ->getStorage('taxonomy_term')
+        ->load($key);
+      if (!$term->field_package_label->isEmpty()) {
+        $value = $term->field_package_label->getValue()[0]['value'];
+      }
+    }
+  }
+}
+
+
+/**
+ * Filter the terms loaded for the lesson type dropdown. Just active terms.
+ *
+ * @param  mixed $form
+ * @param  string $field
+ *   The form field that contain the taxonamy.
+ * @param  string $taxonomy
+ *   The name of taxonamy that should be filtered based.
+ * @return void
+ */
+function _amt_package_form_package_hide_terms(&$form, $field, $taxonomy)
+{
+  $hideTerm = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties([
+    'vid' => $taxonomy,
+    'field_hide' => TRUE,
+  ]);
+
+  //$hideTermIds = ['_none'];
+  foreach ($hideTerm as $key => $term) {
+    $hideTermIds[] = $key;
+  }
+
+  $filtered = array_filter(
+    $form[$field]['widget']['#options'],
+    function ($key) use ($hideTermIds) {
+      return !in_array($key, $hideTermIds);
+    },
+    ARRAY_FILTER_USE_KEY
+  );
+
+  // Override "Select Category" as placeholder.
+  $filtered['_none'] = 'Select Category';
+
+  $form[$field]['widget']['#options'] = $filtered;
+}
+
+function _amt_general_modify_lesson_form(&$form, FormStateInterface $form_state, $form_id)
+{
+  $form['field_duration']['widget']['#default_value'][0] = _amt_general_get_event_length('field_lessons_length');
+}
+
+function _amt_general_modify_service_form(&$form, FormStateInterface $form_state, $form_id)
+{
+  $form['field_duration']['widget']['#default_value'][0] = _amt_general_get_event_length('field_services_length');
+}
+
+function _amt_general_get_event_length($field)
+{
+  $event_length = ConfigPages::config('set_default_event_length');
+  $minutes = "00";
+  $hours = "00";
+  if ($event_length) {
+    $time = $event_length->{$field}->getString();
+    $hours = sprintf("%02d", floor($time / 60));
+    $minutes =  sprintf("%02d", ($time % 60));
+  }
+  return $hours . ':' . $minutes;
+}
+
+/**
+ * Create a DE lesson for the given student.
+ *
+ */
+function _amt_general_create_lesson($student, $student_account, $date_time, $instructor, $lessonTypeId)
+{
+
+  // Get id of new attendee.
+  $attendeeID =  _amt_general_create_new_attendee($student, $student_account);
+
+  // Get definition of target entity type.
+  $eventsDefinition = \Drupal::entityTypeManager()->getDefinition('events');
+
+  // Load up an array for creation.
+  $eventData = [
+    'field_date_and_time' =>  date('Y-m-d\TH:i:s', strtotime($date_time)),
+    'field_duration' => '00:45',
+    'field_instructor' => $instructor,
+    'field_type' => $lessonTypeId,
+    'field_student' => $attendeeID,
+    // Use entity definition to set the appropriate property for the bundle.
+    $eventsDefinition->getKeys()['bundle'] => 'lesson',
+  ];
+
+  // Create new entity by the data array that provided.
+  $newEvent = \Drupal::entityTypeManager()->getStorage('events')->create($eventData);
+  $newEvent->save();
+}
+
+/**
+ * Get the provided lesson type id.
+ */
+function _amt_general_get_lesson_type_id($lessonType)
+{
+
+  $danceEvaluationID = \Drupal::entityQuery('taxonomy_term')
+    ->condition('vid', 'lesson_type')
+    ->condition('name', [$lessonType])
+    ->execute();
+
+  return reset($danceEvaluationID);
+}
+
+/**
+ * Create new attendee programatically.
+ */
+function _amt_general_create_new_attendee($student, $student_account, $enrollment = null, $description = null)
+{
+
+  // Get definition of target entity type.
+  $attendeesDefinition = \Drupal::entityTypeManager()->getDefinition('attendees');
+
+  // Load up an array for creation.
+  $attendeeData = [
+    'field_students' => $student,
+    'field_student_account' => $student_account,
+    'field_enrollment' => $enrollment,
+    'field_description' => $description,
+    $attendeesDefinition->getKeys()['bundle'] => 'attendance',
+  ];
+
+  // Create new entity by the data array that provided.
+  $newAttendee = \Drupal::entityTypeManager()->getStorage('attendees')->create($attendeeData);
+  $newAttendee->save();
+
+  return $newAttendee->id();
+}
+
+/**
+ * Implements hook_entity_delete().
+ *
+ * Redirects user to the related entity's list page after deleting
+ * an item.
+ */
+function amt_general_entity_delete($entity)
+{
+  global $base_url;
+  $entity_bundle = $entity->bundle();
+
+  // The array indexes are the entity bundle
+  // and the values are the entity's list page URL.
+  $redirect_urls = [
+    'enrollment' => $base_url . '/enrollment',
+    'student_account' => $base_url . '/students-list',
+    'services' => $base_url . '/lessons-list',
+    'package' => $base_url . '/packages-list',
+    'payment' => $base_url . '/payment-reports',
+  ];
+  if (isset($redirect_urls[$entity_bundle]) && strpos('amt_dayview/delete', $_SERVER['REQUEST_URI']) === FALSE) {
+    $response = new RedirectResponse($redirect_urls[$entity_bundle]);
+    $response->send();
+
+    drupal_set_message(t('Successfully deleted.'));
+    exit;
+  }
+}
+
+/*
+ * Extract instructor from event.
+ */
+function _amt_general_get_instructor_from_event($form_state)
+{
+
+  $entity = $form_state->getFormObject()->getEntity();
+
+  // For lessons and group lessons.
+  $instructor = 'field_instructor';
+
+  // For schedules.
+  if ($entity->bundle() == 'schedules') {
+    $instructor = 'field_schedule_instructor';
+  } else if ($entity->bundle() == 'services') {
+    // For services.
+    $instructor = 'field_executive';
+  }
+
+  return ($entity->hasField($instructor)) ? $entity->get($instructor)->getValue()[0]['target_id'] : '';
+}
+
+/*
+ * Return list of free lessons (Actually the lesson which won't be counted against student enrollments).
+ */
+function _amt_general_get_free_lessons()
+{
+  // Group lessons are all free. ("Group", "Practice Party", "Non Unit Group").
+  return ["Group", "Practice Party", "Non Unit Group"];
+}

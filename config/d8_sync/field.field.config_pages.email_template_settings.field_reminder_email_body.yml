@@ -1,0 +1,29 @@
+uuid: a3d022cf-b11d-4b8f-bde3-f7f3fdc8debb
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.email_template_settings
+    - field.storage.config_pages.field_reminder_email_body
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.email_template_settings.field_reminder_email_body
+field_name: field_reminder_email_body
+entity_type: config_pages
+bundle: email_template_settings
+label: 'Reminder Email Body'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long

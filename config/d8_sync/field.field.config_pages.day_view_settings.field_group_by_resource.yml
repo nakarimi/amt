@@ -1,0 +1,23 @@
+uuid: 77f93492-c0d9-4478-81b7-cc6bd143861c
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.day_view_settings
+    - field.storage.config_pages.field_group_by_resource
+id: config_pages.day_view_settings.field_group_by_resource
+field_name: field_group_by_resource
+entity_type: config_pages
+bundle: day_view_settings
+label: 'Group By Resource'
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: 1
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

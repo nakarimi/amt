@@ -1,0 +1,173 @@
+<?php
+
+/**
+ * Implements hook_theme().
+ */
+function amt_userdashboard_theme($existing, $type, $theme, $path) {
+  return [
+    'amt_userdashboard' => [
+      'variables' => [
+        'teacher_data' => NULL,
+      ],
+      'path' => $path . '/templates',
+      'template' => 'amt-userdashboard',
+    ],
+  ];
+}
+
+/**
+ * Loading the data for user dashboard page.
+ * 
+ * This function is the main function to be called
+ * and load all the data required for the user/staff/teacher
+ * dashboard page. The function receives the ID of
+ * the user taken from the URL and attempts to
+ * fetch the related data and return them to where
+ * the function is called.
+ */
+function amt_userdashboard_load_teacher_data($user) {
+
+  // Load the user entity.
+  $instructor = \Drupal::entityManager()->getStorage('user')->load($user);
+
+  // Create an empty array to hold final data.
+  $user_data = [];
+
+  // If the istructor entity is loaded.
+  if ($instructor != null) {
+    // Get the full name for the teacher.
+    if (isset($instructor->field_first_name) || isset($instructor->field_first_name)) {
+      $user_data['name'] = $instructor->field_first_name->value . ' ' . $instructor->field_last_name->value;
+    }
+  
+    // Get the email of the teacher.
+    if (isset($instructor->mail) && $instructor->mail->value != null) {
+      $user_data['email'] = $instructor->mail->value;
+    }
+
+     // Get the Legacy ID of the teacher.
+     if (isset($instructor->field_legacy_id) && $instructor->field_legacy_id->value != null) {
+      $user_data['legacy_id'] = $instructor->field_legacy_id->value;
+    }
+
+    // Get the email of the teacher.
+    if (isset($instructor->field_phone_number) && $instructor->field_phone_number->value != null) {
+      $user_data['phone'] = $instructor->field_phone_number->value;
+    }
+  
+    // Set an empty array to hold teacher's roles.
+    $user_data['titles'] = [];
+    if (isset($instructor->roles) && count($instructor->roles) > 0) {
+      foreach ($instructor->roles as $role) {
+        $user_data['titles'][] = t('<span class="roles_in_userdashboard">' . $role->entity->get('label') . '</span>');
+      }
+    }
+  
+    // Get the hiring date for the teacher.
+    if (isset($instructor->field_hiring_date) && $instructor->field_hiring_date->value != null) {
+      $user_data['hiring_date'] = date('m-d-Y', strtotime($instructor->field_hiring_date->value));
+    }
+  
+    // Get the birthday for the teacher.
+    if (isset($instructor->field_birthday) && $instructor->field_birthday->value != null) {
+      $user_data['birthday'] = date('m-d-Y', strtotime($instructor->field_birthday->value));
+    }
+
+    // If this user has availablity table filled.
+    if (isset($instructor->field_availability) && count($instructor->field_availability) > 0) {
+
+      // Structure the availability data properly into an array.
+      $structured_availability = _amt_userdashboard_structure_availability_array($instructor->field_availability);
+
+      // Put the availability array into a table.
+      $user_data['availability'] = _amt_userdashboard_create_availability_table($structured_availability);
+    }
+
+    // Save the user ID as well.
+    $user_data['id'] = $user;
+  }
+
+  // If no teacher with the given ID exists.
+  else {
+    $user_data['no_teacher'] = 'There is no instructor with this ID you have requested!';
+  }
+
+  return $user_data;
+}
+
+/**
+ * Creating Table for availability in user dashboard.
+ */
+function _amt_userdashboard_create_availability_table($availability) {
+
+  $availability_table = [
+    '#type' => 'table',
+    '#header' => [
+      'Day',
+      'Availability'
+    ],
+    '#rows' => $availability,
+  ];
+  // Id for the table.
+  $availability_table['#attributes']['id'] = 'availabilityTable';
+
+  // Adding bootstrap classes for the table.
+  $availability_table['#attributes']['class'] = ['table', 'table-striped'];
+  return $availability_table;
+}
+
+/**
+ * Putting the availability data into structured array.
+ * 
+ * This function recieves the availability data as a chunk of
+ * probably around 84 array items and put them in multidimensional
+ * array of weekdays. Then the function attempts to exclude
+ * Saturdays and Sundays from the list.
+ */
+function _amt_userdashboard_structure_availability_array($availability_array) {
+
+  // An multidimensional array with their first item being the weekdays.
+  // Indexes are set based on the day settings in tables in the database.
+  $structured = [
+    1 => ['Monday'],
+    2 => ['Tuesday'],
+    3 => ['Wednesday'],
+    4 => ['Thursday'],
+    5 => ['Friday'],
+  ];
+
+  // Loop through the availability data for this user.
+  foreach ($availability_array as $day) {
+
+    // If current item is not from Saturday or Sunday.
+    if ($structured[$day->day]) {
+
+      // Save the staring hour.
+      $start = $day->starthours;
+
+      // Save the ending hour.
+      $end = $day->endhours;
+
+      // If starting hour has only 3 numbers.
+      // Means that hour part of the time is one digit.
+      if (strlen($day->starthours) == 3) {
+
+        // Add digit 0 to the beginning.
+        $start = '0' . $start;
+      } 
+
+      // If end hour has only 3 numbers.
+      // Means that hour part of the time is one digit.
+      if (strlen($day->endhours) == 3) {
+
+        // Add digit 0 to the beginning.
+        $end = '0' . $end;
+      }
+
+      // Add the converted time to the array.
+      $structured[$day->day][] = date('h:i a', strtotime($start)) . ' - ' . date('h:i a', strtotime($end));
+    }
+  }
+
+  return $structured;
+}

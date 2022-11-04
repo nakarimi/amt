@@ -1,0 +1,30 @@
+uuid: 9118add0-b899-498c-9839-15ef4a4d0848
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.day_view_settings
+    - field.storage.config_pages.field_studio_working_hours
+  module:
+    - disable_field
+    - office_hours
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.day_view_settings.field_studio_working_hours
+field_name: field_studio_working_hours
+entity_type: config_pages
+bundle: day_view_settings
+label: 'Studio Working Hours'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: office_hours

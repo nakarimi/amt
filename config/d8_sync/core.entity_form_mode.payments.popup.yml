@@ -1,0 +1,10 @@
+uuid: fea1d963-b137-4615-b76c-6a9640365eb9
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: payments.popup
+label: popup
+targetEntityType: payments
+cache: true

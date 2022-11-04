@@ -1,0 +1,11 @@
+uuid: bf1ee5df-63dc-4034-bff1-86c81e034104
+langcode: en
+status: true
+dependencies:
+  module:
+    - entityqueue
+id: config_sync.module.entityqueue
+snapshotSet: config_sync
+extensionType: module
+extensionName: entityqueue
+items: {  }

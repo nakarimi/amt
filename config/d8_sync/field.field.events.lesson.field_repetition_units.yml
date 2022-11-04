@@ -1,0 +1,21 @@
+uuid: 77a6105e-7aeb-4e55-8400-cd1e7b98d91c
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.lesson
+    - field.storage.events.field_repetition_units
+  module:
+    - options
+id: events.lesson.field_repetition_units
+field_name: field_repetition_units
+entity_type: events
+bundle: lesson
+label: 'Repetition Units'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

@@ -1,0 +1,64 @@
+uuid: 09e2db40-f27b-4a2d-8c18-0fce7812c341
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.group_lesson_types.field_abbreviation
+    - field.field.taxonomy_term.group_lesson_types.field_color
+    - field.field.taxonomy_term.group_lesson_types.field_hide
+    - taxonomy.vocabulary.group_lesson_types
+  module:
+    - color_field
+    - path
+    - text
+id: taxonomy_term.group_lesson_types.default
+targetEntityType: taxonomy_term
+bundle: group_lesson_types
+mode: default
+content:
+  description:
+    type: text_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_abbreviation:
+    weight: 32
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_color:
+    weight: 31
+    settings:
+      placeholder_color: ''
+      placeholder_opacity: ''
+    third_party_settings: {  }
+    type: color_field_widget_default
+    region: content
+  field_hide:
+    weight: 33
+    settings:
+      display_label: true
+    third_party_settings: {  }
+    type: boolean_checkbox
+    region: content
+  name:
+    type: string_textfield
+    weight: -5
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  path:
+    type: path
+    weight: 30
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden: {  }

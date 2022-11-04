@@ -1,0 +1,144 @@
+{# Enrollments List Heading #}
+<h1 id="filtersTitle" data-toggle="collapse" href="#collapseFilter" role="button" aria-expanded="true" aria-controls="collapseFilter"> <span class="collapseBtn"> <img src="core/misc/icons/bebebe/hamburger.svg"> </span> Filters</h1>
+{# Enrollments List Filters Container #}
+
+{% set pop = (pageType == 'week') ? 'week' : 'day' %}
+
+<div class="collapse in" id="collapseFilter">
+	<div id="calendarfilter" class="day-view">
+		<form class="calendar_filter_form" role="form">
+
+		{% if pageType == 'day' %}
+			<div class="form-group dayview_col">
+						<select name="instructor_category" id="inputIns" class="form-control" style=" height: auto; ">
+							{% if teacherCategory %}
+								{% for category in teacherCategory %}
+										<option value="{{category.id}}">{{category.name}}</option>
+								{% endfor %}
+							{% endif %}
+						</select>
+					</div>
+		{% endif %}
+			<div class="form-group dayview_col">
+				<select name="instructor" class="form-control instructors_list" style=" height: auto; ">
+					{# <option value="" selected="selected">Choose Instructor...</option> #}
+					{% if teachersList %}
+						{% for key,teacher in teachersList %}
+							<option value="{{key}}">{{teacher}}</option>
+						{% endfor %}
+					{% endif %}
+				</select>
+			</div>
+			<div class="form-group dayview_col">
+				<select name="lessonType" class="form-control lesson_types" style=" height: auto; ">
+					<option value="" selected="selected">Choose Lesson Type...</option>
+					{% if lessonTypes %}
+						{% for key,lesson_type in lessonTypes %}
+							<option value="{{key}}">{{lesson_type}}</option>
+						{% endfor %}
+					{% endif %}
+				</select>
+			</div>
+			<div class="form-group dayview_col">
+				<label class="sr-only" for="">Student</label>
+				<input type="text" class="form-control" name="student" entity="student_accounts" bundle="student_account" placeholder="Student">
+			</div>
+
+			<div class="form-group dayview_col">
+				<input id="calendar_date" type="{{ (pageType == 'day') ? 'date' : 'week' }}" class="form-control" name="calendar_date" placeholder="Date">
+			</div>
+		<div class="checkbox form-group dayview_col">
+		<label>
+			<input type="checkbox" name="group_lesson" id="input" value="1">
+			Group Lesson
+		</label>
+		<label>
+			<input type="checkbox" name="lesson" id="input" value="1">
+			Lesson
+		</label>
+		<label>
+			<input type="checkbox" name="services" id="input" value="1">
+			Services
+		</label>
+		</div>
+			<input type="hidden" name="start" value="" placeholder="">
+			<input type="hidden" name="end" value="" placeholder="">
+		</form>
+		<button type="button" id="filter_form_submited" class="btn btn-primary btn-md">Apply</button>
+		{% if pagePath.full == true %}
+			<a href="/{{ (pageType == 'week') ? 'day' : 'week' }}-view-full" type="button" id="" class="btn btn-info btn-md">{{ (pageType == 'week') ? 'Day ' : 'Week ' }} View</a>
+		{% else %}
+			<a href="/{{ (pageType == 'week') ? 'day' : 'week' }}-view" type="button" id="" class="btn btn-info btn-md">{{ (pageType == 'week') ? 'Day ' : 'Week ' }} View</a>
+		{% endif %}
+	</div>
+</div>
+<button type="button" id="add_inquiry" class="btn btn-success btn-md pull-right use-ajax" data-dialog-type="modal" data-dialog-options='{"width":"68%"}'href="/admin/content/student_accounts/add/student_account?popup=/{{pop}}-view&display=popup">
+	Add Inquiry
+</button>
+<div class="dropdown pull-right">
+    <button class="btn btn-primary active dropdown-toggle" id="add-new-event-dropdown-toggle" type="button" data-toggle="dropdown">
+        <i class="glyphicon glyphicon-file" aria-hidden="true"></i> New Event <span class="caret"></span>
+    </button>
+    <ul id="add-new-event" class="dropdown-menu">
+        <li>
+			<a class="use-ajax" data-dialog-type="modal" data-dialog-options='{"width":"68%"}'
+			   href="/admin/content/events/add/lesson?popup=/{{pop}}-view">Add Lesson</a>
+        </li>
+        <li>
+			<a class="use-ajax" data-dialog-type="modal" data-dialog-options='{"width":"68%"}'
+			   href="/admin/content/events/add/group_lesson?popup=/{{pop}}-view">Add Group Lesson</a>
+        </li>
+        <li>
+			<a class="use-ajax" data-dialog-type="modal" id="add_service" data-dialog-options='{"width":"68%"}'
+			   href="/admin/content/events/add/services?popup=/{{pop}}-view">Add Services</a>
+        </li>
+        <li>
+			<a class="use-ajax" data-dialog-type="modal" id="add_schedule" data-dialog-options='{"width":"68%"}'
+			   href="/admin/content/events/add/schedules?popup=/{{pop}}-view">Add Schedules</a>
+        </li>
+    </ul>
+</div>
+
+{% if pageType == 'day' %}
+<div class="dropdown pull-right">
+	<button class="btn btn-info dropdown-toggle" id="update_multiple_status_dropdown_btn" data-toggle="dropdown" disabled>
+    <i class="glyphicon glyphicon-file" aria-hidden="true"></i> Status Update <span class="caret"></span>
+	</button>
+	<ul id="update_multiple_status_dropdown" class="dropdown-menu">
+		<li>
+			<a href="#" data-bundle="dayview_lessons" class="update_multiple_status_item" type="button" data-dialog-type="modal" data-dialog-options='{"width":"68%"}'>Update Lesson</a>
+		</li>
+		<li>
+			<a href="#" data-bundle="dayview_group_lessons" class="update_multiple_status_item" type="button" data-dialog-type="modal" data-dialog-options='{"width":"68%"}'>Update Group Lesson</a>
+		</li>
+		<li>
+			<a href="#" data-bundle="dayview_services" class="update_multiple_status_item" type="button" data-dialog-type="modal" data-dialog-options='{"width":"68%"}'>Update Services</a>
+		</li>
+	</ul>
+</div>
+{% endif %}
+{# reqular forms #}
+<a class="use-ajax hidden" data-dialog-type="modal" id="lesson" data-dialog-options='{"width":"68%"}' href="/admin/content/events/add/lesson?popup=/day-view&destination=/day-view&type=tooltip">Book Lesson</a>
+
+<a class="use-ajax hidden" data-dialog-type="modal" id="service" data-dialog-options='{"width":"68%"}' href="/admin/content/events/add/services?popup=/day-view&destination=/day-view&type=tooltip">Book Service</a>
+
+<a class="use-ajax hidden" data-dialog-type="modal" id="group_lesson" data-dialog-options='{"width":"68%"}' href="/admin/content/events/add/group_lesson?popup=/day-view&destination=/day-view&type=tooltip">Book Group Lesson</a>
+
+<a class="use-ajax hidden" data-dialog-type="modal" id="schedule" data-dialog-options='{"width":"68%"}' href="/admin/content/events/add/schedules?popup=/day-view&destination=/day-view&type=tooltip">Book Schedule</a>
+
+<a class="use-ajax hidden" data-dialog-type="modal" data-dialog-options='{"width":"68%"}' href="/admin/content/packages/add/enrollment?popup=/day-view&destination=/day-view&type=tooltip">Add Enrollment</a>
+
+<a class="use-ajax hidden" data-dialog-type="modal" data-dialog-options='{"width":"68%"}' href="/admin/content/payments/add/payment?popup=/day-view&destination=/day-view&type=tooltip&display=popup">Payment</a>
+
+{# auto fill forms #}
+<a class="use-ajax hidden" data-dialog-type="modal" id="autofill-lesson" data-dialog-options='{"width":"68%"}' href="/admin/content/events/add/lesson?popup=/day-view&destination=/day-view&type=tooltip&autofill=true">Book Lesson</a>
+
+<a class="use-ajax hidden" data-dialog-type="modal" id="autofill-service" data-dialog-options='{"width":"68%"}' href="/admin/content/events/add/services?popup=/day-view&destination=/day-view&type=tooltip&autofill=true">Book Service</a>
+
+<a class="use-ajax hidden" data-dialog-type="modal" id="autofill-group_lesson" data-dialog-options='{"width":"68%"}' href="/admin/content/events/add/group_lesson?popup=/day-view&destination=/day-view&type=tooltip&autofill=true">Book Group Lesson</a>
+
+<a class="use-ajax hidden" data-dialog-type="modal" id="autofill-schedule" data-dialog-options='{"width":"68%"}' href="/admin/content/events/add/schedules?popup=/day-view&destination=/day-view&type=tooltip&autofill=true">Book Schedule</a>
+
+<a class="use-ajax hidden" data-dialog-type="modal" id="autofill-enrollment" data-dialog-options='{"width":"68%"}' href="/admin/content/packages/add/enrollment?popup=/day-view&destination=/day-view&type=tooltip&autofill=true">Add Enrollment</a>
+
+<a class="use-ajax hidden" data-dialog-type="modal" id="autofill-payment" data-dialog-options='{"width":"68%"}' href="/admin/content/payments/add/payment?popup=/day-view&destination=/day-view&type=tooltip&autofill=true&display=popup">Payment</a>

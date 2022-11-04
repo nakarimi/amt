@@ -1,0 +1,29 @@
+uuid: 9f647b3c-c47a-46a0-99f6-4319280dfd52
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_ami_id
+  module:
+    - disable_field
+    - user
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: user.user.field_ami_id
+field_name: field_ami_id
+entity_type: user
+bundle: user
+label: 'AMI ID'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

@@ -1,0 +1,13 @@
+--- core/modules/views/config/schema/views.filter.schema.yml
++++ core/modules/views/config/schema/views.filter.schema.yml
+@@ -7,6 +7,10 @@ views.filter.*:
+ views.filter.boolean:
+   type: views_filter
+   label: 'Boolean'
++  mapping:
++    null_is_false:
++      type: boolean
++      label: 'Evaluate Null as False.'
+ 
+ views_filter_boolean_string:
+   type: views_filter

@@ -1,0 +1,28 @@
+schemas:
+  bootstrap: 8000
+  amt: 8000
+cdn_provider: ''
+_core:
+  default_config_hash: 71vTnk5szuOQRTsOR-S5bjCzPvkxtx_eVGMqYa_mcqc
+favicon:
+  mimetype: image/vnd.microsoft.icon
+  path: ''
+  url: 'http://amt.com/themes/custom/amt/favicon.ico'
+  use_default: true
+features:
+  comment_user_picture: true
+  comment_user_verification: true
+  favicon: true
+  node_user_picture: true
+logo:
+  path: 'public://logo.png'
+  url: ''
+  use_default: false
+table_responsive: '-1'
+cdn_theme: ''
+cdn_cache_ttl_versions: 0
+cdn_cache_ttl_themes: 0
+cdn_cache_ttl_assets: 0
+cdn_cache_ttl_library: 0
+reset_http_request_cache: ''
+table: ''

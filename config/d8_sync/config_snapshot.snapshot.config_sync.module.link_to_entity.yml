@@ -1,0 +1,11 @@
+uuid: 8abefee1-519b-41eb-8c6c-80196ff0cfb2
+langcode: en
+status: true
+dependencies:
+  module:
+    - link_to_entity
+id: config_sync.module.link_to_entity
+snapshotSet: config_sync
+extensionType: module
+extensionName: link_to_entity
+items: {  }

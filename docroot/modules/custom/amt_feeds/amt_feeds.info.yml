@@ -1,0 +1,8 @@
+name: AMT FEEDS
+description: Genearl custom modifications and changes for AMT Feeds importer
+package: Custom
+type: module
+version: 1.0
+core: 8.x
+dependencies:
+- amt_general

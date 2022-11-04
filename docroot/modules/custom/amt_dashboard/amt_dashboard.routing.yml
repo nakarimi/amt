@@ -1,0 +1,44 @@
+amt_dashboard.filterenrollments:
+  path: "/amt_dashboard/filterenrollments"
+  defaults:
+    _controller: '\Drupal\amt_dashboard\Controller\AmtDashboardController::ajaxLoadFilterEnrollment'
+    _title: "Load the filter enrollment over ajax call"
+  requirements:
+    _permission: "Student Dashboard"
+amt_dashboard.autocomplete:
+  path: "/amt_dashboard/autocomplete"
+  defaults:
+    _controller: '\Drupal\amt_dashboard\Controller\AmtDashboardController::ajaxLoadAutoComplete'
+    _title: "Loading the autocomplete data of the input fields"
+  requirements:
+    _permission: "Student Dashboard"
+amt_student_dashboard.page:
+  path: "/student-dashboard"
+  defaults:
+    _controller: '\Drupal\amt_dashboard\Controller\AmtDashboardController::loadStudentDashboard'
+    _title: "Student Dashboard"
+  requirements:
+    _permission: "Student Dashboard"
+  options:
+    no_cache: 'TRUE'
+amt_student_dashboard.adjustStudentBalance:
+  path: "/student-balancing"
+  defaults:
+    _controller: '\Drupal\amt_dashboard\Controller\AmtDashboardController::adjustStudentBalance'
+    _title: "Student Dashboard"
+  requirements:
+    _permission: "Student Dashboard"
+amt_student_dashboard.updateStudentDepartment:
+  path: "/update-student-department"
+  defaults:
+    _controller: '\Drupal\amt_dashboard\Controller\AmtDashboardController::updateStudentDepartment'
+    _title: "Student Department Update"
+  requirements:
+    _permission: "Student Dashboard"
+amt_dashboard.hideEnrollment:
+  path: "/amt_dashboard/hideEnrollment"
+  defaults:
+    _controller: '\Drupal\amt_dashboard\Controller\AmtDashboardController::ajaxHideEnrollment'
+    _title: "Load the filter enrollment over ajax call"
+  requirements:
+    _permission: "Student Dashboard"

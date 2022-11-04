@@ -1,0 +1,11 @@
+uuid: 1d84e40a-ec0a-496d-8bb2-34fde7315f3d
+langcode: en
+status: true
+dependencies:
+  module:
+    - token
+id: config_sync.module.token
+snapshotSet: config_sync
+extensionType: module
+extensionName: token
+items: {  }

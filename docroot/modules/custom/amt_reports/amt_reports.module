@@ -1,0 +1,1730 @@
+<?php
+
+/**
+ * @file
+ * Provides Reports functionality and alterations for AMT AMI.
+ */
+
+use Drupal\user\Entity\User;
+use Drupal\Core\Database\Database;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\amt_general\LogMessage;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
+/**
+ * Implements hook_theme().
+ */
+function amt_reports_theme($existing, $type, $theme, $path)
+{
+  return [
+    'chat_success_rate' => [
+      'variables' => [
+        'rate_table' => NULL,
+        'table_empty' => TRUE,
+        'empty_text' => t('No Success Rate was Found'),
+        'service_type' => NULL,
+        'start_date' => NULL,
+        'end_date' => NULL,
+        'userRole' => NULL,
+      ],
+      'path' => $path . '/templates',
+      'template' => 'amt-reports-success_rate',
+    ],
+    'instructor_time_conflict' => [
+      'variables' => [
+        'data_table' => TRUE,
+        'eventID' => TRUE,
+        'source' => TRUE,
+        'date' => TRUE,
+        'empty_text' => t('No Success Rate was Found'),
+      ],
+      'path' => $path . '/templates',
+      'template' => 'amt-reports-timeconflict',
+    ],
+    'amt_active_students' => [
+      'variables' => [
+        'events' => NULL,
+        'departments' => NULL,
+        'filterData' => NULL,
+        'active_page' => NULL,
+        'total_pages' => NULL,
+        'pager_url' => NULL,
+      ],
+      'path' => $path . '/templates',
+      'template' => 'amt-reports-active_students',
+    ],
+    'amt_projections_report' => [
+      'variables' => [
+        'projections_table' => NULL,
+        'filter_data' => NULL,
+        'active_page' => NULL,
+        'total_pages' => NULL,
+        'pager_url' => NULL,
+      ],
+      'path' => $path . '/templates',
+      'template' => 'amt-reports-projections_report',
+    ],
+    'amt_students_inventory' => [
+      'variables' => [
+        'students' => NULL,
+        'filterData' => NULL,
+        'active_page' => NULL,
+        'total_pages' => NULL,
+        'pager_url' => NULL,
+      ],
+      'path' => $path . '/templates',
+      'template' => 'amt-reports-students_inventory',
+    ],
+  ];
+}
+
+/**
+ * Provide the Projections Reports for the week.
+ *
+ * This function proviad the list of active student and
+ * pass it in twig file.
+ *
+ * @param int $activePage
+ *   Number of page is active.
+ * @param int $totalPages
+ *   Number of all projection record.
+ *
+ * @return object
+ *   All Projection report data.
+ */
+function _amt_reports_projections_report_list($activePage, &$totalPages)
+{
+  // The number of element for every page of pagination.
+  $numElement = 30;
+  // Get the filter value if set and true the filter flag.
+  if ($_GET['student_name'] != '') {
+    $filterStudent = explode(')', explode('(', $_GET['student_name'])[1])[0];
+  }
+  if ($_GET['enrollment_title'] != '') {
+    $filterEnrollment = explode(')', explode('(', $_GET['enrollment_title'])[1])[0];
+  }
+  if ($_GET['status'] != '') {
+    $filterStatus = $_GET['status'];
+  }
+  if ($_GET['projection_date'] != '') {
+    $date = explode('-W', $_GET['projection_date']);
+    $filterDate = amt_reports_convert_week_to_date($date[1], $date[0]);
+  }
+  // Load the active enrollment.
+  $connection = \Drupal::database();
+  // Selecting the Package field data table.
+  $lessonQuery = db_select('events_field_data', 'events');
+  // Joining the upper table with field total paid table.
+  $lessonQuery->innerjoin('events__field_date_and_time', 'ev_dt', 'ev_dt.entity_id = events.id');
+  // The common data between lesson and group lesson
+  // I copy lesson query to group lesson query.
+  $groupLessonQuery = clone $lessonQuery;
+  $lessonQuery->innerjoin('events__field_student', 'ev_st', 'ev_st.entity_id = events.id');
+  $lessonQuery->innerjoin('attendees__field_enrollment', 'att_enr', 'att_enr.entity_id = ev_st.field_student_target_id');
+  $lessonQuery->innerjoin('packages_field_data', 'enr', 'enr.id = att_enr.field_enrollment_target_id');
+  // Set condition for active enrollment, it get
+  // all event that date is since 60th days after.
+  $lessonQuery->condition('ev_dt.field_date_and_time_value', date('Y-m-d 00:00:00', strtotime("-60 days")), '>=');
+  // Add the enrollment id as field.
+  $lessonQuery->addField('enr', 'id', 'enr_id');
+  $groupLessonQuery->innerjoin('events__field_students', 'ev_sts', 'ev_sts.entity_id = events.id');
+  $groupLessonQuery->innerjoin('attendees__field_enrollment', 'att_enr', 'att_enr.entity_id = ev_sts.field_students_target_id');
+  $groupLessonQuery->innerjoin('packages_field_data', 'enr', 'enr.id = att_enr.field_enrollment_target_id');
+  // Set condition for active enrollment, it get
+  // all event that date is since 60th days after.
+  $groupLessonQuery->condition('ev_dt.field_date_and_time_value', date('Y-m-d 00:00:00', strtotime("-60 days")), '>=');
+  // Add the enrollment Id as field.
+  $groupLessonQuery->addField('enr', 'id', 'enr_id');
+  // Get the union of the lesson and group lesson enrollment query.
+  $finalQuery = $connection->select($groupLessonQuery->union($lessonQuery));
+  $finalQuery->fields(NULL, ['enr_id']);
+  // Return the array of all active enrollment Id.
+  $enrollmentIds = $finalQuery->execute()->fetchCol();
+  $totalAmount = 0;
+  // Check the status is 1 or not set the payment query run.
+  if (($filterStatus == '' || $filterStatus == 1) && $enrollmentIds != NULL) {
+    $payments = Drupal::service('entity.query')
+      ->get('payments')
+      ->condition('field_status', 'Paid')
+      ->condition('field_enrollment_name', $enrollmentIds, 'IN');
+    // Filter the projection record by date of payment.
+    if ($_GET['projection_date'] != '') {
+      $payments->condition('field_date_and_time', $filterDate, 'BETWEEN');
+    }
+    // This is for filtering student.
+    if ($filterStudent != '') {
+      $payments->condition('field_student_name', $filterStudent, '=');
+    }
+    // Filter the Enrollment title.
+    if ($filterEnrollment != '') {
+      $payments->condition('field_enrollment_name', $filterEnrollment, '=');
+    }
+    // Calculate the total number of the page.
+    $newQuery = clone $payments;
+    $totalPages = $startNotpaid = $newQuery->count()->execute();
+    // Load just specific element according to pagination.
+    $payments->range(($activePage - 1) * $numElement, $numElement);
+
+    // Setting the order by in date field.
+    $payments->sort('field_date_and_time', 'DESC');
+    $paymentIds = $payments->execute();
+    // How element this enrollment have for this page.
+    $numThisEn = count($paymentIds);
+    $entities = \Drupal::entityTypeManager()->getStorage('payments')->loadMultiple($paymentIds);
+    foreach ($entities as $key => $value) {
+      $dateAndTime = $value->field_date_and_time->value;
+      if ($value->field_gross_tuition->value) {
+        $totalAmount += $value->field_gross_tuition->value;
+        $paymentAmount = '$' . $value->field_gross_tuition->value;
+      } else {
+        $paymentAmount = 'Not Set';
+      }
+      $enrollmentEntity = $value->field_enrollment_name->referencedEntities()[0];
+      if ($enrollmentEntity != NULL) {
+        // Get the projection report every record.
+        $projectionsData[] = _amt_reports_get_projections_record($enrollmentEntity, $paymentAmount, 'Paid', $dateAndTime);
+      }
+    }
+  }
+  if (($filterStatus == '' || $filterStatus == 2) && $enrollmentIds != NULL) {
+    // Load the enrollment in scheduled payment at this week.
+    $enrollmentQuery = Drupal::service('entity.query')
+      ->get('packages')
+      ->condition('id', $enrollmentIds, 'IN');
+    // ->condition('field_enrollment_status', 'open');
+    // Filter the projection record by date of Enrollment next schedule.
+    if ($_GET['projection_date'] != '') {
+      $enrollmentQuery->condition('field_next_scheduled_payment', $filterDate, 'BETWEEN');
+    }
+    // Do filter by Student.
+    if ($filterStudent != '') {
+      $enrollmentQuery->condition('field_student', $filterStudent, '=');
+    }
+    if ($filterEnrollment != '') {
+      $enrollmentQuery->condition('id', $filterEnrollment, '=');
+    }
+
+    // Calculate the total number of the page.
+    $newQuery = clone $enrollmentQuery;
+    $totalPages += $newQuery->count()->execute();
+    // Check if the Paid enrollment set not the all element this one run.
+    $startNotpaid = ((($activePage - 1) * $numElement) - $startNotpaid);
+    if ($startNotpaid < 0) {
+      $startNotpaid = 0;
+    }
+    // Load just specific element.
+    $enrollmentQuery->range($startNotpaid, $numElement - $numThisEn);
+
+    // Setting the order by in date field.
+    $enrollmentQuery->sort('field_next_scheduled_payment', 'DESC');
+    $ids = $enrollmentQuery->execute();
+
+    $entities = \Drupal::entityTypeManager()->getStorage('packages')->loadMultiple($ids);
+    foreach ($entities as $key => $entity) {
+      if ($entity->field_payment_amount->value) {
+        $totalAmount += $entity->field_payment_amount->value;
+        $paymentAmount = '$' . $entity->field_payment_amount->getString();
+      } else {
+        $paymentAmount = 'Not Set';
+      }
+      // Get the projection report every record.
+      $projectionsData[] = _amt_reports_get_projections_record($entity, $paymentAmount, 'Not Paid');
+    }
+  }
+  $projectionsData[] = [
+    ['data' => 'Total', 'colspan' => 3],
+    ['data' => '$' . $totalAmount, 'colspan' => 2],
+  ];
+  $totalPages = (int) ceil($totalPages / $numElement);
+  return $projectionsData;
+}
+
+/**
+ * Provide the Projections Reports for the week.
+ *
+ * This function provided the list of active student and
+ * pass it in twig file.
+ *
+ * @param object $entity
+ *   The enrollment entity.
+ * @param string $paymentAmount
+ *   Specify the amount paid or to be paid.
+ * @param string $status
+ *   Specify if the amount is paid or not.
+ * @param string $date
+ *   Date for enrollment and Payments.
+ *
+ * @return array
+ *   Projection record.
+ */
+function _amt_reports_get_projections_record($entity, $paymentAmount, $status, $date = 'no')
+{
+  // Check the student and get the Student name if exist.
+  if ($entity->field_student->referencedEntities()[0]) {
+    $student = $entity->field_student->referencedEntities()[0]->title->value;
+    $id = $entity->field_student->referencedEntities()[0]->id->value;
+    $student = new TranslatableMarkup("<a href='/student_accounts/@id'>@message</a>", ['@message' => $student, '@id' => $id]);
+  }
+  // Get the enrollment title for name of enrollment.
+  $enrollmentTitle = $entity->title->value;
+  $enrollmentId = $entity->id->value;
+  $enrollmentTitle = new TranslatableMarkup("<a href='/packages/@enrollmentId'>@message</a>", ['@message' => $enrollmentTitle, '@enrollmentId' => $enrollmentId]);
+  // Check the date and set the payment and next scheduling date of payments.
+  if ($date != 'no') {
+    $date = date("m-d-Y", strtotime($date));
+  } else {
+    $date = $entity->field_next_scheduled_payment->getString();
+    if ($date != NULL) {
+      $date = date("m-d-Y", strtotime($date));
+    } else {
+      $date = 'Misc';
+    }
+  }
+  // Set the data for table of Projections table.
+  return [
+    ['data' => $date],
+    ['data' => $student],
+    ['data' => $enrollmentTitle],
+    ['data' => $paymentAmount],
+    ['data' => $status],
+  ];
+}
+
+/**
+ * Provide a start and end date from week number and year.
+ *
+ * @param int $week
+ *   What week number you want to find dates.
+ * @param int $year
+ *   Which year you want to check the dates.
+ *
+ * @return array
+ *   Return any array contain week_start and week_end dates.
+ */
+function amt_reports_convert_week_to_date($week, $year)
+{
+  $date = new DateTime();
+  // Get the first day of the week and when
+  // we set 1 it show the Monday.
+  $date->setISODate($year, $week, 1);
+  $ret['week_start'] = $date->format('Y-m-d');
+  // Get the last date of the week and
+  // it show 7 day after the start of the week (next Sunday).
+  $date->setISODate($year, $week, 7);
+  $ret['week_end'] = $date->format('Y-m-d');
+  return $ret;
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function amt_reports_views_query_alter($view, $query)
+{
+
+  if ($view->id() == 'enrollment') {
+    foreach ($query->where as &$condition_group) {
+      foreach ($condition_group['conditions'] as &$condition) {
+        if ($condition['field'] == 'packages__field_instructor.field_instructor_target_id') {
+          $valuefromDB = amt_reports_get_user_idbyname($_GET['field_instructor_target_id']);
+          $condition = [
+            'field' => 'packages__field_instructor.field_instructor_target_id',
+            'value' => $valuefromDB,
+            'operator' => '=',
+          ];
+        } elseif ($condition['field'] == 'packages__field_student.field_student_target_id') {
+          $valuefromDB = amt_reports_get_student_idbyname($_GET['field_student_target_id']);
+          $condition = [
+            'field' => 'packages__field_student.field_student_target_id',
+            'value' => $valuefromDB,
+            'operator' => '=',
+          ];
+        } elseif ($condition['field'] == 'packages__field_enrollment_package_name.field_enrollment_package_name_target_id') {
+          $valuefromDB = amt_reports_get_package_idbyname($_GET['field_enrollment_package_name_target_id']);
+          if (!is_array($valuefromDB)) {
+            $condition = [
+              'field' => 'packages__field_enrollment_package_name.field_enrollment_package_name_target_id',
+              // $view->exposed_raw_input['title'],.
+              'value' => $valuefromDB,
+              'operator' => '=',
+            ];
+          } else {
+
+            $orGroup = $query->orConditionGroup();
+            foreach ($valuefromDB as $newID) {
+              $orGroup->condition('packages__field_enrollment_package_name.field_enrollment_package_name_target_id', $newID['id'], '=');
+            }
+            $condition = $orGroup;
+          }
+        }
+      }
+    }
+  }
+  if ($view->id() == 'lessons_list') {
+
+    // The sorting is requested to be (Appointment List shows farthest appointment? (July expiration date shows up first.))
+    // The logic comes from https://stackoverflow.com/questions/13136490/query-to-sort-upcoming-dates-first-ascending-then-past-dates-descending
+    $sql = "CASE WHEN events__field_date_and_time.field_date_and_time_value  >= CURRENT_DATE() THEN events__field_date_and_time.field_date_and_time_value ELSE  '9999-12-31' END";
+    $query->addOrderBy(NULL, $sql, 'ASC', 'ordered_date');
+
+    $sql = "CASE WHEN events__field_date_and_time.field_date_and_time_value  < CURRENT_DATE() THEN events__field_date_and_time.field_date_and_time_value ELSE  NULL END";
+    $query->addOrderBy(NULL, $sql, 'DESC', 'ordered_date');
+    // End Logic of Sort.
+
+    amt_reports_standings_query_search($query);
+
+    // Alter query based on student department.
+    amt_reports_load_lessons_based_on_department($query);
+  }
+}
+
+/**
+ * Load Package ID From Package Name.
+ *
+ * When Someone Enter a Name (string) as parameter to this
+ * function it will go to database query Package fields with a LIKE condition
+ * get the first value and return ID of that package Name and return to user.
+ *
+ * @param string $packageName
+ *   A Text that can should be a Package Name.
+ *
+ * @return int
+ *   As Package ID.
+ */
+function amt_reports_get_package_idbyname($packageName)
+{
+  $connection = Database::getConnection();
+  $query = $connection->select('packages_field_data', 'package');
+  $query->fields('package', ['id']);
+  $query->condition('package.title', '%' . $packageName . '%', 'LIKE');
+
+  $result = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
+  return ($result[0]['id']);
+}
+
+/**
+ * Load user ID From Instructor Name.
+ *
+ * When Someone Enter a Name (string) as parameter to this
+ * function it will go to database query users fields with a LIKE condition
+ * get the first value and return ID of that instructor Name and return to user.
+ *
+ * @param string $userName
+ *   A Text that can should be a Instructor Name.
+ *
+ * @return int
+ *   As Instructor ID.
+ */
+function amt_reports_get_user_idbyname($userName)
+{
+  $connection = Database::getConnection();
+  $query = $connection->select('users_field_data', 'users');
+  $query->fields('users', ['uid']);
+  $query->condition('users.name', '%' . $userName . '%', 'LIKE');
+
+  $result = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
+  return ($result[0]['uid']);
+}
+
+/**
+ * Load Student ID From Package Name.
+ *
+ * When Someone Enter a Name (string) as parameter to this
+ * function it will go to database query Student fields with a LIKE condition
+ * get the first value and return ID of that Student Name and return to user.
+ *
+ * @param string $studentName
+ *   A Text that can should be a Package Name.
+ *
+ * @return int
+ *   As Studnet ID.
+ */
+function amt_reports_get_student_idbyname($studentName)
+{
+  $connection = Database::getConnection();
+  $query = $connection->select('student_accounts_field_data', 'student');
+  $query->fields('student', ['id']);
+  $query->condition('student.title', '%' . $studentName . '%', 'LIKE');
+  $result = $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
+  return ($result[0]['id']);
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * This is to add a custom exposed filter in lessons_list view.
+ */
+function amt_reports_form_alter(&$form, &$form_state, $form_id)
+{
+  $view_names = ['lessons_list'];
+  $enrollmentView = ['enrollment'];
+  $view = $form_state->getStorage('view');
+  if ($form_id == 'views_exposed_form' && in_array($view['view']->id(), $view_names)) {
+
+    // Re-render the intructor field on $form of lessions_list.
+    $options = ['' => 'Select Instructor'];
+
+    // Load all instructors based on category.
+    $instructorsId = \Drupal::entityQuery('user')
+      ->condition('roles', 'instructor')
+      ->condition('status', '1')
+      ->sort('field_first_name')
+      ->sort('field_last_name')
+      ->execute();
+
+    // Provide data for the Select list.
+    foreach (User::loadMultiple($instructorsId) as $user) {
+      $label = $user->field_first_name->value . ' ' . $user->field_last_name->value;
+      $options[$user->id()] = $label;
+    }
+    // Render the field and Inject options.
+    $form['instructor'] = [
+      '#type'         => 'select',
+      '#options'      => $options,
+      '#multiple'     => FALSE,
+    ];
+    // disable the size to correct the display.
+    unset($form['instructor']['#size']);
+
+    $form['field_standings']['#type'] = 'select';
+    $form['field_standings']['#multiple'] = FALSE;
+    $form['field_standings']['#size'] = 0;
+    $form['field_standings']['#options'] = [
+      '' => 'Select Standing Type',
+      'standing' => 'Standing Lessons',
+      'non-standing' => 'Non-Standing Lessons',
+    ];
+
+    // $form['field_status_target_id']['#type'] = 'select';
+    // $form['field_status_target_id']['#multiple'] = TRUE;
+
+    // Change Start date and End date inputs type to date.
+    $form['field_date_and_time_value']['#type'] = "date";
+    // $form['field_date_and_time_value']['max']['#type'] = "date";
+    // Change Start date "And" title to "Through".
+    // $form['field_date_and_time_value']['max']['#title'] = "Through";
+
+    $form['field_date_and_time_value_1']['#type'] = "date";
+    // $form['field_expiration_date_value']['max']['#type'] = "date";
+    // Change end date "And" title to "Through".
+    // $form['field_expiration_date_value']['max']['#title'] = "Through";
+    // Setting the label of the standing select list.
+    $form['field_standings']['#title'] = "Standings";
+  }
+  // Array List of Forms we want to add callback.
+  $eckFormsEvents = [
+    'events_lesson_form',
+    'events_lesson_edit_form',
+    'events_lesson_continuous_appointment_form',
+    'events_group_lesson_form',
+    'events_group_lesson_edit_form',
+    'events_group_lesson_continuous_appointment_form',
+    'events_services_form',
+    'events_services_edit_form',
+    'events_services_continuous_appointment_form',
+  ];
+  // Check if $formId is one $eckFormsEvents List.
+  if (in_array($form_id, $eckFormsEvents)) {
+    $form['actions']['submit']['#submit'][] = 'amt_reports_check_conflictedtime';
+  }
+  if ($form_id == 'views_exposed_form' && in_array($view['view']->id(), $enrollmentView)) {
+    // Change The Sale date input type to date.
+    $form['field_sale_date_value']['#type'] = "date";
+  }
+  // Remove Seconds from all date_and_time fields in a form.
+  $form['field_date_and_time']['widget']['0']['value']['#attributes']['step'] = 0;
+}
+
+/**
+ * This function mainly called in amt_reports_standings_query_search().
+ *
+ * Alter its original query and set some new conditions
+ * this is used in lessons_list view for custom query of
+ * single lesson standing and group lesson standing fields.
+ *
+ * @param string $fieldType
+ *   Variable receiving the bundle value.
+ * @param string $type
+ *   Variable receiving the event type value.
+ * @param string $query
+ *   Variable which contains all query of a filter.
+ */
+// function amt_reports_standings_query($fieldType, $type, $query) {
+//   $fieldDate = "events__field_expiration_date.field_expiration_date_value";
+//   $value = NULL;
+//   $operator = "IS NOT NULL";
+//   $typeOperator = "IN";
+//   if (isset($query->where[1]['conditions'])) {
+//     // Make or alter query for checking if the field value is available or not.
+//     // In here, get the field and check the database
+//     // for exist value of standing fields.
+//     $query->where[1]['conditions'][0] = [
+//       "field"    => $fieldDate,
+//       "value"    => $value,
+//       "operator" => $operator,
+//     ];
+//     // Make or alter query for checking if the field value is equal or not.
+//     // In here, get the field and check the database
+//     // for equal value of standing types.
+//     $query->where[1]['conditions'][1] = [
+//       "field"    => $fieldType,
+//       "value"    => $type,
+//       "operator" => $typeOperator,
+//     ];
+//   }
+// }
+
+/**
+ * This function mainly called in amt_reports_standings_query_search().
+ *
+ * Alter its original query and set some new conditions.
+ * this is used in lessons_list view for custom query
+ * of Single lesson and group lesson.
+ *
+ * @param string $fieldType
+ *   Variable receiving the bundle value.
+ * @param string $type
+ *   Variable receiving the event type value.
+ * @param string $query
+ *   Variable which contains all query of a filter.
+ */
+// function amt_reports_event_type_query($fieldType, $type, $query) {
+//   $value = NULL;
+//   $operator = "IS NULL";
+//   $typeOperator = "=";
+//   if (isset($query->where[1]['conditions'])) {
+//     // Make or alter query for checking if the field value is equal or not.
+//     // In here, get the field and check the database
+//     // for equal value of event types.
+//     $query->where[1]['conditions'][0] = [
+//       "field"    => $fieldType,
+//       "value"    => $type,
+//       "operator" => $typeOperator,
+//     ];
+//     // Make or alter query for checking if the field value is available or not.
+//     // In here, get the field and check the database
+//     // for nonexist value of lesson and group lesson.
+//     $query->where[1]['conditions'][1] = [
+//       "field"    => "events__field_expiration_date.field_expiration_date_value",
+//       "value"    => $value,
+//       "operator" => $operator,
+//     ];
+
+//   }
+// }
+
+/**
+ * This function mainly called in amt_reports_standings_query_search().
+ *
+ * Alter its original query and set some new conditions
+ * this is used in lessons_list view for custom query service type.
+ *
+ * @param string $fieldType
+ *   Variable receiving the bundle value.
+ * @param string $type
+ *   Variable receiving the event type value.
+ * @param string $operator
+ *   Variable which contains operator value in here it is '='.
+ * @param string $query
+ *   Variable which contains all query of a filter.
+ */
+// function amt_report_event_type_service_query($fieldType, $type, $operator, $query) {
+//   // Make or alter query for checking if the field value is available or not.
+//   // In here, get the field and check the database
+//   // for equal value of service event type.
+//   if (isset($query->where[1]['conditions'])) {
+//     $query->where[1]['conditions'][1] = [
+//       "field"    => $fieldType,
+//       "value"    => $type,
+//       "operator" => $operator,
+//     ];
+//   }
+// }
+
+/**
+ * This function set new quries to event type fields. .
+ *
+ * Alter the original query for specific fields that passed by exposed filter.
+ * this is used in lessons_list view for custom query of Event type field.
+ *
+ * @param string &$query
+ *   Variable contains all query of a filter.
+ */
+function amt_reports_standings_query_search(&$query)
+{
+  if (isset($_GET['field_standings']) && $_GET['field_standings'] != "") {
+
+    // If standing is searched then check that standing field of events not be null, other wise the simple events standing field is null.
+    $operator = ($_GET['field_standings'] == 'standing') ? "IS NOT NULL" : "IS NULL";
+
+    if (isset($query->where[1]['conditions'])) {
+      // Based on standing field and the operator value, it select
+      $query->where[1]['conditions'][0] = [
+        "field"    => "events__field_expiration_date.field_expiration_date_value",
+        "value"    => NULL,
+        "operator" => $operator,
+      ];
+    } else {
+      unset($query->where[1]['conditions'][0]);
+    }
+  } else {
+    unset($query->where[1]['conditions'][0]);
+  }
+}
+
+/**
+ * Generate User success rate.
+ *
+ * This fuction load the user and for every user laod the services and group
+ * services by service type and calculate the success rate.
+ *
+ * @return object
+ *   Return the multy array with strucure of table.
+ */
+function _amt_reports_chat_success_rate()
+{
+  $serviceTypeField = $_GET['service_type'];
+  $startDateField = $_GET['start_date'];
+  $endDateField = $_GET['end_date'];
+  $userRole = $_GET['role'];
+  if ($serviceTypeField != '') {
+    // Extract the id from terms.
+    $serviceTypeField = explode(')', explode('(', $serviceTypeField)[1])[0];
+  }
+  // Check for filters if following inputs were set.
+  if ($serviceTypeField != '' || ($startDateField != '' && $endDateField != '') || $userRole != '') {
+    // If filters was set then we call filter function.
+    $successRateData = _amt_reports_chat_success_rate_filter($serviceTypeField, $startDateField, $endDateField, $userRole);
+    return $successRateData;
+  }
+  // If non of above were not true, then shows the success rate page
+  // without filters.
+  else {
+    // Load instructors and executive from users.
+    $userQuery = \Drupal::entityQuery('user')
+      ->condition('roles', ['instructor', 'executive'], 'IN');
+    $usersId = $userQuery->execute();
+    foreach ($usersId as $userKey => $id) {
+      // Load Services for every above users.
+      $serviceQuery = \Drupal::entityQuery('events')
+        ->condition('type', 'services')
+        ->condition('field_status', 'NULL', '!=');
+      $orGroup = $serviceQuery->orConditionGroup()
+        ->condition('field_instructor', $id)
+        ->condition('field_executive', $id);
+      $serviceQuery->condition($orGroup);
+      $servicesId = $serviceQuery->execute();
+      if ($servicesId != NULL) {
+        // Load services entity.
+        $servicesEntity = \Drupal::entityTypeManager()->getStorage('events')->loadMultiple($servicesId);
+        // Load entity of User by id.
+        $userEntity = \Drupal::entityTypeManager()->getStorage('user')->load($id);
+        $userData['name'] = $userEntity->field_first_name->value . " " . $userEntity->field_last_name->value;
+        $role = strtoupper($userEntity->roles->getString());
+        // User role get the Muli role but we need the executive
+        // and instructor role.
+        if (strstr($role, 'EXECUTIVE')) {
+          $userData['role'] = 'EXECUTIVE';
+        } else {
+          $userData['role'] = 'INSTRUCTOR';
+        }
+        $success = [];
+        // Get the service type and calculate the success rate.
+        foreach ($servicesEntity as $key => $service) {
+          if ($service->field_status->target_id != NULL) {
+            $serviceStatus = Term::load($service->field_status->target_id)->name->value;
+            $serviceType = Term::load($service->field_type->target_id)->name->value;
+            if ($serviceType == '') {
+              $serviceType = 'notype';
+            }
+            if ($serviceStatus == 'Sale') {
+              $success[$serviceType]['Sale']++;
+            } else {
+              $success[$serviceType]['noSale']++;
+            }
+          }
+        }
+        $flag = TRUE;
+        // Create table for every user.
+        foreach ($success as $key => $value) {
+          // Rate is equal to sale/sale+notsale .
+          $rate = $value['Sale'] / ($value['noSale'] + $value['Sale']);
+          // To get the percentage.
+          $rate = $rate * 100;
+          // Create the first row of the table with row span attributes.
+          $userNameLink = new TranslatableMarkup("<a href='/user/@id'>@message</a>", ['@message' => $userData['name'], '@id' => $id]);
+          if ($flag) {
+            $successRateData[] = [
+              ['data' => $userNameLink, 'rowspan' => count($success)],
+              ['data' => $userData['role'], 'rowspan' => count($success)],
+              ['data' => $key],
+              // Round the number and show 2 decimal place.
+              ['data' => round($rate, 2) . '%'],
+            ];
+            $flag = FALSE;
+          } else {
+            $successRateData[] = [
+              ['data' => $key],
+              // Round the number and show 2 decimal place.
+              ['data' => round($rate, 2) . '%'],
+            ];
+          }
+        }
+      }
+    }
+  }
+  return $successRateData;
+}
+
+/**
+ * Return contacts with zero lesson available on enrollments.
+ *
+ * @return array
+ *   Student contacts ids.
+ */
+function _amt_reports_student_zero_balance(){
+
+  $enr_with_balance = \Drupal::entityQuery('packages')
+  ->condition('type', 'enrollment')
+  ->condition('field_lesson_available', 0, "!=")
+  ->execute();
+  if ($enr_with_balance) {
+    $database = \Drupal::database();
+    $query = $database->select('packages__field_student', 'enr_stu');
+    $query->condition('enr_stu.entity_id', array_keys($enr_with_balance), 'IN');
+    $query->addField('enr_stu', 'field_student_target_id', 'stuid');
+    $students_with_balance = $query->execute()->fetchCol('stuid');
+  }
+  if ($students_with_balance) {
+    $database = \Drupal::database();
+    $query = $database->select('student_accounts__field_contacts', 'stu');
+    $query->condition('stu.entity_id', $students_with_balance, 'NOT IN');
+    $query->addField('stu', 'field_contacts_target_id', 'contactid');
+    $students_contacts_without_balance = $query->execute()->fetchCol('contactid');
+    return $students_contacts_without_balance;
+  }
+  return NULL;
+}
+
+/**
+ * Fetches Active, Inactive and NFA student list.
+ *
+ * This function is going load the list of all Active, Inactive,
+ * and NFA students.
+ * In this function we have used db_select which is much more
+ * flexible then entity query to extract our desired result.
+ * We have also created two db_select queries two extract student
+ * data both based on lesson and group lesson.
+ *
+ * @param string $indicator
+ *   Indicate if the query should be for active, inactive or NFA students.
+ */
+function _amt_reports_students_list($indicator, $retriveIds = false, $numElement = 50)
+{
+
+  $connection = \Drupal::database();
+  // The first db select that loadeds data based on group lesson.
+  $queryGroupLesson = db_select('contacts_field_data', 'p');
+  // Joining field email with contacts.
+  $queryGroupLesson->leftjoin('contacts__field_email', 'e', 'e.entity_id = p.id');
+  $queryGroupLesson->leftjoin('contacts__field_cell_phone', 'cp', 'cp.entity_id = p.id');
+  // Joining the student account, field of contacts.
+  $queryGroupLesson->rightjoin('student_accounts__field_contacts', 'stac', 'stac.field_contacts_target_id = p.id');
+  // Joining field students of attendees with contacts.
+  $queryGroupLesson->leftjoin('attendees__field_students', 'a', 'a.field_students_target_id = p.id');
+  // Joining enrollment field of attendees.
+  $queryGroupLesson->leftjoin('attendees__field_enrollment', 'en', 'en.entity_id = a.entity_id');
+
+  // Joining field student of events.
+  $queryGroupLesson->leftjoin('events__field_student', 's', 's.field_student_target_id = a.entity_id');
+  // Joining field date and time of events.
+  $queryGroupLesson->leftjoin('events__field_date_and_time', 'd', 'd.entity_id = s.entity_id');
+  // Joining field instructor of enrollment.
+  $queryGroupLesson->leftjoin('events__field_instructor', 'inn', 'inn.entity_id = s.entity_id');
+  // Joining field field category of the enrollment.
+  $queryGroupLesson->leftjoin('packages__field_category', 'cat', 'cat.entity_id = en.field_enrollment_target_id');
+  // Joing student account's student department field.
+  $queryGroupLesson->leftjoin('student_accounts__field_student_department', 'stu_dep', 'stu_dep.entity_id = stac.entity_id');
+  // Joining taxonory term field data to get name of the department.
+  $queryGroupLesson->leftjoin('taxonomy_term_field_data', 'dep', 'dep.tid = stu_dep.field_student_department_target_id');
+  // Joining user field data table to get the name of the instructor.
+  $queryGroupLesson->leftjoin('users_field_data', 'inst', 'inst.uid = inn.field_instructor_target_id');
+
+  // The first db select that loadeds data based on lesson.
+  $queryLesson = db_select('contacts_field_data', 'p');
+  // Joining field email with contacts.
+  $queryLesson->leftjoin('contacts__field_email', 'e', 'e.entity_id = p.id');
+  $queryLesson->leftjoin('contacts__field_cell_phone', 'cp', 'cp.entity_id = p.id');
+  // Joining the student account, field of contacts.
+  $queryLesson->rightjoin('student_accounts__field_contacts', 'stac', 'stac.field_contacts_target_id = p.id');
+  // Joining field students of attendees with contacts.
+  $queryLesson->leftjoin('attendees__field_students', 'a', 'a.field_students_target_id = p.id');
+  // Joining enrollment field of attendees.
+  $queryLesson->leftjoin('attendees__field_enrollment', 'en', 'en.entity_id = a.entity_id');
+
+  // Joining field student of events.
+  $queryLesson->leftjoin('events__field_students', 's', 's.field_students_target_id = a.entity_id');
+  // Joining field date and time of events.
+  $queryLesson->leftjoin('events__field_date_and_time', 'd', 'd.entity_id = s.entity_id');
+  // Joining field instructor of enrollment.
+  $queryLesson->leftjoin('events__field_instructor', 'inn', 'inn.entity_id = s.entity_id');
+  // Joining field field category of the enrollment.
+  $queryLesson->leftjoin('packages__field_category', 'cat', 'cat.entity_id = en.field_enrollment_target_id');
+  // Joing student account's student department field.
+  $queryLesson->leftjoin('student_accounts__field_student_department', 'stu_dep', 'stu_dep.entity_id = stac.entity_id');
+  // Joining taxonory term field data to get name of the department.
+  $queryLesson->leftjoin('taxonomy_term_field_data', 'dep', 'dep.tid = stu_dep.field_student_department_target_id');
+  // Joining user field data table to get the name of the instructor.
+  $queryLesson->leftjoin('users_field_data', 'inst', 'inst.uid = inn.field_instructor_target_id');
+
+  // Renaming the fields to be easily accessed in view.
+  $queryGroupLesson->addField('p', 'id', 'link');
+  $queryGroupLesson->addField('p', 'title', 'student');
+  $queryGroupLesson->addField('cp', 'field_cell_phone_value', 'phone');
+  $queryGroupLesson->addField('d', 'field_date_and_time_value', 'lastlessondate');
+  $queryGroupLesson->addField('inst', 'name', 'instructor');
+  $queryGroupLesson->addField('dep', 'name', 'department');
+  $queryGroupLesson->addField('dep', 'tid', 'department_id');
+  $queryGroupLesson->addField('e', 'field_email_value', 'email');
+  $queryGroupLesson->addField('stac', 'entity_id', 'stac_id');
+  // Renaming the fields to be easily accessed in view.
+  $queryLesson->addField('p', 'id', 'link');
+  $queryLesson->addField('p', 'title', 'student');
+  $queryLesson->addField('cp', 'field_cell_phone_value', 'phone');
+  $queryLesson->addField('d', 'field_date_and_time_value', 'lastlessondate');
+  $queryLesson->addField('inst', 'name', 'instructor');
+  $queryLesson->addField('dep', 'name', 'department');
+  $queryLesson->addField('dep', 'tid', 'department_id');
+  $queryLesson->addField('e', 'field_email_value', 'email');
+  $queryLesson->addField('stac', 'entity_id', 'stac_id');
+
+  // Combining the two above queries.
+  $queryFinal = $connection->select($queryGroupLesson->union($queryLesson));
+
+  // Filter dummy students data, students with no name.
+  $queryFinal->condition('student', NULL, 'IS NOT NULL');
+
+  // If list is active, Set order to DESCENDING.
+  if ($indicator == 'active') {
+    $orderElement = 'DESC';
+  }
+  // If list is inactive and NFA, Set order to ASCENDING.
+  else {
+    $orderElement = 'ASC';
+  }
+  // Setting te order of date.
+  if (isset($_GET['sort']) && $_GET['sort'] && $_GET['sort'] != 'paidAhead') {
+    $orderField = $_GET['sort'];
+    if ($_GET['stype'] == 'DESC') {
+      $orderElement = 'DESC';
+    } else {
+      $orderElement = 'ASC';
+    }
+  } else {
+    $orderField = 'lastlessondate';
+  }
+  // $queryFinal->orderBy('lastlessondate', $orderElement);
+  $queryFinal->orderBy($orderField, $orderElement);
+  
+  if (isset($_GET['paid_finished'])) {
+    // if paid finished requested then just load student contacts with zero lesson available in enrollment.
+    $contacts_id = _amt_reports_student_zero_balance();
+    if( $contacts_id ) {
+      $queryFinal->condition('link', $contacts_id, 'IN');
+    }
+  }
+
+  $queryFinal->fields(NULL, [
+    'student',
+    'email',
+    'phone',
+    'department',
+    'department_id',
+    'lastlessondate',
+    'instructor',
+    'link',
+    'stac_id',
+  ]);
+
+  // Condition to extract active, Inactive and NFA students.
+  if (in_array($indicator, ['active', 'inactive', 'nfa'])) {
+    // If the list is for active students.
+    if ($indicator == 'active') {
+      // Active Students: This should be ANY student that has taken lesson in the last 30 days.
+      // It doesn't matter if they have a future lesson booked or not
+      $queryFinal->condition('lastlessondate', [
+        date(
+          'Y-m-d',
+          strtotime('today - 31 days')
+        ),
+        date('Y-m-d'),
+      ], 'BETWEEN');
+    } elseif ($indicator == 'inactive') {
+      // Inactive Students: This is ANY student that hasn't taken a lesson in the last 30 days. It doesn't matter if they have a future lesson booked or not
+      // Loading the Ids of Active and NFA
+      // students to be excluded from the rest (Inactive).
+
+      $idsOfActiveAndNFAStudents = _amt_reports_get_student_ids($queryGroupLesson, $queryLesson, 'inactive');
+      // Excluding all NFA and Active students from the students list.
+      if ($idsOfActiveAndNFAStudents != NULL) {
+        $queryFinal->condition('link', $idsOfActiveAndNFAStudents, 'NOT IN');
+      }
+    } elseif ($indicator == 'nfa') {
+      // NFA: This is ANY student that has lessons remaining but does NOT have a lesson booked in the future.
+      $studentsHasFutureLesson = _amt_reports_get_student_ids($queryGroupLesson, $queryLesson, 'nfa');
+      if ($studentsHasFutureLesson != NULL) {
+        $queryFinal->condition('link', $studentsHasFutureLesson, 'NOT IN');
+      }
+    }
+  } elseif ($indicator == "act-nfa") {
+    // Condition to extract active and nfa students.
+    // Students who have not future lessons and had lessons in last 30 days.
+    $queryFinal->condition('lastlessondate', [
+      date(
+        'Y-m-d',
+        strtotime('today - 31 days')
+      ),
+      date('Y-m-d'),
+    ], 'BETWEEN');
+    $studentsHasFutureLesson = _amt_reports_get_student_ids($queryGroupLesson, $queryLesson, 'nfa');
+    if ($studentsHasFutureLesson != NULL) {
+      $queryFinal->condition('link', $studentsHasFutureLesson, 'NOT IN');
+    }
+  } elseif ($indicator == "inact-nfa") {
+    // Loading the Ids of InActive and NFA
+    // students to be excluded from the rest (Inactive).
+    $idsOfNFAStudents = _amt_reports_get_student_ids($queryGroupLesson, $queryLesson, 'nfa');
+    $idsOfActiveAndNFAStudents = _amt_reports_get_student_ids($queryGroupLesson, $queryLesson, 'inactive');
+    if ($idsOfActiveAndNFAStudents != NULL || $idsOfNFAStudents != NULL) {
+      $queryFinal->condition('link', array_merge($idsOfNFAStudents, $idsOfActiveAndNFAStudents), 'NOT IN');
+    }
+  } elseif ($indicator == "inact-act") {
+    // There is not possiblity to have active and inactive.
+    $queryFinal->condition('link', NULL);
+  }
+  if ($indicator == 'nfa' || $indicator == 'inact-nfa' || $indicator == 'act-nfa') {
+    if (isset($_GET['paid_finished'])) {
+      $queryFinal->condition('link', NULL);
+    }
+  }
+  // This block runs when there are parameters provided for filtering.
+  if (isset($_GET['name']) && $_GET['name'] != "") {
+    $queryFinal->condition('student', $_GET['name'], '=');
+  }
+  if (isset($_GET['email']) && $_GET['email'] != "") {
+    $queryFinal->condition('email', $_GET['email'], '=');
+  }
+  if (isset($_GET['phone']) && $_GET['phone'] != "") {
+    $queryFinal->condition('phone', $_GET['phone'], '=');
+  }
+
+  if (isset($_GET['instructor']) && $_GET['instructor'][0] != '') {
+
+    $queryFinal->condition('instructor', $_GET['instructor'], 'IN');
+  }
+
+  if (isset($_GET['date']) && $_GET['date'] != "") {
+    $queryFinal->condition('lastlessondate', [$_GET['date'] . 'T00:00:00', $_GET['date'] . 'T23:59:59'], 'BETWEEN');
+  }
+  // As the artguments comming from the view is different, we have
+  // to alter it to check in the database.
+  if (isset($_GET['department']) && $_GET['department'] != "") {
+    $queryFinal->condition('department_id', $_GET['department']);
+  }
+
+  // Pagination config.
+  $activePage = (isset($_GET['page']) && $_GET['page'] != '') ? ($_GET['page'] - 1) : 0;
+  $studentsListsBase = $queryFinal->execute()->fetchAllAssoc('link', PDO::FETCH_ASSOC);
+  $totalRecord = count($studentsListsBase);
+
+  // Get the lesson list data since it reach the pagination and decrement the total by invalid students.
+  $result = _amt_reports_students_remaining_lessons($studentsListsBase, $activePage, $numElement, $retriveIds, $indicator);
+
+  // For CSV export.
+  $session = \Drupal::request()->getSession();
+  $session->set('csv_rows', $result);
+  $session->set('csv_indicator', $indicator);
+
+  $studentsLists = $result[0];
+  // If only ids were needed (for student inventory report), then just return ids with pages params.
+  $totalPages = (int) ceil($totalRecord / $numElement);
+  if ($retriveIds) {
+    $data['ids'] = $result[1];
+    $data['totalPages'] = $totalPages;
+    return $data;
+  }
+
+  // Handling sort.
+  if (isset($_GET['sort']) && $_GET['sort'] == 'paidAhead') {
+    usort($studentsLists, "amt_reports_sort_by_paid_ahead");
+  }
+
+  return ['data' => $studentsLists, 'totalPages' => $totalPages];
+}
+
+/**
+ * Find the student balance and filter zero balance.
+ *
+ * @return array
+ */
+function _amt_reports_students_remaining_lessons($studentsListsBase, $activePage, $numElement, $retriveIds, $indicator, $csv = false)
+{
+  $ids = [];
+  $studentsLists = ($csv) ? array_slice($studentsListsBase, 1 * 0, null) : array_slice($studentsListsBase, $activePage * $numElement, $numElement);
+  // Getting IDs of free enrollments which are Sundy and Uncategorized.
+  $enrollmentTypesIds = amt_general_load_nuteral_enrollments();
+
+  // Returning the query back.
+  for ($i = 0; $i < count($studentsLists); $i++) {
+
+    // Check if the index is available.
+    if (isset($studentsLists[$i])) {
+      $studentId = (array_key_exists($i, $studentsLists)) ? $studentsLists[$i]["link"] : NULL;
+
+      // Add Paid Ahead amount to the students.
+      $paidAhead = amt_general_total_lessons_available($studentsLists[$i]['stac_id'], $enrollmentTypesIds);
+      $studentsLists[$i]['paidAhead'] = $paidAhead;
+      $studentsLists[$i]['upCommingLesson'] = amt_dashboard_student_next_lesson($studentId);
+      // If only ids were needed (for student inventory report), then just collect the ids.
+      if ($retriveIds) {
+        $ids[] = $studentId;
+      } else {
+        if (!is_null($studentId)) {
+          $studentsLists[$i]['lessonRemaining'] = amt_dashboard_student_total_lessons_remaining($studentId);
+        }
+      }
+    }
+    
+  }
+  if ($indicator == 'nfa' || $indicator == 'inact-nfa' || $indicator == 'act-nfa') {
+    $filtered = array_filter(
+      $studentsLists,
+      function ($value) {
+        return (array_key_exists('lessonRemaining', $value) && $value['lessonRemaining'] != 0);
+      }
+    );
+    $studentsLists = $filtered;
+  }
+  if (isset($_GET['paid_finished'])) {
+    $filtered = array_filter(
+      $studentsLists,
+      function ($value) {
+        return (array_key_exists('lessonRemaining', $value) && $value['lessonRemaining'] == 0);
+      }
+    );
+    $studentsLists = $filtered;
+  }
+
+  if ($csv) {
+    return $studentsLists;
+  }
+  
+  return [$studentsLists, $ids];
+}
+
+/**
+ * Fetches Student Ids for excluding from the list.
+ *
+ * This function is is called on loading inactive and nfa students.
+ * This function is going to take the two queries and make use of union
+ * to run both and applies the condition based on the category of
+ * inactive or NFA which is provided via a parameter in the function.
+ */
+function _amt_reports_get_student_ids($queryGroupLesson, $queryLesson, $category)
+{
+  // Setting up a connection.
+  $getIdsConnection = \Drupal::database();
+  // Leverging Union() function of SQL.
+  $queryExcludingIds = $getIdsConnection->select($queryGroupLesson->union($queryLesson));
+  // Choosing only id field (Aliased to link) to be loaded.
+  $queryExcludingIds->fields(NULL, ['link']);
+  // Checking if the category is NFA so that all the NFA students' id.
+  if ($category == 'nfa') {
+    // Limiting the date to be between the next 30 days.
+    $queryExcludingIds->condition('lastlessondate', date('Y-m-d'), '>');
+  }
+  // Checking if the category is Inactive so that all the Inactive students' id.
+  // should be loaded.
+  if ($category == 'inactive') {
+    $queryExcludingIds->condition('lastlessondate', [
+      date(
+        'Y-m-d',
+        strtotime('today - 31 days')
+      ),
+      date('Y-m-d'),
+    ], 'BETWEEN');
+  }
+  // GroupBy link to avoid duplication.
+  $queryExcludingIds->groupBy('link');
+  // Executing the query.
+  $excludingIdsList = $queryExcludingIds->execute()->fetchCol();
+  // Return the set of IDs back.
+  return $excludingIdsList;
+}
+
+/**
+ * Filter User success rate based on the date.
+ *
+ * This function load the users success rate based on the
+ * given date range.
+ *
+ * @param string $serviceTypeField
+ *   Return the service type from success rate filter.
+ * @param string $startDateField
+ *   Return the start date from success rate filters.
+ * @param string $endDateField
+ *   Return the end date from success rate filters.
+ * @param string $userRole
+ *   Return the role of the user.
+ *
+ * @return array
+ *   Return array of success rate after filter set.
+ */
+function _amt_reports_chat_success_rate_filter($serviceTypeField, $startDateField, $endDateField, $userRole)
+{
+  // Load services based on the given filters..
+  $serviceQuery = \Drupal::entityQuery('events')
+    ->condition('type', 'services')
+    ->condition('field_status', 'NULL', '!=');
+  // Filters based on service types.
+  if ($serviceTypeField != '') {
+    $serviceQuery->condition('field_type', $serviceTypeField);
+  }
+  // Filters based on start date and end date.
+  if ($startDateField != '' && $endDateField != '') {
+    $serviceQuery->condition('field_date_and_time', $startDateField, '>=')
+      ->condition('field_date_and_time', $endDateField, '<=');
+  }
+  $servicesId = $serviceQuery->execute();
+  // Load services entity.
+  $servicesEntity = \Drupal::entityTypeManager()->getStorage('events')->loadMultiple($servicesId);
+  $rate = [];
+  foreach ($servicesEntity as $key => $service) {
+    // Load service type.
+    $type = $service->field_type->target_id;
+    // Load service status.
+    $typeStatus = $service->field_status->target_id;
+    if ($type != NULL) {
+      // Load service type.
+      $term = Term::load($type)->getName();
+    }
+    // Load instructor based on the id.
+    $instructorId = $service->field_instructor->target_id;
+    // Load executive based on the id.
+    $executiveId = $service->field_executive->target_id;
+    if ($instructorId != NULL) {
+      $instructor = amt_reports_load_chat_success_rate_user($instructorId);
+      // Save the instructor in a reference variable.
+      $insRate = &$rate[$term][$instructor];
+    }
+    if ($executiveId != NULL) {
+      $executive = amt_reports_load_chat_success_rate_user($executiveId);
+      // Save the executive in a reference variable.
+      $exeRate = &$rate[$term][$executive];
+    }
+    // Check if the user role is 'instructor', then change the structure
+    // of data.
+    if ($userRole == 'instructor') {
+      $extendRate = &$insRate;
+      $id = $instructorId;
+    }
+    // Check if the filter is based on the executive.
+    elseif ($userRole == 'executive') {
+      $extendRate = &$exeRate;
+      $id = $executiveId;
+    }
+    // If the user role was none of above then show all users.
+    else {
+      if ($typeStatus != NULL && Term::load($typeStatus)->getName() == 'Sale') {
+        // Increments if the status is 'Sale'.
+        $insRate['sale']++;
+        $exeRate['sale']++;
+      } else {
+        // Increments if the status is not 'Sale'.
+        $insRate['notsale']++;
+        $exeRate['notsale']++;
+      }
+      // Calculate the rate = sale/ sale + notsale.
+      $insRate['rate'] = $insRate['sale'] / ($insRate['notsale'] + $insRate['sale']);
+      $insRate['role'] = "INSTRUCTOR";
+      // Get user id.
+      $insRate['id'] = $instructorId;
+      // Calculate the rate = sale/ sale + notsale.
+      $exeRate['rate'] = $exeRate['sale'] / ($exeRate['notsale'] + $exeRate['sale']);
+      $exeRate['role'] = "EXECUTIVE";
+      // Get user id.
+      $exeRate['id'] = $executiveId;
+    }
+    // Check the service status if it is sale or not sale.
+    if ($typeStatus != NULL && Term::load($typeStatus)->getName() == 'Sale') {
+      // Increments if the status is 'Sale'.
+      $extendRate['sale']++;
+    } else {
+      // Increments if the status is not 'Sale'.
+      $extendRate['notsale']++;
+    }
+    // Rate = sale/sale + notsale .
+    $extendRate['rate'] = $extendRate['sale'] / ($extendRate['notsale'] + $extendRate['sale']);
+    $extendRate['role'] = strtoupper($userRole);
+    // Get user id.
+    $extendRate['id'] = $id;
+  }
+  foreach ($rate as $typekey => $type) {
+    $flag = TRUE;
+    foreach ($type as $key => $value) {
+      if ($value != NULL) {
+        $successRate = $value['rate'];
+        // Save user with its id as a link.
+        $userName = new TranslatableMarkup("<a href='/user/@id'>@message</a>", ['@message' => $key, '@id' => $value['id']]);
+        // Sum all success rates for a single type.
+        $sum = array_sum(array_column($type, 'rate'));
+        // Count the array with rate key.
+        $count = count(array_keys(array_column($type, 'rate')));
+        // Get average: total = sum of rate values/ number of rate keys.
+        $sum = $sum / $count;
+        if ($flag) {
+          $successRateData[] = [
+            ['data' => $typekey, 'rowspan' => count($type)],
+            ['data' => $userName],
+            ['data' => $value['role']],
+            // Round the number and show 2 decimal.
+            ['data' => round(($successRate * 100), 2) . '%'],
+            // Round the number and show 2 decimal.
+            ['data' => round(($sum * 100), 2) . '%'],
+          ];
+          $flag = FALSE;
+        } else {
+          $successRateData[] = [
+            ['data' => $userName],
+            ['data' => $value['role']],
+            // Round the number and show 2 decimal.
+            ['data' => round(($successRate * 100), 2) . '%'],
+          ];
+        }
+      }
+    }
+  }
+  return $successRateData;
+}
+
+/**
+ * Create Conflited Time Report.
+ *
+ * This fuction load the events standings for current Event
+ * Instrucotr and Check if there is any Conflicted.
+ * return a printable table.
+ *
+ * @return array
+ *   Return the multy array with strucure of table.
+ */
+function _amt_reports_instructor_time_list()
+{
+  $id = $_GET['eid'];
+  $event = \Drupal::entityManager()->getStorage('events')->load($id);
+  // If it is a child event.
+  // Then find the parent event to show in the table.
+  if ($event->field_parent->value != 0) {
+    $id = $event->field_parent->value;
+    $event = \Drupal::entityManager()->getStorage('events')->load($id);
+  }
+
+  $currentDate = $event->get('field_date_and_time')->value;
+  $expiryDate = ($event->get('field_expiration_date')->value);
+  $num = ($event->get('field_repetition_frequency')->value);
+  $unit = ($event->get('field_repetition_units')->value);
+  $duration = ($event->get('field_duration')->value);
+
+  // If the entity is from group lesson buncle.
+  $title = $event->field_type->entity->name->value;
+  // Check if the student account title has legacy id.
+  if (substr($title, 0, strpos($title, " - ")) != "") {
+    // Trimming the legacy id for the student account title.
+    $title = substr($title, 0, strpos($title, " - "));
+  }
+  // Replacing & with , incase if the student account has one.
+  $title = str_replace(' &', ',', $title);
+
+  $standingEventList = [];
+  if (!empty($currentDate) && !empty($expiryDate) && !empty($unit)) {
+    switch ($unit) {
+      case 'Days':
+        $unit = 'day';
+        break;
+
+      case 'Weeks':
+        $unit = 'week';
+        break;
+
+      case 'Months':
+        $unit = 'month';
+        break;
+    }
+    $totalConflicts = 0;
+
+    // Create PHP + Time for date.
+    $addedUnits = ' +' . $num . ' ' . $unit;
+    // Clean Dates and Times.
+    $currentTime = date('H:i', strtotime($currentDate));
+    $currentDate = date('Y-m-d', strtotime($currentDate));
+
+    // Find the and generate all conflicted events for main parent event.
+    amt_reports_standings_event_list($currentDate, $currentTime, $standingEventList, $totalConflicts, $duration, $event);
+
+    // Standing events will create just for next 3 months, not more.
+    // So here the date of next 3 months calculated and used in condisions.
+    $newdate = new \DateTime($currentDate);
+    // Adds 3 months to current date.
+    $newdate->modify(' +3 months');
+    $threeMonthsLater = $newdate->format('Y-m-d');
+
+    // According to the main event create child events.
+    // Generate the diffrent event instance date and time and create them.
+    while (strtotime($currentDate) < strtotime($expiryDate) && strtotime($currentDate) < strtotime($threeMonthsLater)) {
+
+      // Create a New Date Object from Current Date.
+      $newdate = new \DateTime($currentDate);
+      // Adds New Day/week/month to current date.
+      $newdate->modify($addedUnits);
+      // Create A String format from New Date.
+      $nextDate = $newdate->format('Y-m-d');
+      // If below condition is true it seems to be a problem so break it.
+      if ($nextDate == $currentDate || $nextDate > $expiryDate) {
+        break;
+      }
+
+      amt_reports_standings_event_list($nextDate, $currentTime, $standingEventList, $totalConflicts, $duration, $event);
+      $currentDate = $nextDate;
+    }
+  }
+
+  if ($totalConflicts > 0) {
+    $instructor = User::load($instructorID);
+    $name = $instructor->field_first_name->value . ' ' . $instructor->field_last_name->value;
+    $message = new TranslatableMarkup(
+      "<strong>@name</strong> is busy and has conflict with <span style='color:red;'>@number</span> events.<br>Please check the time or instructor.<br><a href='/events/@id/edit'>Edit</a>",
+      [
+        '@name' => $name,
+        '@id' => $id,
+        '@number' => $totalConflicts,
+      ]
+    );
+
+    LogMessage::showMessage($message, 'warning', TRUE, 'amt_validations');
+    return $standingEventList;
+  }
+  // If there were no conflicts for this event.
+  else {
+    // If the event is created via dayview page.
+    if ($_GET['source'] == 'day-view' || $_GET['source'] == 'day') {
+      // Redirect the user back to dayview with related date as parameter.
+      global $base_url;
+      $response = new RedirectResponse($base_url . "/day-view?date=" . date("Y-m-d", strtotime($event->get('field_date_and_time')->value)));
+      $response->send();
+    }else if( $_GET['source'] == 'week' ){
+
+      // Redirect the user back to dayview with related date as parameter.
+      global $base_url;
+      $response = new RedirectResponse($base_url . "/week-view?date=" . date("Y-m-d", strtotime($event->get('field_date_and_time')->value)));
+      $response->send();
+    }
+    // If the event is created via entity form page.
+    else {
+      // Redirect the user to events view page.
+      global $base_url;
+      $response = new RedirectResponse($base_url . "/events/" . $_GET['eid']);
+      $response->send();
+    }
+  }
+}
+
+/**
+ * Build the report data table for the created event and its childs.
+ *
+ * Each standing event will has multiple child, system should check all
+ * all possible conflict with main event and its child.
+ *
+ * @param string $currentDate
+ *   The event date.
+ * @param string $currentTime
+ *   The event time that is same for all childs.
+ * @param array $standingEventList
+ *   The event date.
+ * @param int $totalConflicts
+ *   The number of conflicted event that exist for the standing group.
+ * @param string $duration
+ *   The druation of main event.
+ * @param string $event
+ *   The main event of standing appointments(parent event).
+ */
+function amt_reports_standings_event_list($currentDate, $currentTime, array &$standingEventList, &$totalConflicts, $duration, $event)
+{
+  $eventId = $event->id();
+  $instructorID = $event->get('field_instructor')->getValue()[0]['target_id'];
+
+  $strToTimeEventDate = strtotime($currentDate . ' ' . $currentTime);
+
+  // Check For Time Conflict and Flag it with ID.
+  $currentEndTime = intval(amt_validations_add_to_time(date('Y-m-d H:i:s', $strToTimeEventDate), $duration));
+
+  $conflictResults = _amt_validations_instructor_is_busy($instructorID, $strToTimeEventDate, $currentEndTime, $eventId);
+
+  $conflictedTitle = t('<span  class="text-success">No Conflict Found</a>');
+  $conflictedTime = '';
+  $conflictedClass = '';
+  $currentEventTime = date('Y-m-d h:i A', $strToTimeEventDate) . ' - ' . date('h:i A', $currentEndTime);
+
+  if (count($conflictResults)) {
+    $totalConflicts += count($conflictResults);
+    $standingEventList[] = [
+      [
+        'data' => t('<a href="/events/@id"> Main Event - @date</a>', [
+          '@id' => $eventId,
+          '@date' => date('m/d/Y - h:i A', $strToTimeEventDate),
+        ]), 'rowspan' => count($conflictResults) + 1,
+      ],
+      [
+        'data' => $currentEventTime,
+        'rowspan' => count($conflictResults) + 1,
+      ],
+    ];
+    foreach ($conflictResults as $conflictResult) {
+      $conflictedEvent = \Drupal::entityManager()->getStorage('events')->load($conflictResult);
+      $conflictedTitle = t(
+        '<a class="text-danger" target="_blank" href="/events/@id">@title</a>',
+        [
+          '@id' => $conflictedEvent->id(),
+          '@title' => $conflictedEvent->get('title')->value,
+        ]
+      );
+      $strToTimeData = strtotime($conflictedEvent->get('field_date_and_time')->value);
+      $conflictedEndTime = intval(
+        amt_validations_add_to_time(
+          date('Y-m-d H:i:s', $strToTimeData),
+          $conflictedEvent->get('field_duration')->value
+        )
+      );
+      $conflictedTime = date('Y-m-d h:i A', $strToTimeData) . ' - ' . date('h:i A', $conflictedEndTime);
+      $conflictedClass = 'bg-danger';
+      $standingEventList[] = [
+        [
+          'class' => $conflictedClass,
+          'data' => $conflictedTitle,
+        ],
+        [
+          'class' => $conflictedClass,
+          'data' => $conflictedTime,
+        ],
+      ];
+    }
+  }
+}
+
+/**
+ * Update Enrollment Next scheduled Payment.
+ *
+ * Based on Current payment.
+ *
+ * This functions adds a Add Days To Current Time
+ * based on Interval passed to Selected
+ * Enrollment and update the Enrollment NExt Payment.
+ */
+function amt_reports_check_conflictedtime(array &$form, FormStateInterface $form_state)
+{
+  // Checking where does the form come from.
+  // It's either dayview or entity form page.
+  if (($form_state->get('source') != NULL && $form_state->get('source') == 'day-view') || $_GET['source'] == 'day-view') {
+    $source = 'day-view';
+  } else {
+    $source = 'entityform';
+  }
+  $enrollmentID = $form_state->getValue('field_repetition_units');
+  $currentPaymentDate = date('Y-m-d', strtotime($form_state->getValue('field_date_and_time')[0]['value']));
+  // If the lesson or group lesson are standing and are created.
+  if (
+    $form_state->getValue('field_repetition_units')
+    && $form_state->getValue('field_repetition_frequency')
+    && $form_state->getValue('field_expiration_date')
+    && $form_state->getValue('field_instructor')
+    &&  $form_state->getValue('field_date_and_time')
+  ) {
+    if ($form_state->getValue('field_parent') != NULL || $form_state->getValue('field_parent') != 0) {
+      $url = Url::fromRoute('amt_instructor_conflict_list', [
+        'eid' => $form_state->getValue('field_parent'),
+        'source' => $source,
+        'date' => $currentPaymentDate,
+      ]);
+    } else {
+      $url = Url::fromRoute('amt_instructor_conflict_list', [
+        'eid' => $form_state->getformObject()->getEntity()->id(),
+        'source' => $source,
+        'date' => $currentPaymentDate,
+      ]);
+    }
+    $form_state->setRedirectUrl($url);
+  }
+  // If the lesson or group lesson are not standing and are created
+  // via day-view page, this piece redirects user back to dayview page.
+  elseif ($source == 'day-view') {
+    $url = Url::fromRoute('amt_dayview.page', [
+      'date' => $currentPaymentDate,
+    ]);
+    $form_state->setRedirectUrl($url);
+  }
+}
+
+/**
+ * Implements or load users using their id.
+ *
+ * This function load user by its id for chat success rate
+ * report and return user first and last name.
+ */
+function amt_reports_load_chat_success_rate_user($id)
+{
+  // Load entity of User by id.
+  // Get the First name of user.
+  $firstName = User::load($id)->get('field_first_name')->value;
+  // Get the last name of user.
+  $lastName = User::load($id)->get('field_last_name')->value;
+  // Join first name with last name.
+  $user = $firstName . " " . $lastName;
+  return $user;
+}
+
+/**
+ * Impelements Hook_menu_local_tasks_alter().
+ *
+ * This function rename "Edit as Drop" Tab to
+ * "Drop Enrollment" while Enrollment View mode.
+ */
+function amt_reports_menu_local_tasks_alter(&$data, $router_item, $root_path)
+{
+  // Get The Specific Form mode machine name and edit its tab.
+  $data['tabs'][0]['form_mode_manager.entities:form_mode_manager.packages.enrollment_drop_mode.task_tab']['#link']['title'] = "Drop Enrollment";
+}
+
+function amt_reports_load_all_instructor()
+{
+  $matches = [];
+  // Load all instructors based on category.
+  $instructorsId = \Drupal::entityQuery('user')
+    ->condition('roles', 'instructor')
+    ->condition('status', '1')
+    ->sort('field_first_name')
+    ->sort('field_last_name')
+    ->execute();
+  // Provide data for the autocomplete list.
+  foreach (User::loadMultiple($instructorsId) as $user) {
+    // dd();
+    // Adding the student account title at the end of each autocomplete row.
+    $label = $user->field_first_name->value . ' ' . $user->field_last_name->value;
+
+    // Setting the keys and label to a variable to be passed.
+    $matches[] = [
+      'value' => $user->name->value,
+      'label' => $label,
+    ];
+  }
+  return $matches;
+}
+
+/**
+ * Load Category Types of Enrollments Based on student department.
+ *
+ * This function get enrollment categories from description of student
+ * department taxonomy and alter query of lessons list (lessons_list)
+ * view.
+ * .
+ * It has been called in amt_reports_views_query_alter() function.
+ */
+function amt_reports_load_lessons_based_on_department(&$query)
+{
+  // Get Student Department ID from Query.
+  $departmentId = $query->where[0]['conditions'][0]['value'][':events__field_type_field_type_target_id'];
+  $conditionId = 0;
+  if ($departmentId == null) {
+    $departmentId = $query->where[0]['conditions'][1]['value'][':events__field_type_field_type_target_id'];
+    $conditionId = 1;
+  }
+
+  if ($departmentId != null) {
+    // Load taxonomy based on ID.
+    $department = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($departmentId);
+    // Get the description of taxonomy and split and get the element inside ([])
+    preg_match('#\[(.*?)\]#', $department->description->getString(), $match);
+    $deptEnrollmentsName = preg_split('/,/', $match[1]);
+
+    // Load all taken category IDs from description.
+    $deptCategoryId = array_keys(\Drupal::entityManager()
+      ->getStorage('taxonomy_term')
+      ->loadByProperties(['name' => $deptEnrollmentsName]));
+
+    // Overwrite the query.
+    $query->where[0]['conditions'][$conditionId] = [
+      "field"    => "packages_field_data_attendees__field_enrollment__packages__field_category.field_category_target_id",
+      "value"    => $deptCategoryId,
+      "operator" => 'in',
+    ];
+  }
+}
+
+/**
+ * This help to sort array. 
+ *
+ */
+function amt_reports_sort_by_paid_ahead($a, $b)
+{
+  // For ASC:
+  if ($_GET['stype'] == 'ASC') {
+    return $a["paidAhead"] - $b["paidAhead"];
+  }
+
+  // For DESC:
+  return $b["paidAhead"] - $a["paidAhead"];
+}
+
+/**
+ * This function is going to return the date of last thaught (showed) lesson of a student.
+ */
+function amt_reports_get_last_thaught_lesson_id($studentId)
+{
+
+  $lessonStatusIds = _amt_studio_find_multi_eck_id('lesson_status', ['Showed']);
+
+  // Load the latest attendance Id with status of the showed and no showed charged.
+  $attendId = \Drupal::entityQuery('attendees')
+    ->condition('field_status', $lessonStatusIds, 'IN')
+    ->condition('field_students', $studentId)
+    ->sort('id', 'DESC')
+    ->range(0, 1)
+    ->execute();
+
+  if (count($attendId) > 0) {
+    $event = \Drupal::entityManager()->getStorage('events')->loadByProperties(['field_student' => reset($attendId)]);
+    $event = reset($event);
+
+    if (is_object($event)) {
+      return date('m-d-Y', strtotime($event->field_date_and_time->value));
+    }
+  }
+
+  return 'n/a';
+}
+
+/**
+ * Get current Url for pagination purposes.
+ */
+function amt_reports_get_curent_pageURL()
+{
+
+  $pagerUrl = \Drupal::request()->getRequestUri();
+
+  if (isset($_GET['type']) || isset($_GET['from']) || isset($_GET['to'])) {
+    $pagerUrl .= "&page=";
+  } else {
+    $pagerUrl .= "?page=";
+  }
+
+  return $pagerUrl;
+}

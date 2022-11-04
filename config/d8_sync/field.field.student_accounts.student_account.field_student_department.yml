@@ -1,0 +1,43 @@
+uuid: b5061afd-f348-4f77-a061-3dd3e4ffd18d
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.field_student_department
+    - taxonomy.vocabulary.student_department
+  content:
+    - 'taxonomy_term:student_department:235e7257-7d50-486f-a388-f4ee049087c4'
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: student_accounts.student_account.field_student_department
+field_name: field_student_department
+entity_type: student_accounts
+bundle: student_account
+label: 'Student Department'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    target_uuid: 235e7257-7d50-486f-a388-f4ee049087c4
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      student_department: student_department
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

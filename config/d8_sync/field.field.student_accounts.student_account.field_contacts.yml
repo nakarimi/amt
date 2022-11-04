@@ -1,0 +1,38 @@
+uuid: 724af356-2bd5-47a6-b03d-f99098a3132e
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.contacts.student_record
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.field_contacts
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: student_accounts.student_account.field_contacts
+field_name: field_contacts
+entity_type: student_accounts
+bundle: student_account
+label: Contacts
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:contacts'
+  handler_settings:
+    target_bundles:
+      student_record: student_record
+    sort:
+      field: _none
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

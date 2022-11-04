@@ -1,0 +1,5 @@
+services:
+  amt_general.subscriber:
+    class: Drupal\amt_general\EventSubscriber\UserRedirection
+    tags:
+      - {name: event_subscriber}

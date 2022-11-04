@@ -1,0 +1,42 @@
+/* override styles when printing */
+@media print {
+  @page {
+    /* landscape */
+    size: 280mm 215mm;
+    /* you can also specify margins here:
+         margin: 25mm
+         margin-right: 45mm;
+         for compatibility with both A4 and Letter */ }
+  body {
+    margin: 0;
+    color: #000;
+    background-color: #fff; }
+  body > div.dialog-off-canvas-main-canvas > div > div > div > div > h1 {
+    font-size: 20px; }
+  .conflict-table {
+    font-size: 12px; }
+  body.main-container > row {
+    width: 58mm; }
+  .alert,
+  .region-sidebar-second,
+  .region-footer,
+  #block-mainnavigation {
+    display: none; }
+  .conflict-table {
+    display: block; }
+  .bg-danger {
+    color: red; }
+  .bg-success {
+    color: green; }
+  /* target all pages */
+  @page {
+    margin: 1cm; }
+  /* target the first page only */
+  @page :first {
+    margin-top: 1cm; }
+  /* target left (even-numbered) pages only */
+  @page :left {
+    margin-right: 1cm; }
+  /* target right (odd-numbered) pages only */
+  @page :right {
+    margin-left: 1cm; } }

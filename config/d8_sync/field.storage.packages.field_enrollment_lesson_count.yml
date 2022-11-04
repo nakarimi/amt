@@ -1,0 +1,20 @@
+uuid: 8308bad6-69a8-4881-b0b6-2cf981c58dc1
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: packages.field_enrollment_lesson_count
+field_name: field_enrollment_lesson_count
+entity_type: packages
+type: integer
+settings:
+  unsigned: false
+  size: normal
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

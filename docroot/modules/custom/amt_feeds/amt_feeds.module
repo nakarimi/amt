@@ -1,0 +1,774 @@
+<?php
+
+/**
+ * @file
+ * Provides general functionality and alterations for AMT site functionality.
+ */
+
+use Drupal\Core\Database\Database;
+use Drupal\amt_general\LogMessage;
+use Symfony\Component\HttpFoundation\Session\Session;
+
+/**
+ * Create Student Records ECKs based on the Student Record passed data.
+ *
+ * @param array $studentRecord
+ *   Array of student Record fields data.
+ *
+ * @return int
+ *   Return an id of the current created record.
+ */
+function _amt_feeds_create_entity_stu_record(array $studentRecord, array $address) {
+  // Define entity type and bundle.
+  $entityType = "contacts";
+  $bundle = "student_record";
+
+  // Get definition of target entity type.
+  $entityDefinition = \Drupal::entityManager()->getDefinition($entityType);
+
+  // Load up an array for creation.
+  $entityData = [
+    'title'            => $studentRecord['title'],
+    'field_cell_phone' => $studentRecord['field_cell_phone'],
+    'field_first_name' => $studentRecord['field_first_name'],
+    'field_gender'     => $studentRecord['field_gender'],
+    'field_home_phone' => $studentRecord['field_home_phone'],
+    'field_last_name'  => $studentRecord['field_last_name'],
+    'field_email'      => $studentRecord['field_email'],
+    // Use entity definition to set the appropriate property for the bundle.
+    $entityDefinition->getKeys()['bundle'] => $bundle,
+  ];
+  // Create new entity by the data array that provided.
+  $newEntity = \Drupal::entityManager()->getStorage($entityType)->create($entityData);
+  $newEntity->save();
+  LogMessage::showMessage('Student Record added for `' . $studentRecord['field_first_name'] . '` successfully!', 'info', FALSE, 'amt_feeds');
+  // Set Address TO Database.
+  $conn = Database::getConnection();
+  $queryx = $conn->insert('contacts__field_address')->fields([
+    'bundle'                            => 'student_record',
+    'delta'                             => 0,
+    'langcode'                          => 'en',
+    'entity_id'                         => $newEntity->id(),
+    'revision_id'                       => $newEntity->id(),
+    'field_address_country_code'        => 'US',
+    'field_address_administrative_area' => $address['dependent_locality'],
+    'field_address_locality'            => $address['locality'],
+    'field_address_postal_code'         => $address['postal_code'],
+    'field_address_address_line1'       => $address['address_line1'],
+    'field_address_address_line2'       => $address['address_line2'],
+  ])->execute();
+
+  return $newEntity->id();
+}
+
+/**
+ * Check that the student record exist.
+ *
+ * @param string $email
+ *   The student email address.
+ * @param string $title
+ *   The student title that will contain the first and last name.
+ *
+ * @return array
+ *   Return that student array if exist.
+ */
+function _amt_feeds_check_entity_student_record($email, $title) {
+  $query = \Drupal::entityQuery('contacts')
+    ->condition('type', 'student_record')
+    ->condition('title', $title);
+  if ($email != '') {
+    $query->condition('field_email', $email);
+  }
+
+  return $query->execute();
+}
+
+/**
+ * Update the loaded item according to student account and attendees.
+ *
+ * @param object $item
+ *   The item that loaded from csv file.
+ */
+function _amt_feeds_attendees_scode(&$item) {
+  $scode = $item->get('scode');
+  $lessonType = $item->get('service');
+  $studentAccounts = \Drupal::entityManager()
+    ->getStorage('student_accounts')
+    ->loadByProperties(["field_legacy_id" => $scode]);
+
+  // If student find create attendance for lesson.
+  if ($studentAccounts != NULL) {
+    $studentId = reset($studentAccounts)->id->value;
+
+    // Load the student account based on item socde that is the lagacy id.
+    $enrollments = \Drupal::entityManager()->getStorage('packages')->loadByProperties(['field_student' => $studentId]);
+
+    // This is for mapping appointment status.
+    $status = $item->get('apptstatus');
+    $statusMapping = _amt_feeds_mapp_appointment_status();
+    $convertedStatus = 'Pending Status';
+
+    // Check the mapping against the imported value. If the imported
+    // appointment status is matched, then provide the new value.
+    if (array_key_exists($status, $statusMapping)) {
+      $convertedStatus = $statusMapping[$status];
+    }
+
+    // Loading the Pending Status Id as this status
+    // is supposed to be the default status for
+    // Importing the data from feeds.
+    $loadStatusId = \Drupal::entityQuery('taxonomy_term')
+      ->condition('name', $convertedStatus)
+      ->condition('vid', 'lesson_status')
+      ->execute();
+    if ($loadStatusId) {
+      // Getting the id value from the array.
+      $statusId = array_pop($loadStatusId);
+    }
+    else {
+      $statusId = "";
+    }
+
+    // By this data create new Attendance.
+    $data = [
+      'title'       => $item->get('sname'),
+      'studentAccounts'  => $studentAccounts,
+      'enrIDs'      => NULL,
+      'status'      => $statusId,
+    ];
+
+    if (!empty($enrollments)) {
+      $tempDateAndTime = NULL;
+      
+      // Getting IDs of free enrollments which are Sundy and Uncategorized.
+      $enrollmentTypesIds = amt_general_load_nuteral_enrollments();
+
+      // This is for selecting enrollment when lesson available is
+      // greater then zero and the lesson type not match.
+      $tempEnrollment = NULL;
+      $defaultEnrollmentFlag = FALSE;
+
+      foreach ($enrollments as $key => $enrollment) {
+        $thisEnrId = $enrollment->id->value;
+        $package = $enrollment->field_enrollment_package_name->referencedEntities()[0];
+        // Get enrollment lesson available.
+        $enrollLessonAvailable = $enrollment->field_lesson_available->value;
+        $enrTypeId = $enrollment->field_category->target_id;
+        // Check the lesson type and enrollment category is the same
+        // and lesson available is more then zero.
+        if ($enrollLessonAvailable != "" && $enrollLessonAvailable > 0 && !in_array($enrTypeId, $enrollmentTypesIds)) {
+          $tempEnrollment = $enrollment;
+          // Check package is not null.
+          if ($package != NULL) {
+            $packageLessonType = $package->field_lesson_type->referencedEntities()[0];
+            if ($packageLessonType != NULL) {
+              $packageLessonName = $packageLessonType->name->value;
+              if ($lessonType == $packageLessonName) {
+                $enrollDateAndTime = $enrollment->field_sale_date->value;
+                // If temp date not set the first sale date assign in temp.
+                if ($tempDateAndTime == NULL) {
+                  $tempDateAndTime = $enrollDateAndTime;
+                }
+                // If temp date is equal or greater then enrollment sale date
+                // get enrollment id for assign to attendance.
+                if ($tempDateAndTime >= $enrollDateAndTime) {
+                  $data['enrIDs'] = $enrollment;
+                  // Update the temporary with sale date.
+                  $tempDateAndTime = $enrollDateAndTime;
+                }
+              }
+            }
+          }
+        }
+      }
+      // If the lesson type not match with package lesson type
+      // get the enrollment with lesson available and assign to events.
+      if ($data['enrIDs'] == NULL) {
+        $data['enrIDs'] = $tempEnrollment;
+      }
+    }
+
+    // If any enrollment not have lesson available we create or assign
+    // the existent enrollment to the events.
+    if ($data['enrIDs'] == NULL && $item->get('bundle_type') == 'lesson') {
+      $defaultEnrollmentFlag = TRUE;
+      // Get the default enrollment of student and assign it to event.
+      $defaultEnrollment = _amt_feeds_get_default_enrollment($studentId, $scode);
+      if ($defaultEnrollment != NULL) {
+        $data['enrIDs'] = $defaultEnrollment;
+      }
+      else {
+        // Create an default enrollment and assign it to the event.
+        $data['enrIDs'] = _amt_feeds_create_default_enrollment($studentId, $scode);
+      }
+    }
+
+    // Creating attendance for events before import.
+    $attendanceId = _amt_feeds_attendance_create($data);
+    $item->set('student', $attendanceId);
+  }
+  // Creating the lesson without any attendance.
+  $item->set('scode', $item->get('sname'));
+
+  // Create a TempStore for storing the attendance id for lesson events.
+  $tempstore = \Drupal::service('user.private_tempstore')->get('amt_feeds');
+  $freeLessons = _amt_general_get_free_lessons();
+  // This is for increase lesson available and decrease lesson used.
+  if ($data['enrIDs'] != NULL && $item->get('bundle_type') == 'lesson' && $defaultEnrollmentFlag === FALSE && ($convertedStatus == "Showed" || $convertedStatus == "No Showed, Charged") && !in_array($lessonType, $freeLessons)) {
+    _amt_feeds_manipulate_enrollment_field($data['enrIDs']);
+
+    // Create a TempStore with attendees id field value for prevent
+    // recalculating of enrollment lesson available and lesson used.
+    $tempstore->set($item->get('student'), $item->get('student'));
+  }
+  elseif ($defaultEnrollmentFlag === TRUE && $item->get('bundle_type') == 'lesson') {
+
+    // Create a TempStore with attendees id field value for prevent
+    // recalculating of enrollment lesson available and lesson used.
+    $tempstore->set($item->get('student'), $item->get('student'));
+  }
+}
+
+/**
+ * Create the attendance item according to student account and events.
+ *
+ * @param array $data
+ *   The attendance data for creating the new one.
+ *
+ * @return int
+ *   An id will return that is the attendance ID.
+ */
+function _amt_feeds_attendance_create(array $data) {
+  // Define entity type and bundle.
+  $entityType = "attendees";
+  $bundle = "attendance";
+
+  // Get definition of target entity type.
+  $entityDefinition = \Drupal::entityManager()->getDefinition($entityType);
+  // Load up an array for creation.
+  $entityData = [
+    'title'                 => $data['title'],
+    'field_student_account' => $data['studentAccounts'],
+    'field_students'        => reset($data['studentAccounts'])->field_contacts,
+    'field_enrollment'      => $data['enrIDs'],
+    'field_status'          => $data['status'],
+    'field_description'     => '',
+
+    // Use entity definition to set the appropriate property for the bundle.
+    $entityDefinition->getKeys()['bundle']  => $bundle,
+  ];
+
+  // Create new entity by the data array that provided.
+  $newEntity = \Drupal::entityManager()
+    ->getStorage($entityType)
+    ->create($entityData);
+
+  $newEntity->save();
+  return $newEntity->id();
+}
+
+/**
+ * Creating the default enrollment by scode and student id.
+ *
+ * We create default enrollment when we not have any enrollment
+ * with lesson available and this function create an enrollment
+ * with student id and legacy id.
+ *
+ * @param string $studentId
+ *   The student id for creating enrollment for them.
+ * @param string $legacyId
+ *   The enrollment legacy id.
+ *
+ * @return object
+ *   An object of the enrollment that we created.
+ */
+function _amt_feeds_create_default_enrollment($studentId, $legacyId) {
+  // Define entity type and bundle.
+  $entityType = "packages";
+  $bundle = "enrollment";
+
+  // Get definition of target entity type.
+  $entityDefinition = \Drupal::entityManager()->getDefinition($entityType);
+  // Load up an array for creation.
+  $entityData = [
+    'title' => $legacyId . ' - Default Enrollment',
+    'field_student' => ['target_id' => $studentId],
+    'field_legacy_id' => ['value' => $legacyId],
+    'field_category' => ['target_id' => _amt_feeds_find_single_eck_id('enrollment_type', 'Deafult')],
+    'field_sale_date' => '1969-12-31',
+
+    // Use entity definition to set the appropriate property for the bundle.
+    $entityDefinition->getKeys()['bundle']  => $bundle,
+  ];
+
+  // Create new entity by the data array that provided.
+  $newEntity = \Drupal::entityManager()
+    ->getStorage($entityType)
+    ->create($entityData);
+
+  $newEntity->save();
+  return $newEntity;
+}
+
+/**
+ * Getting the default enrollment by scode and student id.
+ *
+ * We create default enrollment when we not have any enrollment
+ * with lesson available and this function get the default
+ * enrollment of student with student id and legacy id.
+ *
+ * @param string $studentId
+ *   The student id for getting enrollment of him.
+ * @param string $legacyId
+ *   The enrollment legacy id.
+ *
+ * @return object
+ *   An object of the default enrollment.
+ */
+function _amt_feeds_get_default_enrollment($studentId, $legacyId) {
+  // Load the student account based on item scode that is the legacy id.
+  $enrollment = \Drupal::entityManager()
+    ->getStorage('packages')
+    ->loadByProperties(['field_student' => $studentId, 'field_legacy_id' => $legacyId]);
+    return array_pop($enrollment);
+}
+
+/**
+ * Provide the single id of term taxonomy.
+ *
+ * Load the taxonomy term entity base on name and check it have
+ * the same type return the id.
+ *
+ * @param string $type
+ *   The taxonomy type.
+ * @param string $term
+ *   The item that should search.
+ *
+ * @return int
+ *   The term id.
+ */
+function _amt_feeds_find_single_eck_id($type, $term) {
+  $termId = array_keys(\Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties([
+    'name' => $term,
+    'vid' => $type,
+  ]));
+  if($termId) {
+    $termId = $termId[0];
+    return ($termId != NULL) ? $termId : -1;
+  }else {
+    return -1;
+  }
+}
+/**
+ * This function increment the lesson used and decrement the lesson available.
+ *
+ * @param object $enrollmentEntity
+ *   Pass the enrollment entity.
+ */
+function _amt_feeds_manipulate_enrollment_field(&$enrollmentEntity) {
+  // Check the enrollment entity is not be null.
+  if ($enrollmentEntity != NULL) {
+    // If lesson used value will be null.
+    if ($enrollmentEntity->field_lesson_used->value == "") {
+      // It sets the value to 1.
+      $enrollmentEntity->set('field_lesson_used', '1');
+    }
+    else {
+      // Increment Lesson used.
+      $enrollmentEntity->set('field_lesson_used', ($enrollmentEntity->field_lesson_used->value) + 1);
+    }
+    // Decrement Lesson available.
+    $enrollmentEntity->set('field_lesson_available', $enrollmentEntity->field_lesson_available->value - 1);
+    $enrollmentEntity->save();
+  }
+}
+
+/**
+ * This is a mapping function for appointment status convert.
+ *
+ * @return array
+ *   Array of new and old appointment status.
+ */
+function _amt_feeds_mapp_appointment_status() {
+  return [
+    'S'  => 'Showed',
+    'NC' => 'No Showed, Charged',
+    'NN' => 'No Showed Not Charged',
+    'CN' => 'Cancelled',
+    'CM' => 'Rescheduled',
+    'A'  => 'Pending Status',
+  ];
+}
+
+/**
+ * This function creates all the standings of the imported events.
+ *
+ * This function is called when a standing event is being
+ * imported. This function is going to update the parent and
+ * childs to the newly received data from the newsly lesson that
+ * is being imported.
+ */
+function amt_feeds_create_the_standings() {
+  // Loading the IDs of all standings.
+  $standingsIds = amt_feeds_load_standings_ids();
+  // Array to keep IDs of those standings that are already looped
+  // and edited and should not be repeated.
+  $skipThisIds = [];
+  if (!empty($standingsIds)) {
+    // Loop through all standings.
+    foreach ($standingsIds as $eventId) {
+      // Load the event to have access to it's data.
+      $currentlyLoopedItem = \Drupal::entityManager()->getStorage('events')->load($eventId);
+      // If this event is not among the ones that should be skipped.
+      if (!in_array($eventId, $skipThisIds)) {
+        // Pushing this event's id to the list to be skipped next loop.
+        array_push($skipThisIds, $eventId);
+        // Load all other events that are child standing to this one.
+        $similarEvents = amt_feeds_load_similar_events_to_this($currentlyLoopedItem, $skipThisIds);
+        // If one or more events matched and retrieved.
+        if (!empty($similarEvents)) {
+          // Getting the ID of the last child event.
+          $idOfLastEventDate = end($similarEvents);
+          // Loading the last child event for this standing.
+          $lastEventDate = \Drupal::entityTypeManager()->getStorage('events')->load($idOfLastEventDate);
+          // Update the parent event.
+          amt_feeds_update_parent_event($currentlyLoopedItem, $lastEventDate);
+
+          // Update all child events.
+          amt_feeds_update_all_children($currentlyLoopedItem, $lastEventDate, $similarEvents);
+          // Add the IDs of all of these childs to the skip array.
+          $skipThisIds = array_merge($skipThisIds, $similarEvents);
+        }
+        else {
+          // Set the expiration date to it's own date and time.
+          amt_feeds_update_parent_event($currentlyLoopedItem, $currentlyLoopedItem);
+        }
+      }
+      else {
+        // Load the event to have access to it's data.
+        if ($currentlyLoopedItem->field_expiration_date->value == NULL) {
+          amt_feeds_update_parent_event($currentlyLoopedItem, $currentlyLoopedItem);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Update the parent event.
+ *
+ * This functios is updating the parent event by setting the expirary
+ * date of it to the last standing's child date and also set the parent
+ * Id to 0.
+ * 
+ * @param object $currentlyLoopedItem
+ *   The current parent entity that we are looping through.
+ * 
+ * @param object $lastEventDate
+ *   The the last child event for this parent event.
+ */
+function amt_feeds_update_parent_event(&$currentlyLoopedItem, $lastEventDate) {
+  // Setting the last standings' child's date az expiry date
+  // for the parent.
+  $currentlyLoopedItem->field_expiration_date->value = date('Y-m-d', strtotime($lastEventDate->field_date_and_time->value));
+  // Set the parent Id to 0.
+  // This makes this event parent.
+  $currentlyLoopedItem->field_parent->value = 0;
+  // Save the changes.
+  $currentlyLoopedItem->save();
+
+  // Setting the reputation unit for parent to days if not set already.
+  amt_feeds_insert_or_update('events__field_repetition_units', 'field_repetition_units_value', $currentlyLoopedItem->id(), 'Days');
+}
+
+/**
+ * Update the all the children events.
+ *
+ * This functios is updating all the child events by setting their expirary
+ * date of it to the last standing's child date and also set the parent
+ * Id to to parent event's ID.
+ * @param object $currentlyLoopedItem
+ *   The current parent entity that we are looping through.
+ * 
+ * @param object $lastEventDate
+ *   The the last child event for this parent event.
+ * 
+ * @param array $similarEvents
+ *   The Ids of the child events related to this parent event.
+ */
+function amt_feeds_update_all_children($currentlyLoopedItem, $lastEventDate, $similarEvents) {
+  // Updating Children's parent id.
+  $updateChilds = db_update('events__field_parent')
+    ->fields([
+      'field_parent_value' => $currentlyLoopedItem->id(),
+    ])
+    ->condition('entity_id', $similarEvents, 'IN')
+    ->execute();
+  // Looping through All children.
+  foreach ($similarEvents as $childEvent) {
+
+    // Updating children's expiration date.
+    amt_feeds_insert_or_update('events__field_expiration_date', 'field_expiration_date_value', $childEvent, date('Y-m-d', strtotime($lastEventDate->field_date_and_time->value)));
+
+    // Updating Children's repetition unit.
+    amt_feeds_insert_or_update('events__field_repetition_units', 'field_repetition_units_value', $childEvent, 'Days');
+  }
+}
+
+/**
+ * Loading the similar item (child standings).
+ *
+ * This functios is searching throught evetns and getting all the child
+ * standings that are similar to one one being looped.
+ * 
+ * @param object $currentlyLoopedItem
+ *   The current parent entity that we are looping through.
+ * 
+ * @param array $skipThisIds
+ *   The Ids that are already processed and should be skipped.
+ *
+ * @return array
+ *   The Ids of similar events.
+ */
+function amt_feeds_load_similar_events_to_this($currentlyLoopedItem, $skipThisIds) {
+  // Load the created attendance for this event.
+  // This will be used to load other events for this student.
+  $attendance = \Drupal::entityTypeManager()->getStorage('attendees')->load($currentlyLoopedItem->field_student->target_id);
+  // Getting the student account Id for this event.
+  $studenId = $attendance->field_student_account->target_id;
+  // Creating a connection to the database.
+  $connection = \Drupal::database();
+  // Get the field of date and time for events.
+  $querySimilarEvents = db_select('events__field_date_and_time', 'date');
+  // Get field of duration for events.
+  $querySimilarEvents->leftjoin('events__field_duration', 'duration', 'duration.entity_id = date.entity_id');
+  $querySimilarEvents->leftjoin('events__field_type', 'lessontype', 'lessontype.entity_id = date.entity_id');
+  // Get field of expiration date for events.
+  $querySimilarEvents->leftjoin('events__field_expiration_date', 'exp', 'exp.entity_id = date.entity_id');
+  // Get field of parent ID for events.
+  $querySimilarEvents->leftjoin('events__field_parent', 'parent', 'parent.entity_id = date.entity_id');
+  // Get field of repitation frequency for events.
+  $querySimilarEvents->leftjoin('events__field_repetition_frequency', 'frequency', 'frequency.entity_id = date.entity_id');
+  // Get field of attendance target ID for events.
+  $querySimilarEvents->leftjoin('events__field_student', 'student', 'student.entity_id = date.entity_id');
+  // Get field of student account id for events using attendance.
+  $querySimilarEvents->leftjoin('attendees__field_student_account', 'attendance', 'attendance.entity_id = student.field_student_target_id');
+  // Get field of instructor id for events.
+  $querySimilarEvents->leftjoin('events__field_instructor', 'inst', 'inst.entity_id = date.entity_id');
+
+  // Get the date and time value.
+  $querySimilarEvents->addField('date', 'field_date_and_time_value', 'dates');
+  $querySimilarEvents->addField('lessontype', 'field_type_target_id', 'lessontypes');
+  // Get the date and time value.
+  $querySimilarEvents->addField('date', 'entity_id', 'id');
+  // Get the duration value.
+  $querySimilarEvents->addField('duration', 'field_duration_value', 'durations');
+  // Get the expiration date value.
+  $querySimilarEvents->addField('exp', 'field_expiration_date_value', 'expiration');
+  // Get the parent id value.
+  $querySimilarEvents->addField('parent', 'field_parent_value', 'parents');
+  // Get the repitation frequency value.
+  $querySimilarEvents->addField('frequency', 'field_repetition_frequency_value', 'frequencys');
+  // Get the student account id value.
+  $querySimilarEvents->addField('attendance', 'field_student_account_target_id', 'studentids');
+  // Get the instructor name value.
+  $querySimilarEvents->addField('inst', 'field_instructor_target_id', 'teacher');
+  // Selecting the above fields from database.
+  $queryFinal = $connection->select($querySimilarEvents);
+  // Select which fields to retrieve.
+  $queryFinal->fields(NULL, [
+    'id',
+    'dates',
+  ]);
+
+  $timeOfcurrentlyLoopedItem = date('H:i:s', strtotime($currentlyLoopedItem->field_date_and_time->value));
+
+  // Constraint the query based on the
+  // duration that matches this new event.
+  $queryFinal->condition('durations', $currentlyLoopedItem->field_duration->value);
+  // Contraint the query based on the
+  // Timing that matches this new event.
+  $queryFinal->condition('dates', '%' . $timeOfcurrentlyLoopedItem, 'LIKE');
+  // Contraint the query based on the
+  // Lesson Type that matches this new event.
+  $queryFinal->condition('lessontypes', $currentlyLoopedItem->field_type->target_id);
+  // Contraint the query based on the
+  // frequency that matches this new event.
+  $queryFinal->condition('frequencys', $currentlyLoopedItem->field_repetition_frequency->value);
+  // Contraint the query based on the
+  // studentID that matches this new event.
+  $queryFinal->condition('studentids', $studenId);
+  // Contraint the query based on the
+  // teach ID that matches this new event.
+  $queryFinal->condition('teacher', $currentlyLoopedItem->field_instructor->target_id);
+  // Contraint the query based on the
+  // IDs that are not inside Skip Array.
+  $queryFinal->condition('id', $skipThisIds, 'NOT IN');
+  // Order the result based on the dates and should be desc.
+  $queryFinal->orderBy('dates', 'ASC');
+  // Load the matched events.
+  $similarEvents = $queryFinal->execute()->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+  // Validating the list of similar events
+  // and excluding those that their dates
+  // are not in continuity of the rest.
+  $similarEventsFiltered = _amt_feeds_filter_valid_similar_events($similarEvents, $currentlyLoopedItem);
+  
+  return $similarEventsFiltered;
+}
+
+/**
+ * Updating specific columns for events.
+ *
+ * This functios is used to update specicific columns namely
+ * Expiration date and parent Id repetition unit for the events.
+ * 
+ * @param string $tableName
+ *   The name of the table or database to be update or inserted in.
+ * 
+ * @param string $columnName
+ *   The name of the column of the above table.
+ * 
+ * @param int $entityId
+ *   Holding the parent Id to be saved in the above table.
+ * 
+ * @param string $columnValue
+ *   The actual value to be save inside the above column's table.
+ */
+function amt_feeds_insert_or_update($tableName, $columnName, $entityId, $columnValue) {
+  db_merge($tableName)
+    ->insertFields([
+      $columnName => $columnValue,
+      'entity_id' => $entityId,
+      'revision_id' => $entityId,
+      'delta' => 0,
+      'bundle' => 'lesson',
+      'langcode' => 'en',
+      'deleted' => 0,
+    ])
+    ->updateFields([
+      $columnName => $columnValue,
+    ])
+    ->key(['entity_id' => $entityId])
+    ->execute();
+}
+
+/**
+ * Loading the IDs of all standings.
+ *
+ * This functios is used to load the IDs of all the
+ * standings that are imported. We will use the list
+ * to look for similar events for each one of them and update
+ * them accordingly.
+ *
+ * @return array
+ *   The Ids of standing events.
+ */
+function amt_feeds_load_standings_ids() {
+  $connection = Database::getConnection();
+  // Load the created attendance for this event.
+  // This will be used to load other events for this student.
+  $loadAllStandingsIDs = db_select('events__field_repetition_frequency', 'freq');
+  // Get field of duration for events.
+  $loadAllStandingsIDs->leftjoin('events__feeds_item', 'feeds', 'feeds.entity_id = freq.entity_id');
+  // Get the field of date and time for events.
+  $loadAllStandingsIDs->leftjoin('events__field_date_and_time', 'date', 'date.entity_id = freq.entity_id');
+  // Get field of expiration date for events.
+  $loadAllStandingsIDs->leftjoin('events__field_parent', 'parent', 'parent.entity_id = freq.entity_id');
+
+  // Get the date and time value.
+  $loadAllStandingsIDs->addField('freq', 'field_repetition_frequency_value', 'frequency');
+  // Get the date and time value.
+  $loadAllStandingsIDs->addField('feeds', 'feeds_item_target_id', 'feedid');
+  // Get the duration value.
+  $loadAllStandingsIDs->addField('parent', 'field_parent_value', 'parentvalue');
+  // Get the date value.
+  $loadAllStandingsIDs->addField('date', 'field_date_and_time_value', 'date');
+  // Get the id value.
+  $loadAllStandingsIDs->addField('parent', 'entity_id', 'id');
+  $queryFinal = $connection->select($loadAllStandingsIDs);
+  // Select which fields to retrieve.
+  $queryFinal->fields(NULL, [
+    'id',
+  ]);
+
+  // Contraint the query based on the
+  // duration that matches this new event.
+  $queryFinal->condition('frequency', '0', '>');
+  // Their Feeds item field should not be empty.
+  $queryFinal->condition('feedid', 0, '!=');
+  // Their parent Id value should be 0.
+  $queryFinal->condition('parentvalue', '0', '=');
+  $queryFinal->orderBy('date', 'ASC');
+  $result = $queryFinal->execute()->fetchCol();
+
+  return $result;
+}
+
+/**
+ * Validating the lis of similar events.
+ *
+ * Here the function is passed with the data of the current event (parent)
+ * and the list (Ids) of all the similar events. Now this function
+ * is going to evaluate each similar event and decides whether
+ * the similar event's date correspond's the date continuity of the previos
+ * child event or not. This makes sure that those standings that are identical
+ * in everything except their date, they should be split.
+ * For example, a student has standind lesson january of this year,
+ * but has another standings lesson maybe in august. Now this function should
+ * diffrenciate between these two standing lesson and split them in to 
+ * two standings and avoid integrating them into one single standing.
+ * 
+ * @param array $similarEvents
+ *   The Ids of the similar events (child events).
+ * 
+ * @param object $currentlyLoopedItem
+ *   The object of the current event (parent).
+ * 
+ * @return array $similarEventsFiltered
+ *   The list of true childs of the current event.
+ */
+function _amt_feeds_filter_valid_similar_events($similarEvents, $currentlyLoopedItem) {
+  $diff = null;
+  // Final version of the similar events.
+  $similarEventsFiltered = [];
+  // Getting the first event of the similar events.
+  $firstSimilarEvent = reset($similarEvents);
+  // Getting a date from the first similar event.
+  $dateForFirstSimilarEvent = new \DateTime($firstSimilarEvent['dates']);
+  // Getting a date from the current event.
+  $dateForCurrentEvent = new \DateTime($currentlyLoopedItem->field_date_and_time->value);
+  // If the different between the current date and
+  // the first similar event corresponds to the
+  // number of frequency of the current event.
+  if ($dateForFirstSimilarEvent->diff($dateForCurrentEvent)->format("%a") == $currentlyLoopedItem->field_repetition_frequency->value) {
+    // Push this first similar event's id to the $similarEventsFiltered variable.
+    array_push($similarEventsFiltered, $firstSimilarEvent['id']);
+    if (count($similarEvents) > 1) {
+      // Loop through all the similar events.
+      foreach ($similarEvents as $key => $event) {
+        // Get the next event from inside the similar events.
+        $nextEvent = next($similarEvents);
+        
+        if($nextEvent != false) {
+          // Get a date from the current similar event.
+          $currentEventTime = new \DateTime($event['dates']);
+          // Get a date from the next similar event.
+          $futureEventTime = new \DateTime($nextEvent['dates']);
+          // Get the difference between the current and next similar events' date.
+          $diff = $futureEventTime->diff($currentEventTime)->format("%a");
+          // If the difference doesn't correspond to the frequency of the parent.
+          if ($diff != null && $diff != $currentlyLoopedItem->field_repetition_frequency->value) {
+            // Stop and break the loop here.
+            break;
+          }
+          else {
+            // Push the Id of the next event to the $similarEventsFiltered variable.
+            array_push($similarEventsFiltered, $nextEvent['id']);
+          }
+        }
+      }
+    }
+  }
+  
+  return $similarEventsFiltered;
+}

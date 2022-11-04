@@ -1,0 +1,49 @@
+uuid: 8b76520a-5e95-4513-b71a-b270690654d8
+langcode: en
+status: true
+dependencies:
+  module:
+    - devel
+id: config_sync.module.devel
+snapshotSet: config_sync
+extensionType: module
+extensionName: devel
+items:
+  -
+    collection: ''
+    name: devel.settings
+    data:
+      page_alter: false
+      raw_names: false
+      error_handlers:
+        1: 1
+      rebuild_theme: false
+      debug_mail_file_format: '%to-%subject-%datetime.mail.txt'
+      debug_mail_directory: 'temporary://devel-mails'
+      devel_dumper: default
+  -
+    collection: ''
+    name: devel.toolbar.settings
+    data:
+      toolbar_items:
+        - devel.admin_settings_link
+        - devel.cache_clear
+        - devel.container_info.service
+        - devel.menu_rebuild
+        - devel.reinstall
+        - devel.route_info
+        - devel.run_cron
+  -
+    collection: ''
+    name: system.menu.devel
+    data:
+      langcode: en
+      status: true
+      dependencies:
+        enforced:
+          module:
+            - devel
+      id: devel
+      label: Development
+      description: 'Links related to Devel module.'
+      locked: true

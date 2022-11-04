@@ -1,0 +1,57 @@
+uuid: 5ffde6e4-8cee-4bd1-a143-1a9ad2a7081b
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - options
+id: student_accounts.field_dances_type
+field_name: field_dances_type
+entity_type: student_accounts
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: waltz
+      label: Waltz
+    -
+      value: tango
+      label: Tango
+    -
+      value: foxtrot
+      label: Foxtrot
+    -
+      value: 'cha cha'
+      label: 'Cha Cha'
+    -
+      value: rumba
+      label: Rumba
+    -
+      value: swing
+      label: Swing
+    -
+      value: salsa
+      label: Salsa
+    -
+      value: bachata
+      label: Bachata
+    -
+      value: merengue
+      label: Merengue
+    -
+      value: 'country western'
+      label: 'Country Western'
+    -
+      value: 'wc swing'
+      label: 'WC Swing'
+    -
+      value: other
+      label: Other
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

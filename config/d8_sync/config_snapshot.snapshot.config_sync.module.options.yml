@@ -1,0 +1,11 @@
+uuid: b1b234e5-122f-4685-925f-cc531b3f584e
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+id: config_sync.module.options
+snapshotSet: config_sync
+extensionType: module
+extensionName: options
+items: {  }

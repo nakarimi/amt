@@ -1,0 +1,29 @@
+uuid: 9d5f8ea3-3ee2-4e48-b4ed-4d82d6a90add
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.payments.payment
+    - field.storage.payments.field_payment_id
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: payments.payment.field_payment_id
+field_name: field_payment_id
+entity_type: payments
+bundle: payment
+label: 'Payment ID'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

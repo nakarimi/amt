@@ -1,0 +1,29 @@
+uuid: eb09f0bc-9820-4117-867d-9fc97dee138f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_abbreviation
+    - taxonomy.vocabulary.group_lesson_types
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: taxonomy_term.group_lesson_types.field_abbreviation
+field_name: field_abbreviation
+entity_type: taxonomy_term
+bundle: group_lesson_types
+label: Abbreviations
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

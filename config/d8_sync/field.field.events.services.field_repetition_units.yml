@@ -1,0 +1,30 @@
+uuid: 484e2946-a305-454b-bc4f-4fca87e41b06
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.services
+    - field.storage.events.field_repetition_units
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.services.field_repetition_units
+field_name: field_repetition_units
+entity_type: events
+bundle: services
+label: 'Repetition Units'
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

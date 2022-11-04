@@ -1,0 +1,6 @@
+name: 'AMT General'
+description: 'General custom modifications and changes for AMT'
+package: Custom
+type: module
+version: !!float 1
+core: 8.x

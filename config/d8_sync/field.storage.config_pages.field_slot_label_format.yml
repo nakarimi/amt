@@ -1,0 +1,21 @@
+uuid: 95803d4c-e217-4f5f-8066-f9891d357bdb
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+id: config_pages.field_slot_label_format
+field_name: field_slot_label_format
+entity_type: config_pages
+type: string
+settings:
+  max_length: 255
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

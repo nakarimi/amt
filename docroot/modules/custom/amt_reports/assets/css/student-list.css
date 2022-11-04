@@ -1,0 +1,50 @@
+.multiselect-container {
+  width: 100%;
+  padding: 0 10px !important;
+}
+.multiselect-container .checkbox {
+  margin: 0px;
+}
+.multiselect-container .dropdown-menu > .active > a, .multiselect-container .dropdown-menu > .active > a:hover, .multiselect-container .dropdown-menu > .active > a:focus {
+  color: black !important;
+  background-color: #e6e6e6 !important;
+}
+.multiselect-container .dropdown-menu li label:hover {
+  cursor: pointer;
+}
+
+button.multiselect {
+  text-align: left !important;
+}
+
+#studentsListTable tr th:not(.tableCellHideOnPrint):not(.disableSort) {
+  cursor: pointer;
+}
+#studentsListTable tr th svg {
+  margin-bottom: -3px;
+  margin-left: 5px;
+}
+#studentsListTable tr th svg.bi-arrow-repeat {
+  animation-name: spin;
+  animation-duration: 3000ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  /* transform: rotate(3deg); */
+  /* transform: rotate(0.3rad);/ */
+  /* transform: rotate(3grad); */ 
+  /* transform: rotate(.03turn);  */
+}
+#studentsListTable tr th:not(.DESC) .bi-caret-down-fill {
+  transform: rotate(180deg);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/*# sourceMappingURL=student-list.css.map */

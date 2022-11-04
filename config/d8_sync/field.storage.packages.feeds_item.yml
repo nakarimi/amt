@@ -1,0 +1,20 @@
+uuid: f90b0080-bc4a-474f-8ac6-d039ebb6802b
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - feeds
+id: packages.feeds_item
+field_name: feeds_item
+entity_type: packages
+type: feeds_item
+settings:
+  target_type: feeds_feed
+module: feeds
+locked: false
+cardinality: 1
+translatable: false
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

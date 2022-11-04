@@ -1,0 +1,154 @@
+uuid: f27fbfc9-ef26-44fc-8398-3ac492cde58e
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.group_lesson
+    - field.field.events.group_lesson.feeds_item
+    - field.field.events.group_lesson.field_base_lesson
+    - field.field.events.group_lesson.field_date_and_time
+    - field.field.events.group_lesson.field_duration
+    - field.field.events.group_lesson.field_expiration_date
+    - field.field.events.group_lesson.field_importer
+    - field.field.events.group_lesson.field_instructor
+    - field.field.events.group_lesson.field_notes
+    - field.field.events.group_lesson.field_parent
+    - field.field.events.group_lesson.field_repetition_frequency
+    - field.field.events.group_lesson.field_repetition_units
+    - field.field.events.group_lesson.field_reschedule_date
+    - field.field.events.group_lesson.field_students
+    - field.field.events.group_lesson.field_type
+  module:
+    - amt_appointment
+    - datetime
+    - field_group
+    - inline_entity_form
+third_party_settings:
+  field_group:
+    group_personal_information:
+      children:
+        - field_students
+      parent_name: ''
+      weight: 11
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: open
+        description: ''
+        required_fields: false
+      label: 'Personal Information'
+      region: hidden
+    group_standing_lesson:
+      children:
+        - field_expiration_date
+        - field_repetition_frequency
+        - field_repetition_units
+        - field_base_lesson
+        - field_importer
+      parent_name: ''
+      weight: 10
+      format_type: tab
+      format_settings:
+        id: ''
+        classes: ''
+        formatter: open
+        description: ''
+        required_fields: false
+      label: 'Standing Lesson'
+      region: hidden
+id: events.group_lesson.default
+targetEntityType: events
+bundle: group_lesson
+mode: default
+content:
+  field_base_lesson:
+    weight: 13
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_date_and_time:
+    weight: 4
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_duration:
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_expiration_date:
+    weight: 10
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_instructor:
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select_empty
+    region: content
+  field_notes:
+    weight: 5
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textarea
+    region: content
+  field_repetition_frequency:
+    weight: 11
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: number
+    region: content
+  field_repetition_units:
+    weight: 12
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_students:
+    weight: 3
+    settings:
+      match_operator: CONTAINS
+      form_mode: default
+      override_labels: false
+      label_singular: ''
+      label_plural: ''
+      collapsible: false
+      collapsed: false
+      allow_new: true
+      allow_existing: false
+      allow_duplicate: false
+    third_party_settings: {  }
+    type: inline_entity_form_complex
+    region: content
+  field_type:
+    weight: 0
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  title:
+    type: string_textfield
+    weight: 1
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  feeds_item: true
+  field_importer: true
+  field_parent: true
+  field_reschedule_date: true

@@ -1,0 +1,30 @@
+uuid: 7101f323-2e9f-4069-9f10-3989955206a1
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - file
+    - image
+id: student_agreement.field_student_signature
+field_name: field_student_signature
+entity_type: student_agreement
+type: image
+settings:
+  uri_scheme: public
+  default_image:
+    uuid: ''
+    alt: 'Student Signature'
+    title: 'Student Signature'
+    width: null
+    height: null
+  target_type: file
+  display_field: false
+  display_default: false
+module: image
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

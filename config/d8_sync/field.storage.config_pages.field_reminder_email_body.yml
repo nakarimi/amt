@@ -1,0 +1,19 @@
+uuid: fac8ce16-a52d-4201-a5a0-725deaf88378
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+id: config_pages.field_reminder_email_body
+field_name: field_reminder_email_body
+entity_type: config_pages
+type: string_long
+settings:
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,32 @@
+uuid: df32fc6f-c16b-4f45-b831-978b2818569f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.sps_code.field_color
+    - taxonomy.vocabulary.sps_code
+  module:
+    - color_field
+    - text
+id: taxonomy_term.sps_code.default
+targetEntityType: taxonomy_term
+bundle: sps_code
+mode: default
+content:
+  description:
+    label: hidden
+    type: text_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_color:
+    weight: 1
+    label: above
+    settings:
+      format: hex
+      opacity: '1'
+    third_party_settings: {  }
+    type: color_field_formatter_text
+    region: content
+hidden: {  }

@@ -1,0 +1,72 @@
+uuid: b78c6261-57a6-4b1e-80e8-1a2619a94ea8
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.ami_token_settings
+    - field.field.config_pages.ami_token_settings.field_ami_address
+    - field.field.config_pages.ami_token_settings.field_client_id
+    - field.field.config_pages.ami_token_settings.field_clientecret
+    - field.field.config_pages.ami_token_settings.field_grant_type
+    - field.field.config_pages.ami_token_settings.field_password
+    - field.field.config_pages.ami_token_settings.field_user
+  module:
+    - link
+    - options
+id: config_pages.ami_token_settings.default
+targetEntityType: config_pages
+bundle: ami_token_settings
+mode: default
+content:
+  field_ami_address:
+    weight: 2
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    type: link
+    region: content
+  field_client_id:
+    weight: 3
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_clientecret:
+    weight: 4
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_grant_type:
+    weight: 7
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
+  field_password:
+    weight: 5
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+  field_user:
+    weight: 6
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden: {  }

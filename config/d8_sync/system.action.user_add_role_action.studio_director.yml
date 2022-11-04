@@ -1,0 +1,14 @@
+uuid: 3f8281cf-56d9-40bd-98ad-40d0384541ed
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.studio_director
+  module:
+    - user
+id: user_add_role_action.studio_director
+label: 'Add the Studio Director role to the selected user(s)'
+type: user
+plugin: user_add_role_action
+configuration:
+  rid: studio_director

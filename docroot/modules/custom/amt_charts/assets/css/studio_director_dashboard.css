@@ -1,0 +1,47 @@
+.widget {
+  border: 1px solid black;
+  margin-top: 30px;
+  padding: 5px; }
+.widget h3 {
+  text-align: center; }
+
+#contact div {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  border-radius: 50%;
+  padding-top: 20px;
+  font-size: 36px;
+  margin: 0 auto;
+  font-family: "Bahnschrift";
+  border: 12px solid #68BC94; }
+
+#booked div {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  border-radius: 50%;
+  padding-top: 20px;
+  font-size: 36px;
+  margin: 0 auto;
+  font-family: "Bahnschrift";
+  border: 12px solid #0077B7; }
+
+#showed div {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  border-radius: 50%;
+  padding-top: 20px;
+  font-size: 36px;
+  margin: 0 auto;
+  font-family: "Bahnschrift";
+  border: 12px solid #E5E5E5; }
+
+#contact p, #booked p, #showed p {
+  font-size: 20px;
+  font-weight: bold;
+  font-family: "Bahnschrift"; }
+
+#contact span, #booked span, #showed span {
+  font-family: "Bahnschrift"; }

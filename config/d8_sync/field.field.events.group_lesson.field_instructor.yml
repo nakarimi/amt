@@ -1,0 +1,45 @@
+uuid: 4233c319-d7fc-44c3-a347-ae98db0dcc27
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.events.group_lesson
+    - field.storage.events.field_instructor
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: events.group_lesson.field_instructor
+field_name: field_instructor
+entity_type: events
+bundle: group_lesson
+label: Instructor
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:user'
+  handler_settings:
+    include_anonymous: true
+    filter:
+      type: role
+      role:
+        instructor: instructor
+        administrator: '0'
+        executive: '0'
+        studio_director: '0'
+        studio_manager: '0'
+        developer: '0'
+    target_bundles: null
+    sort:
+      field: _none
+    auto_create: false
+field_type: entity_reference

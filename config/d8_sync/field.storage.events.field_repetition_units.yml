@@ -1,0 +1,39 @@
+uuid: f277fa6b-464e-4f80-9240-50166d021ff3
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - options
+id: events.field_repetition_units
+field_name: field_repetition_units
+entity_type: events
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: Weekly
+      label: Weekly
+    -
+      value: EOW
+      label: EOW
+    -
+      value: Monthly
+      label: Monthly
+    -
+      value: Days
+      label: Days
+    -
+      value: Weeks
+      label: Weeks
+    -
+      value: Months
+      label: Months
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

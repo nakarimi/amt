@@ -1,0 +1,11 @@
+uuid: 94474671-d7c1-432e-9573-5d28d54de94b
+langcode: en
+status: true
+dependencies:
+  module:
+    - csv_serialization
+id: config_sync.module.csv_serialization
+snapshotSet: config_sync
+extensionType: module
+extensionName: csv_serialization
+items: {  }

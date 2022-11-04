@@ -1,0 +1,9 @@
+amt_userdashboard.page:
+  path: "/user/{user}"
+  defaults:
+    _controller: '\Drupal\amt_userdashboard\Controller\AmtUserDashboard::basePageCallback'
+    _title: "Teacher Profile"
+  requirements:
+    _permission: "Teachers Dashboard Page"
+  options:
+    no_cache: "TRUE"

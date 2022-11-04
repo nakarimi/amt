@@ -1,0 +1,35 @@
+uuid: b13086b9-6c11-413c-8a98-fa30b1d48c25
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.field_enrollment_lesson_price
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: packages.enrollment.field_enrollment_lesson_price
+field_name: field_enrollment_lesson_price
+entity_type: packages
+bundle: enrollment
+label: 'Lesson Price'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: !!float 0
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: decimal

@@ -1,0 +1,50 @@
+#student-agreement-wrapper {
+  width: 100%;
+  float: none;
+  clear: both;
+  overflow: hidden;
+}
+#student-agreement {
+  overflow: hidden;
+  border: 1px solid #ddd;
+  margin: 20px 0;
+}
+#student-agreement h3 {
+  background-color: #eee !important;
+  margin: 0;
+  padding: 15px;
+  font-size: 22px;
+}
+#student-agreement .field {
+  padding: 10px 20px;
+  width: 50%;
+  float: left;
+}
+#student-agreement .field--label {
+  font-weight: bold;
+}
+#student-agreement img {
+  max-width: 200px;
+}
+
+
+@media only screen {
+  #agreement-back-side {
+    display: none !important;
+  }
+}
+
+@media only print {
+  * {
+    -webkit-print-color-adjust: exact;
+  }
+  #student-agreement {
+    border: none;
+    page-break-after: always;
+    /* height: 100vh; */
+  }
+  #agreement-back-side {
+    border: 1px solid #ddd;
+    padding: 15px;
+  }
+}

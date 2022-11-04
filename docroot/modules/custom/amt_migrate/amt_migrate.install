@@ -1,0 +1,17 @@
+<?php
+
+function amt_migrate_uninstall() {
+  // Get the path for the module we want to remove configs for.
+  $module_path = DRUPAL_ROOT. base_path() . drupal_get_path('module', 'amt_migrate') . '/config/install';
+  // Get all of the migration config names.
+  $configs = array();
+  $files = file_scan_directory($module_path, '/migrate/');
+  if ($files) { foreach ($files as $file) { $configs[] = $file->name; }
+    // Delete each config using configFactory.
+    foreach ($configs as $config_name) {
+      drush_print("..." . $config_name);
+      \Drupal::configFactory()->getEditable($config_name)->delete();
+    }
+    return TRUE;
+  }
+}

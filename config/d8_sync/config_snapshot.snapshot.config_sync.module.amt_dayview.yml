@@ -1,0 +1,11 @@
+uuid: 57e17ca3-e64f-43d2-a969-c33ebeca845c
+langcode: en
+status: true
+dependencies:
+  module:
+    - amt_dayview
+id: config_sync.module.amt_dayview
+snapshotSet: config_sync
+extensionType: module
+extensionName: amt_dayview
+items: {  }

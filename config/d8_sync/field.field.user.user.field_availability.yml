@@ -1,0 +1,35 @@
+uuid: 8f7b229e-7061-4b21-857e-468d51c584fe
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.user.field_availability
+  module:
+    - disable_field
+    - office_hours
+    - user
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: user.user.field_availability
+field_name: field_availability
+entity_type: user
+bundle: user
+label: Availability
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    starthours: 1145
+    day: 0
+    endhours: 2030
+    comment: ''
+default_value_callback: ''
+settings: {  }
+field_type: office_hours

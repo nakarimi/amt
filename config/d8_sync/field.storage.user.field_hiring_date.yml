@@ -1,0 +1,20 @@
+uuid: d4716d02-31de-4c22-9249-a6d9631231e9
+langcode: en
+status: true
+dependencies:
+  module:
+    - datetime
+    - user
+id: user.field_hiring_date
+field_name: field_hiring_date
+entity_type: user
+type: datetime
+settings:
+  datetime_type: date
+module: datetime
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

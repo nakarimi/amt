@@ -1,0 +1,21 @@
+uuid: 25665423-42db-4e25-8b3d-0340b8acb4c3
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: payments.field_payment_id
+field_name: field_payment_id
+entity_type: payments
+type: string
+settings:
+  max_length: 255
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

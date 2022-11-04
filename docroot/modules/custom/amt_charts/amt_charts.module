@@ -1,0 +1,216 @@
+<?php
+
+/**
+ * @file
+ * Creating contents for main dashboard page like charts.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function amt_charts_theme($existing, $type, $theme, $path) {
+  return [
+    'amt_charts' => [
+      'variables' => [
+        'showed' => NULL,
+        'contact' => NULL,
+        'booked' => NULL,
+      ],
+      'path' => $path . '/templates',
+      'template' => 'amt-charts-main-dashboard',
+    ],
+  ];
+}
+
+/**
+ * Provide the Interview and Renewal Department for every staff.
+ *
+ * Load the enrollment for every staff by id and calculate the Interview and
+ * renewal Dept by front dept and back dept categroy of enrollment.
+ *
+ * @return array
+ *   Return all chart data, month , this year and last year total price.
+ */
+function _amt_charts_enrollment_sold_chart() {
+  $monthData[] = ['month', date("Y"), (string) (date("Y") - 1)];
+  // This for make this and past year months and query databse
+  // based on the given month.
+  $fields = [
+    'packages_field_data',
+    'packages__field_sale_date',
+    'packages__field_enrollment_total_price',
+    'field_sale_date_value',
+    'field_enrollment_total_price_value',
+  ];
+  _amt_charts_load_chart_data($fields, $monthData);
+  return $monthData;
+}
+
+/**
+ * Loading payments for chart generation.
+ *
+ * This function is loading all the payments' fields of
+ * date and tuition from current year and last year to
+ * to display them on charts on dashboard page.
+ *
+ * @return array
+ *   Returns array of payment data.
+ */
+function _amt_charts_load_payment_charts() {
+  $monthData[] = ['month', date("Y"), (string) (date("Y") - 1)];
+  // This for make this and past year months and query databse
+  // based on the given month.
+  $fields = [
+    'payments_field_data',
+    'payments__field_date_and_time',
+    'payments__field_gross_tuition',
+    'field_date_and_time_value',
+    'field_gross_tuition_value',
+  ];
+  _amt_charts_load_chart_data($fields, $monthData);
+  return $monthData;
+
+}
+
+/**
+ * Loading the Chart Data.
+ *
+ * Payments and enrollment charts has same structure to load.
+ * Here based on the date the total price loaded for
+ * enrollment chart and the tuition will load for payments.
+ *
+ * @param array $fields
+ *   The fields that is diffrent for payment and enrollment.
+ * @param array &$monthData
+ *   The reference array that will store the data for chart.
+ */
+function _amt_charts_load_chart_data(array $fields, array &$monthData) {
+  for ($m = 1; $m <= 12; $m++) {
+    $date = mktime(0, 0, 0, $m, 1, date('Y'));
+    $thisYearMonth = date('Y-m', $date);
+    $previousYearMonth = date('Y-m', mktime(0, 0, 0, $m, 1, (date('Y') - 1)));
+    $monthData[$m][] = date('M', $date);
+    // Generate the first and last date of each month,
+    // for the current year and last year.
+    $thisYearMonth = [
+      date('Y-m', strtotime($thisYearMonth)),
+      date('Y-m-t', strtotime($thisYearMonth)),
+    ];
+    $previousYearMonth = [
+      date('Y-m', strtotime($previousYearMonth)),
+      date('Y-m-t', strtotime($previousYearMonth)),
+    ];
+    $connection = \Drupal::database();
+    // The first db select that loadeds data based on entity
+    // that will passed as function param.
+    $entityQuery = db_select($fields[0], 'pay');
+    $entityQuery->leftjoin($fields[1], 'date', 'date.entity_id = pay.id');
+    $entityQuery->leftjoin($fields[2], 'value', 'value.entity_id = pay.id');
+    $entityQuery->addField('date', $fields[3], 'date');
+    $entityQuery->addField('value', $fields[4], 'value');
+    $entityQuery = $connection->select($entityQuery);
+    $entityQuery->fields(NULL, [
+      'date',
+      'value',
+    ]);
+    $entityQuery->addExpression('sum(value)', 'total');
+    $currentMonths = clone $entityQuery;
+    // Exectute query to get data for this year month between
+    // the generated date for the month.
+    $currentMonths->condition('date', $thisYearMonth, 'BETWEEN');
+    $monthData[$m][] = (int) $currentMonths->execute()->fetchField(2);
+    // Exectute query to get data for previous year month between
+    // the generated date for the month.
+    $entityQuery->condition('date', $previousYearMonth, 'BETWEEN');
+    $monthData[$m][] = (int) $entityQuery->execute()->fetchField(2);
+  }
+}
+
+/**
+ * Returns a render-able array for Dashboard page containing LessonBooked data.
+ */
+function _amt_charts_lesson_booked() {
+
+  $monthData[] = ['month', date("Y"), (string) (date("Y") - 1)];
+  // This for make this and past year months and query databse
+  // based on the given month.
+  for ($m = 1; $m <= 12; $m++) {
+    $date = mktime(0, 0, 0, $m, 1, date('Y'));
+    $current_months = date('Y-m', $date);
+    $previous_months = date('Y-m', mktime(0, 0, 0, $m, 1, (date('Y') - 1)));
+    $monthData[$m][] = date('M', $date);
+
+    $query = \Drupal::entityQuery('events')
+      ->condition('type', 'lesson')
+      ->condition('field_date_and_time', '%' . $current_months . '%', 'LIKE');
+    $monthData[$m][] = (int) $query->count()->execute();
+    $query = \Drupal::entityQuery('events')
+      ->condition('type', 'lesson')
+      ->condition('field_date_and_time', '%' . $previous_months . '%', 'LIKE');
+    $monthData[$m][] = (int) $query->count()->execute();
+  }
+  return $monthData;
+}
+
+/**
+ * Count student accounts specific fields for dashboard.
+ *
+ * This function count all (inquiry,showed,booked) students of current
+ * and previous year.
+ *
+ * @param string $field
+ *   The field that being passed.
+ */
+function amt_charts_query_for_inquiry_data($field, $excludeing = null) {
+  // Setting the date for last 28 days (4 weeks).
+  $forWeeksAgo = date('Y-m-d', strtotime('-28 days'));
+  // Counting the data for the last 4 weeks.
+
+  // exclude studnet accounts joined in these service types.
+  $account_ids = [];
+  if (!empty($excludeing)) {
+    $ex_service_type_ids = [572, 571, 575];
+    $eventsIds = \Drupal::entityQuery('events')
+    ->condition('type', 'services')
+    ->condition('field_student', NULL, 'IS NOT NULL')
+    ->condition('field_date_and_time', [$forWeeksAgo, date('Y-m-d')], 'BETWEEN')
+    ->condition('field_type', $ex_service_type_ids,'IN')
+    ->execute();
+    $servicesEntities = \Drupal::entityTypeManager()->getStorage('events')->loadMultiple($eventsIds);
+    foreach ($servicesEntities as $key => $event) {
+      $attendance = $event->field_student->referencedEntities()[0];
+      $account_ids[] = $attendance->field_student_account->getString();
+    }
+  }
+  
+  
+  $querylastFourWeek = \Drupal::entityQuery('student_accounts')
+    ->condition($field, [$forWeeksAgo, date('Y-m-d')], 'BETWEEN');
+  if (count($account_ids) > 0) {
+    $querylastFourWeek->condition('id', $account_ids, 'NOT IN');
+  }
+  $countLastFourWeek = $querylastFourWeek->count()->execute();
+
+  // Query for current year based on the passed field for inquiry data.
+  $query = \Drupal::entityQuery('student_accounts')
+    ->condition($field, '%' . strftime("%Y") . '%', 'LIKE');
+  if (count($account_ids) > 0) {
+    $query->condition('id', $account_ids, 'NOT IN');
+  }
+  $current = $query->count()->execute();
+  // Query for past year based on the passed field for inquiry data
+  // till this this date of past year.
+  $query = \Drupal::entityQuery('student_accounts')
+    ->condition($field, date('Y-m-d', strtotime("last year December 31st")), '<=')
+    ->condition($field, date('Y-m-d', strtotime("last year January 1st")), '>=');
+  if (count($account_ids) > 0) {
+    $query->condition('id', $account_ids, 'NOT IN');
+  }
+  $previous = $query->count()->execute();
+
+  return [
+    'current' => $current,
+    'previous' => $previous,
+    'lastFourWeeks' => $countLastFourWeek,
+  ];
+}

@@ -1,0 +1,10 @@
+uuid: 2c9cd2c2-def5-44bc-a775-fdf35e1d6539
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: student_accounts.popup
+label: popup
+targetEntityType: student_accounts
+cache: true

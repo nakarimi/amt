@@ -1,0 +1,11 @@
+uuid: 18f46a31-a5cd-414c-be76-1f4583a23ab4
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_link_content
+id: config_sync.module.menu_link_content
+snapshotSet: config_sync
+extensionType: module
+extensionName: menu_link_content
+items: {  }

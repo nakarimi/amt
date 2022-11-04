@@ -1,0 +1,5 @@
+services:
+  amt_userdashboard.subscriber:
+    class: Drupal\amt_userdashboard\Routing\UserDashboardRedirection
+    tags:
+      - { name: event_subscriber }

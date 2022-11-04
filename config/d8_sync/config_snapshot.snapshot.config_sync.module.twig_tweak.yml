@@ -1,0 +1,11 @@
+uuid: f7f25bdc-1896-4679-83e4-6c0847d96238
+langcode: en
+status: true
+dependencies:
+  module:
+    - twig_tweak
+id: config_sync.module.twig_tweak
+snapshotSet: config_sync
+extensionType: module
+extensionName: twig_tweak
+items: {  }

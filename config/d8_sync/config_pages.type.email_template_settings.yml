@@ -1,0 +1,16 @@
+uuid: 0648ba21-2c35-4835-936e-03c7d9ca88a4
+langcode: en
+status: true
+dependencies: {  }
+id: email_template_settings
+label: 'Email Template Settings'
+context:
+  show_warning: true
+  group:
+    language: false
+  fallback:
+    language: ''
+menu:
+  path: /admin/config/amt_notification/email_template_settings
+  weight: 0
+  description: 'Email Template Settings'

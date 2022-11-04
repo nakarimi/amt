@@ -1,0 +1,33 @@
+uuid: eb5d2e52-cc7b-47cf-82d0-107a728cacef
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_hide
+    - taxonomy.vocabulary.lesson_type
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: taxonomy_term.lesson_type.field_hide
+field_name: field_hide
+entity_type: taxonomy_term
+bundle: lesson_type
+label: Hide
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: Hide
+  off_label: Hide
+field_type: boolean

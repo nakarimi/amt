@@ -1,0 +1,23 @@
+uuid: 26add80a-4d4a-466e-b86a-e3ae0da9998d
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.day_view_settings
+    - field.storage.config_pages.field_all_day_slot
+id: config_pages.day_view_settings.field_all_day_slot
+field_name: field_all_day_slot
+entity_type: config_pages
+bundle: day_view_settings
+label: 'All Day Slot'
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

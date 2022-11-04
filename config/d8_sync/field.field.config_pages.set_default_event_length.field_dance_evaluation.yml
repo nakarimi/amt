@@ -1,0 +1,32 @@
+uuid: 5ab84b2a-d6a2-4a40-ac8d-35dbae74a946
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.set_default_event_length
+    - field.storage.config_pages.field_dance_evaluation
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.set_default_event_length.field_dance_evaluation
+field_name: field_dance_evaluation
+entity_type: config_pages
+bundle: set_default_event_length
+label: 'Dance Evaluation (DE) '
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 30
+default_value_callback: ''
+settings: {  }
+field_type: list_integer

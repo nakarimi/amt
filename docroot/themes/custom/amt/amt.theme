@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Bootstrap sub-theme.
+ *
+ * Place your custom PHP code in this file.
+ */
+
+/**
+ * Implements hook_preprocess_page() for swiftmailer.html.twig.
+ *
+ * This is to provide a dynamic logo address for the email template.
+ */
+function amt_preprocess_swiftmailer(&$variables) {
+  $base_url = \Drupal::request()->getSchemeAndHttpHost();
+  $variables['logopath'] = $base_url . file_url_transform_relative(file_create_url(theme_get_setting('logo.url')));
+  $variables['base_domain'] = $base_url;
+
+}

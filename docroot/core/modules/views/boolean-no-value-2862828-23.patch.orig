@@ -1,0 +1,166 @@
+diff --git a/core/modules/views/config/schema/views.filter.schema.yml b/core/modules/views/config/schema/views.filter.schema.yml
+index 1eb09007ae..0ff7384a3a 100644
+--- a/core/modules/views/config/schema/views.filter.schema.yml
++++ b/core/modules/views/config/schema/views.filter.schema.yml
+@@ -7,6 +7,10 @@ views.filter.*:
+ views.filter.boolean:
+   type: views_filter
+   label: 'Boolean'
++  mapping:
++    null_is_false:
++      type: boolean
++      label: 'Evaluate Null as False.'
+ 
+ views_filter_boolean_string:
+   type: views_filter
+diff --git a/core/modules/views/src/Plugin/views/filter/BooleanOperator.php b/core/modules/views/src/Plugin/views/filter/BooleanOperator.php
+index 81a31880c3..c287183ccc 100644
+--- a/core/modules/views/src/Plugin/views/filter/BooleanOperator.php
++++ b/core/modules/views/src/Plugin/views/filter/BooleanOperator.php
+@@ -102,8 +102,8 @@ public function init(ViewExecutable $view, DisplayPluginBase $display, array &$o
+     if (isset($this->definition['accept null'])) {
+       $this->accept_null = (bool) $this->definition['accept null'];
+     }
+-    elseif (isset($this->definition['accept_null'])) {
+-      $this->accept_null = (bool) $this->definition['accept_null'];
++    elseif (isset($this->options['null_is_false'])) {
++      $this->accept_null = (bool) $this->options['null_is_false'];
+     }
+     $this->valueOptions = NULL;
+   }
+@@ -143,10 +143,21 @@ protected function defineOptions() {
+     $options = parent::defineOptions();
+ 
+     $options['value']['default'] = FALSE;
++    $options['null_is_false']['default'] = FALSE;
+ 
+     return $options;
+   }
+ 
++  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
++    parent::buildOptionsForm($form, $form_state);
++
++    $form['null_is_false'] = [
++      '#type' => 'checkbox',
++      '#title' => $this->t('Evaluate Null as False'),
++      '#default_value' => $this->options['null_is_false'],
++    ];
++  }
++
+   protected function valueForm(&$form, FormStateInterface $form_state) {
+     if (empty($this->valueOptions)) {
+       // Initialize the array of possible values for this filter.
+@@ -233,39 +244,90 @@ public function query() {
+    *   self::EQUAL.
+    */
+   protected function queryOpBoolean($field, $query_operator = self::EQUAL) {
++    // Forces a self::EQUAL operator instead of a self::NOT_EQUAL for
++    // performance reasons.
++    $use_equal = !empty($this->definition['use_equal']);
++
+     if (empty($this->value)) {
+-      if ($this->accept_null) {
+-        if ($query_operator === self::EQUAL) {
+-          $condition = (new Condition('OR'))
+-            ->condition($field, 0, $query_operator)
+-            ->isNull($field);
+-        }
+-        else {
+-          $condition = (new Condition('AND'))
+-            ->condition($field, 0, $query_operator)
+-            ->isNotNull($field);
+-        }
+-        $this->query->addWhere($this->options['group'], $condition);
++      if (!$use_equal) {
++        $query_operator === self::EQUAL ? $this->queryIsFalse($field) : $this->queryIsNotFalse($field);
+       }
+       else {
+-        $this->query->addWhere($this->options['group'], $field, 0, $query_operator);
++        $query_operator === self::EQUAL ? $this->queryIsFalse($field) : $this->queryIsTrue($field);
+       }
+     }
+     else {
+-      if (!empty($this->definition['use_equal'])) {
+-        // Forces a self::EQUAL operator instead of a self::NOT_EQUAL for
+-        // performance reasons.
+-        if ($query_operator === self::EQUAL) {
+-          $this->query->addWhere($this->options['group'], $field, 1, self::EQUAL);
+-        }
+-        else {
+-          $this->query->addWhere($this->options['group'], $field, 0, self::EQUAL);
+-        }
++      if (!$use_equal) {
++        $query_operator === self::EQUAL ? $this->queryIsTrue($field) : $this->queryIsNotTrue($field);
+       }
+       else {
+-        $this->query->addWhere($this->options['group'], $field, 1, $query_operator);
++        $query_operator === self::EQUAL ? $this->queryIsTrue($field) : $this->queryIsFalse($field);
+       }
+     }
+   }
+ 
++  /**
++   * Adds a where condition to the query for a boolean being false.
++   *
++   * @param string $field
++   *   The field name to add the where condition for.
++   */
++  protected function queryIsFalse($field) {
++    if ($this->accept_null) {
++      $condition = (new Condition('OR'))
++        ->condition($field, 0, self::EQUAL)
++        ->isNull($field);
++      $this->query->addWhere($this->options['group'], $condition);
++    }
++    else {
++      $this->query->addWhere($this->options['group'], $field, 0, self::EQUAL);
++    }
++  }
++
++  /**
++   * Adds a where condition to the query for a boolean being not false.
++   *
++   * @param string $field
++   *   The field name to add the where condition for.
++   */
++  protected function queryIsNotFalse($field) {
++    if ($this->accept_null) {
++      $condition = (new Condition('AND'))
++        ->condition($field, 0, self::NOT_EQUAL)
++        ->isNotNull($field);
++      $this->query->addWhere($this->options['group'], $condition);
++    }
++    else {
++      $this->query->addWhere($this->options['group'], $field, 0, self::NOT_EQUAL);
++    }
++  }
++
++  /**
++   * Adds a where condition to the query for a boolean being true.
++   *
++   * @param string $field
++   *   The field name to add the where condition for.
++   */
++  protected function queryIsTrue($field) {
++    $this->query->addWhere($this->options['group'], $field, 1, self::EQUAL);
++  }
++
++  /**
++   * Adds a where condition to the query for a boolean being not true.
++   *
++   * @param string $field
++   *   The field name to add the where condition for.
++   */
++  protected function queryIsNotTrue($field) {
++    if ($this->accept_null) {
++      $condition = (new Condition('OR'))
++        ->condition($field, 1, self::NOT_EQUAL)
++        ->isNull($field);
++      $this->query->addWhere($this->options['group'], $condition);
++    }
++    else {
++      $this->query->addWhere($this->options['group'], $field, 1, self::NOT_EQUAL);
++    }
++  }
++
+ }

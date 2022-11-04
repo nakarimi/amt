@@ -1,0 +1,99 @@
+.widget {
+  border: 1px solid black;
+  margin-top: 30px;
+  padding: 5px;
+}
+.widget h3 {
+  text-align: center;
+}
+
+#totalLessonsEnrolled div, #totalFutureLessons div, #totalLessonsPaidAhead div, #totalLessonsTaken div, #totalLessonsRemaining div {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  border-radius: 50%;
+  padding-top: 20px;
+  font-size: 36px;
+  margin: 0 auto;
+  font-family: "Bahnschrift";
+}
+
+#totalLessonsEnrolled div {
+  border: 12px solid #68BC94;
+}
+
+#totalLessonsTaken div {
+  border: 12px solid #68ff94;
+}
+
+#totalLessonsRemaining div {
+  border: 12px solid #FCC761;
+}
+
+#totalFutureLessons div {
+  border: 12px solid #0077B7;
+}
+
+#totalLessonsPaidAhead div {
+  border: 12px solid #E5E5E1;
+}
+
+#totalLessonsEnrolled p, #totalFutureLessons p, #totalLessonsPaidAhead p, #totalLessonsTaken p, #totalLessonsRemaining p {
+  font-size: 20px;
+  font-weight: bold;
+  font-family: "Bahnschrift";
+}
+
+#totalLessonsEnrolled span, #totalFutureLessons span, #totalLessonsPaidAhead span, #totalLessonsTaken span, #totalLessonsRemaining span {
+  font-family: "Bahnschrift";
+}
+
+#LessonsListTable tr > :nth-child(7) {
+  padding-right: 0px;
+  text-align: center;
+}
+#LessonsListTable tr > :nth-child(7).sorting:after {
+  display: none;
+}
+#LessonsListTable tr > td:nth-child(7) {
+  word-spacing: 10px;
+  font-weight: 700;
+}
+
+table#LessonsListTable {
+  width: 100% !important;
+}
+table#LessonsListTable tr.enrollment {
+  background-color: #8aeb49;
+}
+
+.amt-student-future-lessons-list #filtersTitle {
+  display: none;
+}
+.amt-student-future-lessons-list #views-exposed-form-student-future-lessons-block-1 {
+  display: block;
+}
+.amt-student-future-lessons-list #views-exposed-form-student-future-lessons-block-1 .form-inline {
+  display: flex;
+  align-items: flex-end;
+}
+.amt-student-future-lessons-list #views-exposed-form-student-future-lessons-block-1 .form-item {
+  max-width: 150px;
+}
+.amt-student-future-lessons-list #views-exposed-form-student-future-lessons-block-1 .button {
+  margin-bottom: 0;
+}
+
+.view-header {
+  position: relative;
+}
+
+button.btn.btn-primary.amt-print-student-future-appointments {
+  display: block;
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  margin: 0;
+}
+
+/*# sourceMappingURL=student_dashboard_style.css.map */

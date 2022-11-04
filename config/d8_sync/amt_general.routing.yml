@@ -1,0 +1,8 @@
+amt_general:
+  insturctor_sort_update:
+    path: /amt_general/insturctor_sort_update
+    defaults:
+      _controller: '\Drupal\amt_general\Controller\amtGeneralController::insturctorSortUpdate'
+      _title: 'Updated instructor sorting.'
+    requirements:
+      _permission: 'access content'

@@ -1,0 +1,16 @@
+uuid: a83f042f-258d-44ad-a326-dc76b4056ede
+langcode: en
+status: true
+dependencies: {  }
+id: day_view_settings
+label: 'Day View Settings'
+context:
+  show_warning: true
+  group:
+    language: false
+  fallback:
+    language: ''
+menu:
+  path: /admin/config/day-view-settings
+  weight: 0
+  description: 'Day View Settings'

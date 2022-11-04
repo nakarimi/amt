@@ -1,0 +1,32 @@
+amt_validations.enrollmentlist:
+  path: '/enrollments/{studentId}/{isEvent}/{isPayment}'
+  defaults:
+    _controller: '\Drupal\amt_validations\Controller\AmtEnrollmentViewController::enrollmentlist'
+    _title: 'Load Enrollment List based on Student account ID.'
+    isPayment: false
+  requirements:
+    _permission: 'Ajax Enrollment'
+  options:
+    no_cache: 'TRUE'
+amt_validations.enrollmentCheckerror:
+  path: '/enrollmentserrors/{lessontype}/{studentaccountid}/{enrollmentid}'
+  defaults:
+    _controller: '\Drupal\amt_validations\Controller\AmtEnrollmentViewController::enrollmentcheck'
+    _title: 'Load Enrollment checkErrors and Student account ID.'
+  requirements:
+    _permission: 'Ajax Enrollment'
+amt_validations.timeslots:
+  path: '/amt_validations/timeslots'
+  defaults:
+    _controller: '\Drupal\amt_validations\Controller\AmtEnrollmentViewController::timeslotsCheck'
+    _title: 'load the Available Time slots.'
+  requirements:
+    _permission: 'Ajax Enrollment'
+    
+amt_validations.student_account_contact:
+  path: '/amt_validations/student_account_contact'
+  defaults:
+    _controller: '\Drupal\amt_validations\Controller\AmtEnrollmentViewController::studentAccountContact'
+    _title: 'load the student account contacts.'
+  requirements:
+    _permission: 'access content'

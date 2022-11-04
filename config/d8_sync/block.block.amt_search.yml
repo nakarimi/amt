@@ -1,0 +1,22 @@
+uuid: cd70c3e4-139f-47b8-b480-d9fb47268286
+langcode: en
+status: false
+dependencies:
+  module:
+    - search
+  theme:
+    - amt
+_core:
+  default_config_hash: F3d5hyAFunLh4PhGviJF019fHn1Z3_zy5gzsQ0tX1K0
+id: amt_search
+theme: amt
+region: sidebar_second
+weight: -7
+provider: null
+plugin: search_form_block
+settings:
+  id: search_form_block
+  label: Search
+  provider: search
+  label_display: visible
+visibility: {  }

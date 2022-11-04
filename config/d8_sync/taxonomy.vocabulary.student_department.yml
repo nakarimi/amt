@@ -1,0 +1,8 @@
+uuid: 20963a9c-4c98-427d-8d24-ef444754236d
+langcode: en
+status: true
+dependencies: {  }
+name: 'Student Department'
+vid: student_department
+description: ''
+weight: 0

@@ -1,0 +1,21 @@
+uuid: 631d825d-472d-442a-b6df-46f181fa8dc0
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: packages.field_legacy_id
+field_name: field_legacy_id
+entity_type: packages
+type: string
+settings:
+  max_length: 255
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

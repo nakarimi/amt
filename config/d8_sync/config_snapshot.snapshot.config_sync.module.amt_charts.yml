@@ -1,0 +1,11 @@
+uuid: acb428f6-4e47-4874-ad6e-fe1ff2ed9ab5
+langcode: en
+status: true
+dependencies:
+  module:
+    - amt_charts
+id: config_sync.module.amt_charts
+snapshotSet: config_sync
+extensionType: module
+extensionName: amt_charts
+items: {  }

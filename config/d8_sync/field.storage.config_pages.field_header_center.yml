@@ -1,0 +1,21 @@
+uuid: 99b00ed1-7ea8-4773-97a6-0b297ebbb32a
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_pages
+id: config_pages.field_header_center
+field_name: field_header_center
+entity_type: config_pages
+type: string
+settings:
+  max_length: 255
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

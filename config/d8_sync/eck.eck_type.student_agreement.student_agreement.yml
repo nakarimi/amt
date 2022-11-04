@@ -1,0 +1,9 @@
+uuid: eab8d85d-1a71-4fe0-92aa-588ca277ac94
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_entity_type.student_agreement
+name: 'Student Agreement'
+type: student_agreement
+description: 'This ECK using to get the student agreement'

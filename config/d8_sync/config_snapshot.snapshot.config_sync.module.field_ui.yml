@@ -1,0 +1,16 @@
+uuid: 0d9afba1-4ab2-41d6-a52e-14b8c716c816
+langcode: en
+status: true
+dependencies:
+  module:
+    - field_ui
+id: config_sync.module.field_ui
+snapshotSet: config_sync
+extensionType: module
+extensionName: field_ui
+items:
+  -
+    collection: ''
+    name: field_ui.settings
+    data:
+      field_prefix: field_

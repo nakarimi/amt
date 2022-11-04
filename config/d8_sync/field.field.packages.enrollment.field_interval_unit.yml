@@ -1,0 +1,21 @@
+uuid: 185be33f-188e-4e88-bec3-10bbddde6f5d
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.field_interval_unit
+  module:
+    - options
+id: packages.enrollment.field_interval_unit
+field_name: field_interval_unit
+entity_type: packages
+bundle: enrollment
+label: 'Interval Unit'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

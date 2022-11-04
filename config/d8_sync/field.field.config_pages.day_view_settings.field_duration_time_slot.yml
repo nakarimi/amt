@@ -1,0 +1,23 @@
+uuid: 9c009284-86af-4b7b-84f7-0fa5ad6748e3
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.day_view_settings
+    - field.storage.config_pages.field_duration_time_slot
+  module:
+    - options
+id: config_pages.day_view_settings.field_duration_time_slot
+field_name: field_duration_time_slot
+entity_type: config_pages
+bundle: day_view_settings
+label: 'Duration Time Slot'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: '00:15:00'
+default_value_callback: ''
+settings: {  }
+field_type: list_string

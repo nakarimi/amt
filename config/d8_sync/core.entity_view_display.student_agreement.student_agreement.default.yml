@@ -1,0 +1,77 @@
+uuid: b90bc157-8dce-4912-9cdb-0f89a226ee44
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_agreement.student_agreement
+    - field.field.student_agreement.student_agreement.field_agreement_date
+    - field.field.student_agreement.student_agreement.field_enrollment
+    - field.field.student_agreement.student_agreement.field_student
+    - field.field.student_agreement.student_agreement.field_student_signature
+  module:
+    - datetime
+    - field_group
+    - image
+third_party_settings:
+  field_group:
+    group_student_agreement:
+      children:
+        - field_student
+        - field_enrollment
+        - field_agreement_date
+        - field_student_signature
+      parent_name: ''
+      weight: 0
+      format_type: html_element
+      format_settings:
+        element: div
+        show_label: true
+        label_element: h3
+        label_element_classes: ''
+        attributes: ''
+        effect: none
+        speed: fast
+        id: student-agreement
+        classes: ''
+      label: 'Student Agreement'
+      region: content
+id: student_agreement.student_agreement.default
+targetEntityType: student_agreement
+bundle: student_agreement
+mode: default
+content:
+  field_agreement_date:
+    weight: 3
+    label: above
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_enrollment:
+    weight: 2
+    label: above
+    settings:
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_student:
+    weight: 1
+    label: inline
+    settings:
+      link: false
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_student_signature:
+    weight: 4
+    label: above
+    settings:
+      image_style: ''
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+    region: content
+hidden: {  }

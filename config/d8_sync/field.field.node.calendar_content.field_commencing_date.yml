@@ -1,0 +1,21 @@
+uuid: 454d396f-0568-471a-abb8-6cb8619ee665
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_commencing_date
+    - node.type.calendar_content
+  module:
+    - datetime
+id: node.calendar_content.field_commencing_date
+field_name: field_commencing_date
+entity_type: node
+bundle: calendar_content
+label: 'Commencing Date'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: datetime

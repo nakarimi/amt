@@ -1,0 +1,11 @@
+uuid: 9bd5aeeb-cfbf-47bc-8908-87cd729967c1
+langcode: en
+status: true
+dependencies:
+  module:
+    - config_merge
+id: config_sync.module.config_merge
+snapshotSet: config_sync
+extensionType: module
+extensionName: config_merge
+items: {  }

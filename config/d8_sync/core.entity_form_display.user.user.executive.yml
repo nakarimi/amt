@@ -1,0 +1,90 @@
+uuid: aac80caa-35ab-4266-bab1-55a982d6cb6b
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.user.executive
+    - field.field.user.user.feeds_item
+    - field.field.user.user.field_ami_id
+    - field.field.user.user.field_availability
+    - field.field.user.user.field_first_name
+    - field.field.user.user.field_last_name
+    - field.field.user.user.field_legacy_id
+    - field.field.user.user.field_lesson_types
+    - field.field.user.user.field_teacher_category
+    - field.field.user.user.user_picture
+  module:
+    - office_hours
+    - user
+_core:
+  default_config_hash: K-1rBM8mTIkFp9RqOC2tMRUukOQ1xbRCfSKK8dEddnA
+id: user.user.executive
+targetEntityType: user
+bundle: user
+mode: executive
+content:
+  account:
+    weight: 2
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_ami_id:
+    weight: 3
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings:
+      conditional_fields: {  }
+    type: string_textfield
+    region: content
+  field_availability:
+    weight: 9
+    settings: {  }
+    third_party_settings: {  }
+    type: office_hours_default
+    region: content
+  field_first_name:
+    weight: 0
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_last_name:
+    weight: 1
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_legacy_id:
+    weight: 4
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_lesson_types:
+    weight: 6
+    settings:
+      match_operator: CONTAINS
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_teacher_category:
+    weight: 5
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+hidden:
+  contact: true
+  feeds_item: true
+  language: true
+  timezone: true
+  user_picture: true

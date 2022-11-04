@@ -1,0 +1,33 @@
+uuid: 9525e3e6-8160-4163-b1a6-90b1fc37d519
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.student_accounts.student_account
+    - field.storage.student_accounts.field_lesson_available
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: all
+    add_disable_roles: {  }
+    edit_disable: all
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: student_accounts.student_account.field_lesson_available
+field_name: field_lesson_available
+entity_type: student_accounts
+bundle: student_account
+label: 'Lesson Available'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

@@ -1,0 +1,35 @@
+  <div class="form-item js-form-item form-type-select js-form-type-select form-item-year js-form-item-year form-group">
+    <label for="edit-year" class="control-label">Year</label>
+    <div class="select-wrapper">
+      <select data-drupal-selector="edit-year" class="form-select form-control" id="edit-year" name="year">
+      {% for year in years %}
+        <option value="{{ year }}" {{ (selectedData.year == year) ? 'selected' : '' }}>{{ year }}</option>
+      {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="form-item js-form-item form-type-select js-form-type-select form-item-week js-form-item-week form-group">
+    <label for="edit-week" class="control-label">Week</label>
+    <div class="select-wrapper">
+      <select data-drupal-selector="edit-week" class="form-select form-control" id="edit-week" name="week">
+      {% for week in weeks %}
+        <option value="{{ week }}" {{ (selectedData.week == week) ? 'selected' : '' }}>{{ week }}</option>
+      {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div data-drupal-selector="edit-actions" class="form-actions form-group" id="edit-actions" >
+      <label for="edit-week" class="control-label"></label>
+      <div class="select-wrapper">
+      <button data-drupal-selector="edit-submit-ami-staff-performance" class="button js-form-submit form-submit btn-info btn" type="submit" id="edit-submit-ami-staff-performance" value="Apply" name="">Apply</button>
+      <button data-drupal-selector="edit-api-submit" class="button js-form-submit form-submit btn-success btn" type="submit" id="edit-api-submit" name="operation" value="Send API">Send API</button>
+      <button data-drupal-selector="edit-api-submit" class="button js-form-submit form-submit btn-warning btn" type="submit" id="edit-api-submit" name="operation" value="Update API">Update API</button>
+
+      {% if not table_empty %}
+        <a href="{{ url('<front>') }}csv-export" class="btn btn-secondary">Export CSV</a>
+      {% endif %}
+
+      <a href="{{ url('<front>') }}/ami-reports" class="btn btn-danger pull-right">Back to list</a>
+      
+    </div>
+  </div>

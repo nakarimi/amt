@@ -1,0 +1,162 @@
+{
+    "name": "drupal/drupal",
+    "description": "Drupal is an open source content management platform powering millions of websites and applications.",
+    "type": "project",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "composer/installers": "^1.6",
+        "wikimedia/composer-merge-plugin": "^1.4",
+       	"drupal/draggableviews":"^2.0.0",
+	"drupal/eck": "^1.0@alpha",
+        "drupal/inline_entity_form": "^1.0@RC",
+        "drush/drush": "^9.6",
+        "drupal/token": "^1.5",
+        "drupal/admin_toolbar": "^1.27",
+        "drupal/bootstrap": "^3.19",
+        "drupal/coffee": "^1.0@beta",
+        "drupal/advagg": "^4.0",
+        "drupal/adminimal_admin_toolbar": "^1.9",
+        "drupal/devel": "^2.1",
+        "drupal/conditional_fields": "^1.0@alpha",
+        "drupal/profile": "^1.0@RC",
+        "drupal/address": "^1.6",
+        "drupal/adminimal_theme": "^1.4",
+        "drupal/office_hours": "^1.1",
+        "drupal/form_mode_manager": "^1.3",
+        "drupal/backup_migrate": "^4.0",
+        "drupal/feeds": "^3.0@alpha",
+        "drupal/auto_entitylabel": "2.x-dev",
+        "drupal/feeds_tamper": "2.x-dev",
+        "drupal/better_exposed_filters": "^3.0@alpha",
+        "drupal/field_group": "^3.0",
+        "drupal/drush_delete": "^2.2",
+        "drupal/color_field": "^2.0",
+        "drupal/views_conditional": "^1.0",
+        "google/charts": "45",
+        "drupal/config_pages": "^2.6",
+        "drupal/disable_field": "^2.0",
+        "drupal/autologout": "1.0",
+        "drupal/superfish": "^1.3",
+        "drupal/menu_export": "1.x-dev",
+        "drupal/twilio": "1.x-dev",
+        "drupal/swiftmailer": "^1.0@beta",
+        "drupal/ultimate_cron": "^2.0@alpha",
+        "drupal/entity_print": "^2.1",
+        "mikehaertl/phpwkhtmltopdf": "~2.1",
+        "tecnickcom/tcpdf": "~6",
+        "dompdf/dompdf": "^0.8.3",
+        "drupal/views_autocomplete_filters": "^1.2",
+        "drupal/front": "^1.0@beta",
+        "drupal/menu_per_role": "^1.0",
+        "drupal/redirect_after_login": "^2.5",
+        "drupal/duplicate_role": "^1.0",
+        "drupal/smtp": "^1.0@beta",
+        "drupal/entityqueue": "^1.0@beta",
+        "drupal/twig_tweak": "^2.4",
+        "drupal/config_sync": "^2.0",
+        "drupal/migrate_tools": "^4.5",
+        "drupal/migrate_plus": "^4.2",
+        "drupal/structure_sync": "^2.0"
+    },
+    "replace": {
+        "drupal/core": "^8.7"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "preferred-install": "dist",
+        "autoloader-suffix": "Drupal8"
+    },
+    "extra": {
+        "_readme": [
+            "By default Drupal loads the autoloader from ./vendor/autoload.php.",
+            "To change the autoloader you can edit ./autoload.php.",
+            "This file specifies the packages.drupal.org repository.",
+            "You can read more about this composer repository at:",
+            "https://www.drupal.org/node/2718229"
+        ],
+        "merge-plugin": {
+            "include": [
+                "core/composer.json"
+            ],
+            "recurse": true,
+            "replace": false,
+            "merge-extra": false
+        },
+        "installer-paths": {
+            "core": ["type:drupal-core"],
+            "modules/patched/{$name}": [
+                "drupal/feeds",
+                "drupal/eck",
+                "drupal/auto_entitylabel",
+                "drupal/views_autocomplete_filters",
+                "drupal/inline_entity_form"
+            ],
+            "modules/contrib/{$name}": ["type:drupal-module"],
+            "profiles/contrib/{$name}": ["type:drupal-profile"],
+            "themes/contrib/{$name}": ["type:drupal-theme"],
+            "drush/contrib/{$name}": ["type:drupal-drush"],
+            "modules/custom/{$name}": ["type:drupal-custom-module"],
+            "themes/custom/{$name}": ["type:drupal-custom-theme"],
+            "libraries/{$name}": ["type:drupal-library"]
+        },
+        "patches": {
+            "drupal/feeds": {
+                "Drupal adding the User role referencing fixed": "https://www.drupal.org/files/issues/2018-05-07/feeds-config-entityreference.patch"
+            },
+            "drupal/eck": {
+                "Provide Auto Entity Label support": "https://www.drupal.org/files/issues/2018-04-27/eck-Add-support-to-eck-for-auto_entitylabel-2905426-12-D8.patch"
+            },
+            "drupal/views_autocomplete_filters": {
+                "Make the fields available and choose one automatically": "https://www.drupal.org/files/issues/2018-04-27/eck-Add-support-to-eck-for-auto_entitylabel-2905426-12-D8.patch"
+            },
+            "drupal/inline_entity_form": {
+                "Changes the message when asking for remove based on the singularity or plurality of the entity": "/modules/patched/inline_entity_form/singular_and_plural_type_entity_names_fix.patch"
+            },
+            "drupal/auto_entitylabel": {
+                "Allow different formats of entity ID providers": "https://www.drupal.org/files/issues/2018-12-04/views_autocomplete_filters-8.x-1.x-add-some-fields-to-view-2986201-14.patch",
+                "Allow contrib modules to hook into Auto Entity Label": "https://www.drupal.org/files/issues/2018-09-22/2829571-provide-a-hook-for-contrib.patch",
+                "Fix Title displayed as %AutoEntityLabel% after saving via Inline Entity Form": "https://www.drupal.org/files/issues/Title_displayed_as_AutoEntityLabel_after_saving_via_Inline_Entity_Form-2905230-6.patch"
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Drupal\\Core\\Composer\\": "core/lib/Drupal/Core/Composer"
+        }
+    },
+    "scripts": {
+        "pre-autoload-dump": "Drupal\\Core\\Composer\\Composer::preAutoloadDump",
+        "post-autoload-dump": "Drupal\\Core\\Composer\\Composer::ensureHtaccess",
+        "post-package-install": "Drupal\\Core\\Composer\\Composer::vendorTestCodeCleanup",
+        "post-package-update": "Drupal\\Core\\Composer\\Composer::vendorTestCodeCleanup",
+        "drupal-phpunit-upgrade-check": "Drupal\\Core\\Composer\\Composer::upgradePHPUnit",
+        "drupal-phpunit-upgrade": "@composer update phpunit/phpunit phpspec/prophecy symfony/yaml --with-dependencies --no-progress",
+        "phpcs": "phpcs --standard=core/phpcs.xml.dist --runtime-set installed_paths $($COMPOSER_BINARY config vendor-dir)/drupal/coder/coder_sniffer --",
+        "phpcbf": "phpcbf --standard=core/phpcs.xml.dist --runtime-set installed_paths $($COMPOSER_BINARY config vendor-dir)/drupal/coder/coder_sniffer --"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "google/charts",
+                "version": "45",
+                "type": "drupal-library",
+                "extra": {
+                    "installer-name": "google_charts"
+                },
+                "dist": {
+                    "url": "https://www.gstatic.com/charts/loader.js",
+                    "type": "file"
+                },
+                "require": {
+                    "composer/installers": "~1.0"
+                }
+            }
+        }
+    ]
+}

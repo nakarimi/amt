@@ -1,0 +1,28 @@
+uuid: e0ffd3da-503c-40bf-a230-fd40332cbf9f
+langcode: en
+status: true
+dependencies:
+  module:
+    - autologout
+id: config_sync.module.autologout
+snapshotSet: config_sync
+extensionType: module
+extensionName: autologout
+items:
+  -
+    collection: ''
+    name: autologout.settings
+    data:
+      timeout: 1800
+      max_timeout: 172800
+      padding: 20
+      role_logout: false
+      redirect_url: /user/login
+      no_dialog: false
+      message: 'Your session is about to expire. Do you want to reset it?'
+      inactivity_message: 'You have been logged out due to inactivity.'
+      enforce_admin: false
+      jstimer_format: '%hours%:%mins%:%secs%'
+      jstimer_js_load_option: false
+      use_alt_logout_method: false
+      use_watchdog: true

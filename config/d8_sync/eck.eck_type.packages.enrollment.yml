@@ -1,0 +1,9 @@
+uuid: 37a35ba6-2128-47cc-84f0-78f62350050b
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_entity_type.packages
+name: Enrollment
+type: enrollment
+description: ''

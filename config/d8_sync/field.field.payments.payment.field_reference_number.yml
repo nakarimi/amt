@@ -1,0 +1,29 @@
+uuid: 4a676da3-12d6-4ee5-9a23-fd047a880d40
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.payments.payment
+    - field.storage.payments.field_reference_number
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: payments.payment.field_reference_number
+field_name: field_reference_number
+entity_type: payments
+bundle: payment
+label: 'Reference Number'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

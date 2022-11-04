@@ -1,0 +1,22 @@
+
+<!-- this for adding the fillter of staff performace report view -->
+{% include "@amt_staff/amt-staff-staff_report_filter.html.twig" %}
+
+{% if staff_header_table %}
+  <div class="view-tables table-headers rprt_table">
+    {{ staff_header_table }}
+  </div>
+{% endif %}
+
+{% if staff_content_table %}
+  <div class="view-tables">
+    {{ staff_content_table }}
+  </div>
+{% endif %}
+
+{% if table_empty %}
+  <div class="show-empty-message">
+    {{ empty_text }}
+  </div>
+
+{% endif %}

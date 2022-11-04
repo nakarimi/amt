@@ -1,0 +1,18 @@
+uuid: ee87fb62-f316-464f-b72e-85be45e6cc84
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: contacts.field_gender
+field_name: field_gender
+entity_type: contacts
+type: boolean
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

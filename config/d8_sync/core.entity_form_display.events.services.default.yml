@@ -1,0 +1,135 @@
+uuid: 85fcbeb1-f1ec-4e64-b901-513e6965b2db
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.attendees.student_services
+    - eck.eck_type.events.services
+    - field.field.events.services.feeds_item
+    - field.field.events.services.field_date_and_time
+    - field.field.events.services.field_duration
+    - field.field.events.services.field_executive
+    - field.field.events.services.field_expiration_date
+    - field.field.events.services.field_importer
+    - field.field.events.services.field_instructor
+    - field.field.events.services.field_notes
+    - field.field.events.services.field_parent
+    - field.field.events.services.field_repetition_frequency
+    - field.field.events.services.field_repetition_units
+    - field.field.events.services.field_status
+    - field.field.events.services.field_student
+    - field.field.events.services.field_type
+  module:
+    - datetime
+    - field_group
+    - inline_entity_form
+third_party_settings:
+  field_group:
+    group_standing_appointment:
+      children:
+        - field_expiration_date
+        - field_repetition_frequency
+        - field_repetition_units
+      parent_name: ''
+      weight: 6
+      format_type: tab
+      format_settings:
+        description: ''
+        id: ''
+        classes: ''
+        required_fields: false
+        formatter: closed
+      label: 'Standing Appointment'
+      region: content
+id: events.services.default
+targetEntityType: events
+bundle: services
+mode: default
+content:
+  field_date_and_time:
+    weight: 5
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_duration:
+    weight: 4
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_executive:
+    weight: 3
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_expiration_date:
+    weight: 9
+    settings: {  }
+    third_party_settings: {  }
+    type: datetime_default
+    region: content
+  field_notes:
+    weight: 8
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textarea
+    region: content
+  field_repetition_frequency:
+    weight: 10
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: number
+    region: content
+  field_repetition_units:
+    weight: 11
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_status:
+    weight: 9
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
+    region: content
+  field_student:
+    type: inline_entity_form_complex
+    weight: 7
+    region: content
+    settings:
+      form_mode: student_services
+      label_singular: ''
+      label_plural: ''
+      allow_new: true
+      match_operator: CONTAINS
+      override_labels: false
+      collapsible: false
+      collapsed: false
+      allow_existing: false
+      allow_duplicate: false
+    third_party_settings: {  }
+  field_type:
+    type: options_select
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden:
+  created: true
+  feeds_item: true
+  field_importer: true
+  field_instructor: true
+  field_parent: true

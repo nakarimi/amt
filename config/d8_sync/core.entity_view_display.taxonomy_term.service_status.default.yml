@@ -1,0 +1,32 @@
+uuid: d68eeedd-336b-4de9-9630-e707ce157643
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.service_status.field_color
+    - taxonomy.vocabulary.service_status
+  module:
+    - color_field
+    - text
+id: taxonomy_term.service_status.default
+targetEntityType: taxonomy_term
+bundle: service_status
+mode: default
+content:
+  description:
+    label: hidden
+    type: text_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_color:
+    weight: 1
+    label: above
+    settings:
+      format: hex
+      opacity: '1'
+    third_party_settings: {  }
+    type: color_field_formatter_text
+    region: content
+hidden: {  }

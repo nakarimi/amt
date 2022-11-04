@@ -1,0 +1,21 @@
+uuid: cde53bd3-7dcb-4fe1-a1df-692e50c29dba
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: student_accounts.field_legacy_id
+field_name: field_legacy_id
+entity_type: student_accounts
+type: string
+settings:
+  max_length: 255
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

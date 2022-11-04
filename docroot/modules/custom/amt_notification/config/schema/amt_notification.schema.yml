@@ -1,0 +1,21 @@
+amt_notification.notification_settings:
+  type: mapping
+  label: 'AMT Notification Settings'
+  mapping:
+    amt_notification:
+      type: mapping
+      mapping:
+        notification_delay:
+          type: textfield
+          label: 'Notification delay'
+        disable_notifications_from:
+          type: time
+          label: 'Disable sending notifications from:'
+        disable_notifications_until:
+          type: time
+          lable: 'Disable sending notifications until:'
+block.settings.amt_notification_block:
+  type: block_settings
+  label: 'Lorem ipsum block'
+  mapping:
+    amt_notification_block_settings:

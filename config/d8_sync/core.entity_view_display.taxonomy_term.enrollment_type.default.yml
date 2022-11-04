@@ -1,0 +1,41 @@
+uuid: 0f64b745-5252-4901-85d0-16a737c5c24b
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.taxonomy_term.enrollment_type.field_hide
+    - field.field.taxonomy_term.enrollment_type.field_student_department
+    - taxonomy.vocabulary.enrollment_type
+  module:
+    - text
+id: taxonomy_term.enrollment_type.default
+targetEntityType: taxonomy_term
+bundle: enrollment_type
+mode: default
+content:
+  description:
+    label: hidden
+    type: text_default
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_hide:
+    weight: 3
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+    region: content
+  field_student_department:
+    weight: 1
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+hidden: {  }

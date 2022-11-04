@@ -1,0 +1,47 @@
+.multiselect-container
+    width: 100%
+    padding: 0 10px !important
+
+    & .checkbox
+        margin: 0px
+
+    & .dropdown-menu > .active > a,
+    & .dropdown-menu > .active > a:hover,
+    & .dropdown-menu > .active > a:focus
+        color: black !important
+        background-color: #e6e6e6 !important
+
+    & .dropdown-menu li label:hover
+        cursor: pointer
+
+button.multiselect
+    text-align: left!important
+
+#studentsListTable
+    tr
+        th:not(.tableCellHideOnPrint):not(.disableSort)
+            cursor: pointer
+
+        th
+            svg
+                margin-bottom: -3px
+                margin-left: 5px
+
+                &.bi-arrow-repeat
+                    animation-name: spin
+                    animation-duration: 3000ms
+                    animation-iteration-count: infinite
+                    animation-timing-function: linear
+                    /* transform: rotate(3deg); */
+                    /* transform: rotate(0.3rad);/ */
+                    /* transform: rotate(3grad); */ 
+                    /* transform: rotate(.03turn);  */
+
+        th:not(.DESC) .bi-caret-down-fill
+            transform: rotate(180deg)
+@keyframes spin
+    from
+        transform: rotate(0deg)
+
+    to
+        transform: rotate(360deg)

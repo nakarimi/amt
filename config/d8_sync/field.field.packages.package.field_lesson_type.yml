@@ -1,0 +1,39 @@
+uuid: b3d03e09-20eb-42e6-9d44-6b7ec09a3141
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.package
+    - field.storage.packages.field_lesson_type
+    - taxonomy.vocabulary.lesson_type
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: packages.package.field_lesson_type
+field_name: field_lesson_type
+entity_type: packages
+bundle: package
+label: 'Lesson Type'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      lesson_type: lesson_type
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: enrollment_type
+field_type: entity_reference

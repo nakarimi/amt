@@ -1,0 +1,11 @@
+uuid: 99db0997-21f9-4a60-81a7-937eb8f91dcb
+langcode: en
+status: true
+dependencies:
+  module:
+    - history
+id: config_sync.module.history
+snapshotSet: config_sync
+extensionType: module
+extensionName: history
+items: {  }

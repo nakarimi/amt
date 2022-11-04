@@ -1,0 +1,30 @@
+uuid: 52ec9642-8e14-4fcd-9856-6b63cc5c332f
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.contacts.student_record
+    - field.storage.contacts.field_notification_preference
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: contacts.student_record.field_notification_preference
+field_name: field_notification_preference
+entity_type: contacts
+bundle: student_record
+label: 'Lesson Reminders'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_string

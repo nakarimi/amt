@@ -1,0 +1,20 @@
+uuid: d941541a-4b62-4ad8-ad3a-72fc0816c76d
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+    - taxonomy
+id: packages.field_sps_code
+field_name: field_sps_code
+entity_type: packages
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

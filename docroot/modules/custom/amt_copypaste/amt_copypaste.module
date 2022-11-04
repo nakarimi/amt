@@ -1,0 +1,255 @@
+<?php
+
+/**
+ * @file
+ * Copies and pastes events in AMT Dayview FullCalendar.
+ */
+
+ /**
+  * Event Copy Paste Endpoint.
+  * 
+  * This is the end point for the event copy
+  * and paste action that is triggered in
+  * in day-view page. Here we first determine,
+  * whether the event needs to be moved or copied,
+  * then we will refer to related function accordingly.
+  */
+function amt_copypaste_endpoint() {
+
+    // Load the selected event.
+    $event = \Drupal::entityManager()->getStorage('events')->load($_GET['id']);
+
+    if ($_GET['operation'] == 'copy') {
+        // Replicate the event.
+        $newEvent = amt_copypaste_copy_event($event);
+    }
+    else {
+        // Move the event.
+        $newEvent = amt_copypaste_move_event($event);
+    }
+
+    // Preparing the entity for the dayview calendar.
+    $filteringData = amt_dayview_filter_data();
+    $manipulatedData = _amt_dayview_event_details($newEvent, $filteringData);
+
+    // Return the newly edited/replicated event.
+    return $manipulatedData;
+}
+
+/**
+ * Move the event.
+ * 
+ * This function actually moves the event to another datetime
+ * by changing this property of the event and also the related
+ * instructor to that timing.
+ */
+function amt_copypaste_move_event(object $event) {
+
+    if ($_GET['newInstructor'] != NULL) {
+        // Change instructor information.
+        // all events have instructor execpt schedules that only have executive.
+        $teacher = 'field_instructor';
+        if ($event->bundle() == 'schedules') {
+            $teacher = 'field_schedule_instructor';
+        }
+        else if ($event->bundle() == 'services') {
+            $teacher = 'field_executive';
+        }
+
+        $event->set($teacher, $_GET['newInstructor']);
+    }
+
+    if ($_GET['datetime'] != NULL) {
+        // Change Date Time information.
+        $event->set('field_date_and_time', $_GET['datetime']);
+    }
+
+    // Save the event.
+    $event->save();
+
+    // Return the newly edited event back.
+    return \Drupal::entityManager()->getStorage('events')->load($_GET['id']);
+}
+
+/**
+ * Replicate the event.
+ * 
+ * This function is called when an event needs to be
+ * replicated to a desired date time.
+ */
+function amt_copypaste_copy_event($event) {
+
+    if ($event->bundle() == 'lesson') {
+        // Duplicate it as lesson.
+        $newEntity = amt_copypaste_replicate_lesson($event);
+    }
+    else if ($event->bundle() == 'group_lesson') {
+        // Duplicate it as group lesson.
+        $newEntity = amt_copypaste_replicate_group_lesson($event);
+    }
+    else if ($event->bundle() == 'schedules') {
+        // Duplicate it as schedule.
+        $newEntity = amt_copypaste_replicate_schedules($event);
+    }
+    else {
+        // Duplicate it as service.
+        $newEntity = amt_copypaste_replicate_service($event);
+    }
+
+    return $newEntity;
+}
+
+/**
+ * Replicate the event of bunlde lesson.
+ * 
+ * This function is called we the replication is
+ * for the event that is from bundle lesson.
+ */
+function amt_copypaste_replicate_lesson($event) {
+    // Get definition of target entity type.
+    $entityDefinition = \Drupal::entityManager()->getDefinition('events');
+
+    // Load up an array for creation.
+    $entityData = [
+        'field_date_and_time' => $_GET['datetime'],
+        'field_duration' => $event->field_duration->value,
+        'field_expiration_date' => $event->field_expiration_date->value,
+        'field_instructor' => $_GET['newInstructor'],
+        'field_type' => $event->field_type->target_id,
+        'field_parent' => $event->field_parent->value,
+        'field_student' => amt_copypaste_replicate_attendee($event->field_student->target_id),   
+        'field_repetition_frequency' => $event->field_repetition_frequency->value,
+        'field_repetition_units' => $event->field_repetition_units->value,
+        // Use entity definition to set the appropriate property for the bundle.
+        $entityDefinition->getKeys()['bundle'] => 'lesson',
+    ];
+    // Create new entity by the data array that provided.
+    $newEntity = \Drupal::entityManager()->getStorage('events')->create($entityData);
+    $newEntity->save();
+
+    return $newEntity;
+}
+
+/**
+ * Replicate the event of bunlde group lesson.
+ * 
+ * This function is called we the replication is
+ * for the event that is from bundle group lesson.
+ */
+function amt_copypaste_replicate_group_lesson($event) {
+    // Get definition of target entity type.
+    $entityDefinition = \Drupal::entityManager()->getDefinition('events');
+
+    // Load up an array for creation.
+    $entityData = [
+        'field_base_lesson' => $event->field_base_lesson->target_id,
+        'field_date_and_time' => $_GET['datetime'],
+        'field_duration' => $event->field_duration->value,
+        'field_expiration_date' => $event->field_expiration_date->value,
+        'field_instructor' => $_GET['newInstructor'],
+        'field_type' => $event->field_type->target_id,
+        'field_parent' => $event->field_parent->value,
+        'field_students' => amt_copypaste_replicate_attendee($event->field_students->target_id),
+        'field_repetition_frequency' => $event->field_repetition_frequency->value,
+        'field_repetition_units' => $event->field_repetition_units->value,
+        // Use entity definition to set the appropriate property for the bundle.
+        $entityDefinition->getKeys()['bundle'] => 'group_lesson',
+    ];
+    // Create new entity by the data array that provided.
+    $newEntity = \Drupal::entityManager()->getStorage('events')->create($entityData);
+    $newEntity->save();
+
+    return $newEntity;
+}
+
+/**
+ * Replicate the event of bunlde services.
+ * 
+ * This function is called we the replication is
+ * for the event that is from bundle services.
+ */
+function amt_copypaste_replicate_service($event) {
+    // Get definition of target entity type.
+    $entityDefinition = \Drupal::entityManager()->getDefinition('events');
+
+    // Load up an array for creation.
+    $entityData = [
+        'field_date_and_time' => $_GET['datetime'],
+        'field_duration' => $event->field_duration->value,
+        'field_executive' => $_GET['newInstructor'],
+        'field_type' => $event->field_type->target_id,
+        'field_notes' => $event->field_notes->value,
+        'field_student' => amt_copypaste_replicate_attendee($event->field_student->target_id),
+        'field_status' => $event->field_status->target_id,
+        // Use entity definition to set the appropriate property for the bundle.
+        $entityDefinition->getKeys()['bundle'] => 'services',
+    ];
+    // Create new entity by the data array that provided.
+    $newEntity = \Drupal::entityManager()->getStorage('events')->create($entityData);
+    $newEntity->save();
+
+    return $newEntity;
+}
+
+/**
+ * Replicate the event of bunlde schedules.
+ * 
+ * This function is called we the replication is
+ * for the event that is from bundle schedules.
+ */
+function amt_copypaste_replicate_schedules($event) {
+    // Get definition of target entity type.
+    $entityDefinition = \Drupal::entityManager()->getDefinition('events');
+
+    // Load up an array for creation.
+    $entityData = [
+        'field_date_and_time' => $_GET['datetime'],
+        'field_duration' => $event->field_duration->value,
+        'field_schedule_instructor' => $_GET['newInstructor'],
+        'field_type' => $event->field_type->target_id,
+        'field_notes' => $event->field_notes->value,
+        // Use entity definition to set the appropriate property for the bundle.
+        $entityDefinition->getKeys()['bundle'] => 'schedules',
+    ];
+    // Create new entity by the data array that provided.
+    $newEntity = \Drupal::entityManager()->getStorage('events')->create($entityData);
+    $newEntity->save();
+
+    return $newEntity;
+}
+
+/**
+ * Implements hook_page_attachments().
+ * 
+ * This hook runs on login page and adds the logout.js
+ * file to that page to be loaded and executed. The file
+ * empties the local storage from any unsaved event that
+ * was supposed to be moved or copied by the logged out user,
+ * but the user logged out before doing so.
+ */
+function amt_copypaste_page_attachments(array &$page) {
+    if (\Drupal::service('path.current')->getPath() == '/user/login') {
+        $page['#attached']['library'][] = 'amt_copypaste/logout-handler';
+    }
+}
+
+/**
+ * Replicate the attendee of event.
+ * 
+ * This function is called we the replication is
+ * for the event.
+ */
+function amt_copypaste_replicate_attendee($id) {
+
+    // Replicate attendee.
+    $attendee = \Drupal::entityTypeManager()->getStorage('attendees')->load($id);
+
+    // Make Shorter params.
+    $stdnt = $attendee->field_students->target_id;
+    $stdnt_acc = $attendee->field_student_account->target_id;
+    $enrollment = $attendee->field_enrollment->target_id;
+    $description = $attendee->field_description->value;
+
+    // Create new attendee and return id.
+    return _amt_general_create_new_attendee($stdnt, $stdnt_acc, $enrollment, $description);
+}

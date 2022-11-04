@@ -1,0 +1,33 @@
+uuid: e9fefcdd-51c4-4bd1-9c7a-3514a96e78f7
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_hide
+    - taxonomy.vocabulary.service_type
+  module:
+    - disable_field
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: taxonomy_term.service_type.field_hide
+field_name: field_hide
+entity_type: taxonomy_term
+bundle: service_type
+label: Hide
+description: 'This make the field hide for the dropdown lists.'
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: Hide
+  off_label: Hide
+field_type: boolean

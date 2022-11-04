@@ -1,0 +1,65 @@
+<div id="calendarfilter" class="day-view">
+	<form class="calendar_filter_form" role="form">
+		<div style=" width: 100%; ">
+			<div class="form-group dayview_col">
+				<select name="instructor_category" id="inputIns" class="form-control" style=" height: auto; ">
+					{% if teacherCategory %}
+						{% for category in teacherCategory %}
+								<option value="{{category.id}}">{{category.name}}</option>
+					    {% endfor %}
+					{% endif %}
+				</select>
+			</div>
+			<div class="form-group dayview_col">
+				<label class="sr-only" for="">Instractor</label>
+				<input type="text" class="form-control" name="instructor" entity="user" bundle="instructor" placeholder="Instractor">
+			</div>
+			<div class="form-group dayview_col">
+				<label class="sr-only" for="">Lesson Type</label>
+				<input type="text" class="form-control" name="lessonType" entity="taxonomy_term" bundle="lesson_type,service_type" placeholder="Lesson Type">
+			</div>
+		</div>
+		<div style=" width: 100%; ">
+			<div class="form-group dayview_col">
+				<label class="sr-only" for="">Student</label>
+				<input type="text" class="form-control" name="student" entity="attendees" bundle="attendance" placeholder="Student">
+			</div>
+			<div class="checkbox form-group dayview_col">
+				<label>
+					<input type="checkbox" name="group_lesson" id="input" value="1">
+					Group Lesson
+				</label>
+				<label>
+					<input type="checkbox" name="lesson" id="input" value="1">
+					Lesson
+				</label>
+				<label>
+					<input type="checkbox" name="services" id="input" value="1">
+					Services
+				</label>
+			</div>
+		</div>
+		<input type="hidden" name="start" value="" placeholder="">
+		<input type="hidden" name="end" value="" placeholder="">
+	</form>
+	<button type="button" id="filter_form_submited" class="btn btn-primary btn-sm">Apply</button>
+</div>
+<div class="dropdown pull-right">
+    <button class="btn btn-primary active dropdown-toggle" type="button" data-toggle="dropdown">
+        <i class="glyphicon glyphicon-file" aria-hidden="true"></i> New Event <span class="caret"></span>
+    </button>
+    <ul id="add-new-event" class="dropdown-menu">
+        <li>
+			<a class="use-ajax" data-dialog-type="modal" data-dialog-options='{"width":750}'
+			   href="/admin/content/events/add/lesson?popup=/day-view">Add Lesson</a>
+        </li>
+        <li>
+			<a class="use-ajax" data-dialog-type="modal" data-dialog-options='{"width":750}'
+			   href="/admin/content/events/add/group_lesson?popup=/day-view">Add Group Lesson</a>
+        </li>
+        <li>
+			<a class="use-ajax" data-dialog-type="modal" data-dialog-options='{"width":750}'
+			   href="/admin/content/events/add/services?popup=/day-view">Add Services</a>
+        </li>
+    </ul>
+</div>

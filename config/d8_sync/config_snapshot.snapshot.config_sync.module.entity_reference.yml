@@ -1,0 +1,11 @@
+uuid: cdd460be-1bd1-4f23-a8ce-f846aebd6fe0
+langcode: en
+status: true
+dependencies:
+  module:
+    - entity_reference
+id: config_sync.module.entity_reference
+snapshotSet: config_sync
+extensionType: module
+extensionName: entity_reference
+items: {  }

@@ -1,0 +1,23 @@
+uuid: 0c246ed3-1921-4e87-b6cf-54af31b391fa
+langcode: en
+status: true
+dependencies:
+  config:
+    - eck.eck_type.packages.enrollment
+    - field.storage.packages.field_enrollment_status
+  module:
+    - options
+id: packages.enrollment.field_enrollment_status
+field_name: field_enrollment_status
+entity_type: packages
+bundle: enrollment
+label: 'Enrollment Status'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: Open
+default_value_callback: ''
+settings: {  }
+field_type: list_string

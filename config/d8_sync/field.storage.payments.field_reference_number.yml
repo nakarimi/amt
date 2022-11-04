@@ -1,0 +1,21 @@
+uuid: 99015bc9-de6a-4c02-ba46-034c329c3670
+langcode: en
+status: true
+dependencies:
+  module:
+    - eck
+id: payments.field_reference_number
+field_name: field_reference_number
+entity_type: payments
+type: string
+settings:
+  max_length: 255
+  is_ascii: false
+  case_sensitive: false
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

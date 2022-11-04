@@ -1,0 +1,29 @@
+uuid: f9745657-959f-49dc-aadd-25a01959aded
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_student_department
+    - taxonomy.vocabulary.enrollment_type
+    - taxonomy.vocabulary.student_department
+id: taxonomy_term.enrollment_type.field_student_department
+field_name: field_student_department
+entity_type: taxonomy_term
+bundle: enrollment_type
+label: 'Student Department'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      student_department: student_department
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

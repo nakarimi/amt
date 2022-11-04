@@ -1,0 +1,2227 @@
+<?php
+
+/**
+ * @file
+ * Provides DayView functionality and alterations for AMT AMI.
+ */
+
+use Drupal\amt_general\UserInfo;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\eck\Form\Entity\EckEntityForm;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\user\Entity\User;
+use Drupal\user\UserInterface;
+use Drupal\config_pages\Entity\ConfigPages;
+
+define('AMT_DAYVIEW_PATH', '/day-view');
+
+/**
+ * Implements hook_theme().
+ */
+function amt_dayview_theme($existing, $type, $theme, $path)
+{
+  return [
+    'amt_dayview_calendar' => [
+      'variables' => [
+        'teacherCategory' => NULL,
+        'teachersList' => NULL,
+        'lessonTypes' => NULL,
+        'lesson_status_list' => NULL,
+        'service_status_list' => NULL,
+        'pageType' => NULL,
+        'userRole' => NULL,
+        'weekNumber' => date("W"),
+      ],
+      'path' => $path . '/templates',
+      'template' => 'dayview-calendar',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_views_view_field().
+ *
+ * Rerite the last paid column of enrollments.
+ */
+function amt_dayview_preprocess_views_view_field(&$vars)
+{
+
+  if (isset($vars['view']) && ($vars['view']->id() == 'enrollment')) {
+    $request = \Drupal::request();
+    $session = $request->getSession();
+
+    // Get the enrollment id and store into a session.
+    if ($vars['field']->table == "packages_field_data" && $vars['field']->field == "id") {
+      $session->set('enrID', $vars['field']->getValue($vars['row']));
+    }
+
+    // field_additional_notes field is used interchangeablly as Last paid column.
+    if ($vars['field']->field == "field_additional_notes") {
+      // Using enrollment id stored in session we can now find last payment date of this enrollment and attach it to the view.
+      $lastPaymentDate = _amt_dashboard_get_last_payment_for_this_enrollment($session->get('enrID', 0));
+      $vars['output'] =  [
+        '#markup' => $lastPaymentDate,
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Prevents popup's redirection from Day-view to another link.
+ */
+function amt_dayview_form_alter(&$form, FormStateInterface $formState, $formId)
+{
+  /* @var $obj \Drupal\Core\Entity\EntityFormInterface */
+  $obj = $formState->getformObject();
+  $isEckForm = $obj instanceof EckEntityForm;
+
+  // Prevents popup's redirection from Day-view to another link.
+  if ($isEckForm) {
+    if (!empty(\Drupal::request()->get('popup'))) {
+      $form['#prefix'] = '<div id="popup_form_wrapper">';
+      $form['#suffix'] = '</div>';
+      if (strpos($formId, 'events_lesson_form') !== FALSE || strpos($formId, 'events_group_lesson_form') !== FALSE || strpos($formId, 'events_services_form') !== FALSE) {
+        $formState->set('source', 'day-view');
+        $form['actions']['submit']['#submit'][] = 'amt_reports_check_conflictedtime';
+      } else {
+        $form['actions']['submit']['#ajax'] = ['callback' => '_amt_dayview_popup_submit'];
+      }
+    }
+  }
+}
+
+/**
+ * Implements callback_form_ajax().
+ *
+ * Prevents popup's redirection from Day-view to another link.
+ *
+ * Users were redirected to another page as soon as the Event-creation
+ * popup form was submitted, just added an AJAX handler to submit button.
+ * which prevents the redirect using ajax,
+ * and when there is any error on the form, the message is sent to the popup.
+ */
+function _amt_dayview_popup_submit(array &$form, FormStateInterface $formState)
+{
+  $response = new AjaxResponse();
+  if ($formState->getErrors()) {
+    // Update the popup to show error messages.
+    unset($form['#prefix']);
+    unset($form['#suffix']);
+    $form['status_messages'] = [
+      '#type' => 'status_messages',
+      '#weight' => -10,
+    ];
+    $response->addCommand(new HtmlCommand('#popup_form_wrapper', $form));
+    return $response;
+  }
+  // Closing the pop up on success
+  // and handle special paths, like Day-view.
+  $response->addCommand(new CloseModalDialogCommand());
+  $id = \Drupal::request()->get('popup');
+  if ($id === AMT_DAYVIEW_PATH) {
+    // Get the date of date and time field and set it in full calendar view.
+    $dateFieldData = $form['field_date_and_time']['widget'][0]['value']['date']['#value'];
+    // Reload the day-view table with date field we save it.
+    $response->addCommand(new InvokeCommand(NULL, "ajaxCallbackGoToDate", [$dateFieldData]));
+  }
+  // If the submittion is happening in /payment-reports page.
+  elseif ($id === '/payment-reports') {
+    // Reload the payment-reports table (Simulates clicking on "Apply" button).
+    $response->addCommand(new InvokeCommand('button[id^="edit-submit-payment-reports"]', 'click'));
+  }
+
+  return $response;
+}
+
+/**
+ * For teacher category selection needed to use in dayview.
+ *
+ * Load all taxonamy that are for teacher category.
+ *
+ * @return array
+ *   List of all matched taxonamy with name and id.
+ */
+function amt_dayview_teacher_category()
+{
+  $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree('teacher_category');
+  $teacherCategory = [];
+  foreach ($terms as $key => $term) {
+    $teacherCategory[$key]['id'] = $term->tid;
+    $teacherCategory[$key]['name'] = $term->name;
+  }
+  return $teacherCategory;
+}
+
+/**
+ * Implements hook_user_login().
+ *
+ * Redirects "staff users" automatically to the appropriate day-view,
+ * to view their schedule.
+ */
+function amt_dayview_user_login(UserInterface $account)
+{
+  $userInfo = new UserInfo($account->id());
+  if ($userInfo->isValid() && $userInfo->isStaffMember()) {
+    $request = \Drupal::request();
+    $destinationPath = $request->getUriForPath(AMT_DAYVIEW_PATH);
+    $request->query->set('destination', $destinationPath);
+  }
+}
+
+/**
+ * Prevent from writing duplicate code to get the account title.
+ *
+ * Get the attendace Id and then load student account that has title.
+ *
+ * @param int $attendeesID
+ *   The Id of attendees.
+ *
+ * @return array
+ *   Just return the title of student account.
+ */
+function amt_dayview_student_details($attendeesID)
+{
+
+  // Getting IDs of free enrollments which are Sundy and Uncategorized.
+  $enrollmentTypesIds = amt_general_load_nuteral_enrollments();
+  $studentName = '';
+  $studentLastName = '';
+  $lessonAvailable = 0;
+  $enrollmentID = '';
+  $description = '';
+  $threshold = 0;
+  $studentAccountId = '';
+
+  if (!is_null($attendeesID)) {
+
+    $attendeesData = \Drupal::entityTypeManager()->getStorage('attendees')->load($attendeesID);
+
+    if (isset($attendeesData->field_student_account)) {
+
+      // Load student reference entity to get its title for dayview grid.
+      if (isset($attendeesData->field_student_account->referencedEntities()[0])) {
+        $studentAccount = $attendeesData->field_student_account->referencedEntities()[0];
+        $studentAccountId = $studentAccount->id();
+        $threshold = $studentAccount->field_low_lesson_threshold->value;
+      }
+
+      // Load student reference entity to get its title for dayview grid.
+      if (isset($attendeesData->field_students->referencedEntities()[0])) {
+        $students = $attendeesData->field_students->referencedEntities()[0];
+        $studentName = $students->field_first_name->value . ' ' . $students->field_last_name->value;
+        $studentLastName = $students->field_last_name->value;
+      }
+
+      // Geting the attendess description for dayview grid.
+      // Load Enrollment Data for this student.
+
+      if (isset($attendeesData->field_enrollment->referencedEntities()[0])) {
+        $attendeesEnrollment = $attendeesData->field_enrollment->referencedEntities()[0];
+        $enrollmentID = $attendeesEnrollment->id->value;
+      }
+
+      $description = $attendeesData->field_description->value;
+
+      $lessonAvailable = amt_dashboard_total_lessons_paid_ahead_taken($attendeesData->field_student_account->target_id, false) ?? 0;
+    }
+
+    // Use associative array to simply get currect value every where.
+    return [
+      'studentID' => $attendeesID,
+      'studentName' => $studentName,
+      'studentLastName' => $studentLastName,
+      'lessonAvailable' => $lessonAvailable,
+      'enrollmentID' => $enrollmentID,
+      'description' => $description,
+      'threshold' => $threshold,
+      'studentAccountId' => $studentAccountId,
+    ];
+  }
+}
+
+/**
+ * Filter data to use on load instructor and events.
+ *
+ * Get the Filter Data and arrange them according to events requirements.
+ *
+ * @return array
+ *   Return array of data to use in query conditions.
+ */
+function amt_dayview_filter_data()
+{
+  $eventType = [];
+  if (!empty($_GET['lesson'])) {
+    // If the lesson checked means just load lessons.
+    array_push($eventType, 'lesson');
+  }
+  if (!empty($_GET['group_lesson'])) {
+    // If the group lesson checked means just load group lessons.
+    array_push($eventType, 'group_lesson');
+  }
+  if (!empty($_GET['services'])) {
+    // If the group lesson checked means just load group lessons.
+    array_push($eventType, 'services');
+  }
+  if (!empty($_GET['schedules'])) {
+    // If the group lesson checked means just load group lessons.
+    array_push($eventType, 'schedules');
+  }
+  if ($eventType == NULL) {
+    $eventType = ['services', 'lesson', 'group_lesson', 'schedules'];
+  }
+  $fieldsName = [
+    'instructor' => 'field_instructor',
+    'type' => 'field_type',
+    'student' => 'field_student',
+    'date' => 'field_date_and_time',
+    'expire' => 'field_expiration_date',
+    'groupStudent' => 'field_students',
+  ];
+  return [$eventType, $fieldsName];
+}
+
+/**
+ * For diffrent set of instructors that will loaded for dayview.
+ *
+ * Same data structur needed for calendar, here just user data.
+ *
+ * Id diffrent that makes diffrent information with same structur.
+ *
+ * @param object $userData
+ *   Instructor data as an object.
+ * @param string $date
+ *   The date that calendar loaded.
+ * @param array $orderedIds
+ *   An array contains all instuructor with priority.
+ *
+ * @return array
+ *   The generated data for calendar.
+ */
+function amt_dayview_calendar_instructor_data($userData, $date, array $orderedIds = [])
+{
+  $userName = $userData->field_first_name[0]->value . ' ' . $userData->field_last_name[0]->value;
+  $orderedIds[] = $id = $userData->uid[0]->value;
+  // Generate resource data for calendar.
+  $instructorInfo = amt_dayview_load_instructor_info($id, $date, $userName);
+  return [
+    'id'            => $id,
+    'title'         => $userName,
+    'type'          => $userData->name[0]->value,
+    'businessHours' => amt_dayview_load_instructor_availability($id, $date),
+    'info'          => $instructorInfo[0],
+    'privateLesson' => $instructorInfo[1],
+    'privatePostedLesson' => $instructorInfo[2],
+  ];
+}
+
+/**
+ * Getting Instructor Data for Dayview calender.
+ *
+ * Load Events where Event type is Services
+ * then join Services Data and Instructor Informaion
+ * then return the instructor information.
+ *
+ * @param string $date
+ *   The filter date.
+ *
+ * @return array
+ *   Return the list of all event for instructor.
+ */
+function amt_dayview_load_events_instructor($date)
+{
+
+  // Provide an array of data needed for calendar from instructor data.
+  $orderedIds = $manipulatedData = [];
+  $instructorWithOrder = amt_dayview_instructor_based_category();
+  foreach ($instructorWithOrder as $instructor) {
+    // Provide instructor data from user data for calendar.
+    $manipulatedData[] = amt_dayview_calendar_instructor_data($instructor, $date, $orderedIds);
+  }
+  // Load all of those instructor that has not priority
+  // But is in the same category with ordered instructors.
+  $instructorDisorderQuery = \Drupal::entityQuery('user')
+    ->condition('roles', 'instructor')
+    ->condition('field_teacher_category', $_GET['instructor_category'])
+    ->sort('field_first_name')
+    ->sort('field_last_name');
+
+  // Check that do system has any ordered instructor.
+  if ($orderedIds != NULL) {
+    $instructorDisorderQuery->condition('uid', $orderedIds, 'NOT IN');
+  }
+  $instructorsId = $instructorDisorderQuery->execute();
+
+  // Generate data for instructor without priorirty.
+  foreach (User::loadMultiple($instructorsId) as $instructor) {
+    // Provide instructor data from user data for calendar.
+    $manipulatedData[] = amt_dayview_calendar_instructor_data($instructor, $date);
+  }
+  return $manipulatedData;
+}
+
+/**
+ * Check the event occure in the day view date.
+ *
+ * It check the standding event occure in the date of day view
+ * if occure it return the True and assign the date to the
+ * stadding entity.
+ *
+ * @param object $entity
+ *   Event entity.
+ * @param string $date
+ *   Date of day view.
+ *
+ * @return bool
+ *   Return the true if stadding event occure
+ *
+ * @throws Exception
+ */
+function _amt_dayview_check_standding_entity(&$entity, $date)
+{
+  $startDate = $entity->field_date_and_time->value;
+  $expireDate = $entity->field_expiration_date->value;
+  $repetitionUnit = $entity->field_repetition_units->value;
+  $repetFrequency = $entity->field_repetition_frequency->value;
+  // Get the date object of dav view date.
+  $startDate = new DateTime($startDate);
+  // Change the date and time format to date format.
+  $increamentDate = $startDate->format('Y-m-d');
+  // Execute untle the entity date is less or equal then day view date.
+  while ($increamentDate <= $date) {
+    // If the date is equal to day view date return true.
+    if ($increamentDate == $date) {
+      $entity->field_date_and_time->value = $startDate->format('Y-m-d\TH:i:s');
+      return TRUE;
+    } else {
+      $increamentDate = $startDate->modify('+' . $repetFrequency . $repetitionUnit)->format('Y-m-d');
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Getting Instructor availablility Hours of the day.
+ *
+ * Converts the date into week day.
+ * search the week day data from Availibility table from profile
+ * return the array with start and end time of the availiable day.
+ *
+ * @param string $instructorID
+ *   ID of the Instructor.
+ * @param string $date
+ *   The filter date.
+ *
+ * @return array
+ *   return array with start and end time.
+ */
+function amt_dayview_load_instructor_availability($instructorID, $date)
+{
+  // Load Instructor TimeTable.
+  $instructorInfo = User::load($instructorID);
+  // Get that Specific Day TimeTable Like : Tuesday = 4.
+  // 0 = Sunday, 1 = Monday, 2 = Tuesday.
+  // 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday.
+  $weekDay = date("w", strtotime($date));
+  // Get the available times of instructor.
+  $timeTables = $instructorInfo->get("field_availability")->getValue();
+  foreach ($timeTables as $timeTable) {
+    // Check if day is current day.
+    if ($timeTable["day"] == $weekDay) {
+      $availablity[] = $timeTable;
+    }
+  }
+  // Get all available times of an instructor.
+  foreach ($availablity as $available) {
+    // Set the Start time.
+    $timeTableStart = date("H:i", strtotime(clean_time_table($available['starthours'])));
+    // Set the End time.
+    $timeTableEnd = date("H:i", strtotime(clean_time_table($available['endhours'])));
+    // Send data with start date and end date with the today day number.
+    $businessHour[] = [
+      'dow' => $weekDay,
+      'start' => $timeTableStart,
+      'end' => $timeTableEnd,
+    ];
+  }
+  return $businessHour;
+}
+
+/**
+ * Filter instructor users based on category.
+ *
+ * @return array
+ *   Array contains the instructors id.
+ */
+function _amt_dayview_instructor_filter_category()
+{
+
+  if (empty($_GET['instructor_category'])) {
+    return [];
+  }
+
+  $database = \Drupal::database();
+  $query = $database->select('users', 'u');
+  $query->leftjoin('user__field_teacher_category', 'tc', 'tc.entity_id = u.uid');
+  $query->addField('u', 'uid', 'uid');
+  $query->addField('tc', 'field_teacher_category_target_id', 'tcid');
+  $query->condition('field_teacher_category_target_id', $_GET['instructor_category'], '=');
+  return $query->execute()->fetchCol();
+}
+
+/**
+ * Load services according to the date filtering.
+ *
+ * Diffrent events have diffrent machine names.
+ *
+ * Load the services based on date and provide an array of data.
+ *
+ * The $ins is reference value then this Function not needed return.
+ *
+ * @param string $date
+ *   The start date of the week or selected date.
+ * @param string $endDate
+ *   The end date of the week or nothing.
+ *
+ * @return array
+ *   Return all events list.
+ */
+function amt_dayview_load_events($date, $endDate)
+{
+  $filteringData = amt_dayview_filter_data();
+
+  // Load Only Time (start time and End time) of all events.
+  // To set Office Hours.
+  if (isset($_GET['onlytime'])) {
+    $manipulatedData = _amt_dayview_start_end_time_sesstion($filteringData, $date, $endDate);
+  }
+  // Main functionality to load events.
+  else {
+    $entities = amt_dayview_load_filterd_events($date, $filteringData, $endDate);
+    $manipulatedData = $startTimeData = $endTimeData = [];
+    foreach ($entities as $key => $entity) {
+      $temp = _amt_dayview_event_details($entity, $filteringData);
+      // Adding unique id for every event.
+      $temp['id'] = '' . $key;
+      $manipulatedData[] = $temp;
+    }
+  }
+
+  return $manipulatedData;
+}
+
+/**
+ * Day view needs to get the min time event that start.
+ *
+ * And the Max time that an event can be schedualed (maxstratTime + duration).
+ *
+ * @param object $filteringData
+ *   The filter fields that will used on queries.
+ *
+ * @return array
+ *   An Associative array contains start and end time.
+ */
+function _amt_dayview_start_end_time_sesstion($filteringData, $date, $endDate)
+{
+
+  $instructorIds = _amt_dayview_instructor_filter_category();
+  $date = date("Y-m-d", strtotime($date));
+  $database = \Drupal::database();
+  $query = $database->select('events_field_data', 'e');
+  $query->leftjoin('events__field_schedule_instructor', 'si', 'si.entity_id = e.id');
+  $query->leftjoin('events__field_instructor', 'i', 'i.entity_id = e.id');
+  $query->leftjoin('events__field_duration', 'd', 'd.entity_id = e.id');
+  $query->leftjoin('events__field_date_and_time', 'dt', 'dt.entity_id = e.id');
+  $query->leftjoin('events__field_type', 'lt', 'lt.entity_id = e.id');
+  $query->leftjoin('events__field_students', 'ss', 'ss.entity_id = e.id');
+  $query->leftjoin('events__field_student', 's', 's.entity_id = e.id');
+
+  // field_schedule_instructor
+  $query->orderBy('field_date_and_time_value', 'ASC');
+  $query->condition('field_date_and_time_value', [$date, $endDate], 'BETWEEN');
+
+  // Apply filter condition if requested.
+  if ($_GET['lessonType'] != '') {
+    // Extract the id from terms to use in condition query.
+    preg_match_all('!\d+!', $_GET['lessonType'], $matches);
+    $term = end($matches[0]);
+    $query->condition('lt.field_type_target_id', $term, '=');
+  }
+  if ($_GET['student'] != '') {
+
+    // Apply condition for student on services or lesson.
+    // And as well on students field for group lesson.
+    $studentOrCondition = $query->orConditionGroup()
+      ->condition('s.field_student_target_id', $_GET['student'])
+      ->condition('ss.field_students_target_id', $_GET['student']);
+    $query->condition($studentOrCondition);
+  }
+
+  // If current user is an istructor then just load related events.
+  $currentUserData = User::load(\Drupal::currentUser()->id());
+  if ($currentUserData->roles->getString() == 'instructor') {
+    $instructorOrCondition = $query->orConditionGroup()
+      ->condition('i.field_instructor_target_id', \Drupal::currentUser()->id(), '=')
+      ->condition('si.field_schedule_instructor_target_id', \Drupal::currentUser()->id(), '=');
+    $query->condition($instructorOrCondition);
+  }
+  // If is not instuctor, check that filter setuped or not.
+  elseif ($_GET['instructor'] != '') {
+    $instructorOrCondition = $query->orConditionGroup()
+      ->condition('i.field_instructor_target_id', $_GET['instructor'], '=')
+      ->condition('si.field_schedule_instructor_target_id', $_GET['instructor'], '=');
+    $query->condition($instructorOrCondition);
+  } elseif (count($instructorIds) > 0) {
+    $instructorOrCondition = $query->orConditionGroup()
+      ->condition('i.field_instructor_target_id', $instructorIds, 'IN')
+      ->condition('si.field_schedule_instructor_target_id', $instructorIds, 'IN');
+    $query->condition($instructorOrCondition);
+  }
+  $query->condition('type', $filteringData[0], 'IN');
+
+  try {
+    // Check if query not face any error.
+    $q1 = clone $query;
+    $q1->addExpression('MIN(CAST(REPLACE(field_date_and_time_value, "T", " ") AS TIME))', 'start');
+    $res = $q1->execute();
+
+    // Get the min time that matched with search query.
+    $query->addExpression('REPLACE(field_date_and_time_value, "T", " ")', 'start');
+
+    // Extract the max time according to duration.
+    $query->addExpression('MAX(DATE_ADD(CAST(REPLACE(field_date_and_time_value, "T", " ") AS TIME), INTERVAL TIME_TO_SEC(CONCAT(field_duration_value, ":00"))/60 MINUTE))', 'end');
+    $result = $query->execute()->fetchAll();
+    $startEndTime = reset($result);
+    if ($startEndTime->start == NULL || $startEndTime->end == NULL) {
+      $startEndTime->start = "00:00:00";
+      $startEndTime->end = "23:59:59";
+    } else {
+      $startEndTime->start = date('H:i:s', strtotime($startEndTime->start));
+      $startEndTime->end = date('H:i:s', strtotime($startEndTime->end));
+    }
+    if ($_GET['instructor']) {
+      amt_dayview_load_instructor_availability_weekly($date, $endDate, $startEndTime);
+    }
+    return $startEndTime;
+  } catch (\Throwable $th) {
+    // If query faced any issue then, return this as default.
+    return ["start" => "12:00:00", "end" => "21:30:00"];
+  }
+}
+
+
+/**
+ * Week view need to check the working hours on whole week.
+ *
+ * And the Max time that an event can be schedualed (maxstratTime + duration).
+ *
+ * @param object $startEndTime
+ *   The events min/max times.
+ * @param string $endDate 
+ *   The end date of the week.
+ * @param string $start
+ *   the start date of the week.
+ */
+function amt_dayview_load_instructor_availability_weekly($start, $endDate, &$startEndTime)
+{
+  $begin = new DateTime($start);
+  $end = new DateTime($endDate);
+
+  $startTemp = strtotime($startEndTime->start);
+  $endTemp = strtotime($startEndTime->end);
+
+  $interval = DateInterval::createFromDateString('1 day');
+  $period = new DatePeriod($begin, $interval, $end);
+
+  // campare the date with instructor availability
+  foreach ($period as $date) {
+    $hours = amt_dayview_load_instructor_availability($_GET['instructor'], $date);
+    $hours = reset($hours);
+    $timeStart = strtotime($hours['start']);
+    $timeEnd = strtotime($hours['end']);
+    if ($startTemp > strtotime($hours['start'])) {
+      $startEndTime->start = date('H:i:s', $timeStart);
+      $startTemp = $timeStart;
+    }
+    if ($endTemp < strtotime($hours['end'])) {
+      $startEndTime->end = date('H:i:s', $timeEnd);
+      $startTemp = $timeEnd;
+    }
+  }
+  // compare the min/max time with studio working hours.
+  $studio = _amt_dayview_full_calendar_start_session_settings();
+  foreach ($studio as $day) {
+    foreach ($day as $key => $time) {
+      $time = strtotime($time);
+      if ($startTemp > $time) {
+        $startEndTime->start = date('H:i:s', $time);
+        $startTemp = $time;
+      }
+      if ($endTemp < $time) {
+        $startEndTime->end = date('H:i:s', $time);
+        $endTemp = $time;
+      }
+    }
+  }
+}
+/**
+ * Event details has specific structure.
+ *
+ * Here based on each events the details for calendar event generated.
+ *
+ * @param object $entity
+ *   The event data.
+ * @param object $filteringData
+ *   The filter fields that will used on queries.
+ *
+ * @return array
+ *   An array of event details needed for dayview.
+ */
+function _amt_dayview_event_details($entity, $filteringData)
+{
+
+  $studentDetails = [];
+
+  if ($entity->bundle() != 'group_lesson') {
+    // If it is service or lesson then feild name is diffrent.
+    // Check if there is any student, if yes then get user data like, student name, enrollment name and description.
+    if (isset($entity->field_student->target_id[0])) {
+      $attendeesID = $entity->field_student->target_id;
+      $studentDetails = amt_dayview_student_details($attendeesID);
+    }
+  } else if ($entity->bundle() != 'services') {
+    if (isset($entity->field_student->target_id[0])) {
+      $attendeesID = $entity->field_student->target_id;
+      $studentDetails = amt_dayview_student_details($attendeesID);
+    }
+  } else {
+    // If it is group lesson then field name is different.
+    // Get user data like, student name, enrollment name and description.
+    if (count(array($entity->field_students)) > 1) {
+      $studentDetails = [
+        "studentID" => "0",
+        "studentName" => "Group Lesson",
+        "studentLastName" => "Group Lesson",
+      ];
+    } else {
+      if (isset($entity->field_students->target_id[0])) {
+        $attendeesID = $entity->field_students->target_id;
+        $studentDetails = amt_dayview_student_details($attendeesID);
+      }
+    }
+  }
+
+  // This fuction is for loading standding appointment entity.
+  $nextEvents = ['nextdate' => 'NFA', 'upcomingEvent' => 'No Appointment Available'];
+  $upcomingHtml = 'No Upcoming Appointment';
+  $className = null;
+
+  // Get Standing events values.
+  $expirationDate = (!empty($entity->field_expiration_date->value) ? $entity->field_expiration_date->value : '');
+  $repetition = (!empty($entity->field_repetition_frequency->value) ? $entity->field_repetition_frequency->value : '');
+  $repetitionUnits = (!empty($entity->field_repetition_units->value) ? $entity->field_repetition_units->value : '');
+
+  // Getting the next events data for current event.
+  // Check condition that this event has any attendance.
+  // Check that this event is group lesson without more than 1 attendance.
+  if (!empty($studentDetails) && count(array($entity->field_students)) <= 1) {
+
+    // Check that this event has valid date.
+    if ($entity->field_date_and_time->value != NULL) {
+      $nextEvents = amt_dayview_get_next_event_date_and_appointments(
+        $entity->field_date_and_time->value,
+        $studentDetails,
+        $entity->id->value,
+        $expirationDate,
+        $repetition,
+        $repetitionUnits
+      );
+    }
+  }
+
+  $typeID = NULL;
+  if ($entity->field_type->target_id != NULL) {
+    // If it is group lesson or lesson then field name is different.
+    $typeID = $entity->field_type->target_id;
+  } elseif ($entity->field_service_type && $entity->field_service_type->target_id != NULL) {
+    // If it is service then feild name is diffrent.
+    $typeID = $entity->field_service_type->target_id;
+  }
+
+  $startTime = $entity->get($filteringData[1]['date'])->value;
+  // $lessonType = Term::load($typeID)->name->value; // This is not used anywhere.
+  // If the lesson status set as cancelled lesson it show
+  // the color of the status in day view.
+  $cancelledFlag = FALSE;
+  if ($entity->bundle() == 'lesson') {
+    $attendace = isset($entity->field_student->referencedEntities()[0]) ? $entity->field_student->referencedEntities()[0] : NULL;
+    if ($attendace != NULL) {
+      $entityLessonStatus = Term::load($attendace->field_status->target_id);
+      if ($entityLessonStatus != NULL) {
+        if ($entityLessonStatus->name->value == 'Cancelled') {
+          $colorCode = $entityLessonStatus->field_color->color;
+          $className = "Cancelled";
+          $cancelledFlag = TRUE;
+        }
+      }
+    }
+  }
+  if (!$cancelledFlag) {
+    $colorCode = amt_dayview_event_color($typeID, $entity);
+  }
+
+  // Get package Type Abbrivation.
+  $lessenTypeAbbreviation = '';
+
+  $typeTerm = is_null($typeID) ? NULL : Term::load($typeID);
+  if ($typeTerm && !$typeTerm->hasField('field_abbreviation')) {
+    $lessenTypeAbbreviation = $typeTerm->getName();
+  } else if ($typeTerm != NULL) {
+    $fieldValue = $typeTerm->get('field_abbreviation')->getValue();
+    $lessenTypeAbbreviation = (sizeof($fieldValue) > 0) ? $fieldValue[0]['value'] : NULL;
+    if (empty($lessenTypeAbbreviation) || $lessenTypeAbbreviation == NULL) {
+      $lessenTypeAbbreviation = Term::load($typeID)->getName();
+    }
+  } else {
+    $lessenTypeAbbreviation = 'Not Found';
+  }
+
+  // If there was not set lesson available or threshold then show 0.
+  $textColor = ($colorCode == '#FF4136') ? 'black' : 'red';
+  if (!isset($studentDetails['threshold'])) {
+    $numberOfAvailableLessons = '<span style="color:' . $textColor . '">' . @$studentDetails['lessonAvailable'] . '</span>';
+  } else {
+    // Get the Lesson available and Make it red if it's less than
+    // the threshold then it should be red in calendar view.
+    $numberOfAvailableLessons = (@$studentDetails['lessonAvailable'] < @$studentDetails['threshold'] ? '<span style="color:' . $textColor . '">' .
+      @$studentDetails['lessonAvailable'] . '</span>' : @$studentDetails['lessonAvailable']);
+  }
+  // Set the tooltip default to "N/A".
+  $tooltipText = "N/A";
+  // If event is service, don't show the "~ NFA" Part.
+  // Contains an if condition to check if the student name is not
+  // available so that to hide ~ that comes before the name.
+  if ($entity->bundle() == 'services') {
+    $content = (isset($studentDetails['studentLastName'][1])) ? ' ~ ' . $studentDetails['studentLastName'] : '';
+    $serviceNote = ($entity->field_notes->value != "") ? ' ~ ' . $entity->field_notes->value : '';
+    $dataToShow = '<div class="event_title" style="text-align:center; white-space: pre-wrap;" id="' . $entity->id() . '"><div>' . $lessenTypeAbbreviation . $content . $serviceNote . '</div></div';
+    $tooltipText .= ($entity->field_notes->value != "") ? '<p>' . $entity->field_notes->value . '</p>' : '';
+  } else if ($entity->bundle() == 'schedules') {
+    $serviceNote = ($entity->field_notes->value != "") ? ' ~ ' . $entity->field_notes->value : '';
+    $dataToShow = '<div class="event_title" style="text-align:center; white-space: pre-wrap;" id="' . $entity->id() . '"><div>' . $lessenTypeAbbreviation . $serviceNote . '</div></div';
+    $tooltipText .= ($entity->field_notes->value != "") ? '<p>' . $entity->field_notes->value . '</p>' : '';
+  }
+
+  // If event is not service, display the "~ NFA" part.
+  else {
+    // If the event is group lesson, so it may has more than 1 attendance.
+    // If so, just show lesson type and the group lesson text.
+    if (count(array($entity->field_students)) > 1) {
+      $dataToShow = '<div class="event_title" style="text-align:center" id="' .
+        $entity->id() . '"><div>' . $lessenTypeAbbreviation . ' ~ ' . $studentDetails['studentLastName'] .
+        '</div><div>';
+      $tooltipText = '';
+    }
+    // If not, act like the lesson and show the data for that one attendance.
+    else {
+      $GRP_PARTY = ["GRP", "PARTY"];
+      $dataToShow = '<div class="event_title" style="text-align:center" id="' .
+        $entity->id() . '"><div>' . $lessenTypeAbbreviation . ' ~ ' . ($studentDetails['studentLastName'] ?? '') .
+        '</div><div>' . ($studentDetails['description'] ?? '') . '</div><div>' .
+        $numberOfAvailableLessons;
+
+      // Remove the NFA from GRP and PARTY lesson.
+      if (!in_array($lessenTypeAbbreviation, $GRP_PARTY)) {
+        $dataToShow .= ' ~ ' . $nextEvents['nextdate'] . ' </div></div>';
+      }
+    }
+
+    if (isset($entity->field_notes) && !empty($entity->field_notes->value)) {
+      $dataToShow .= ' ~ ' . $entity->field_notes->value;
+    }
+  }
+  // If the popup dialog is empty. Usually happens for services.
+  // if ($studentDetails['studentName'] == "" && $studentDetails['description'] == "" && $nextEvents['nextEvent'] == "") {
+  // $tooltipText = "N/A";
+  // }
+  // Check if it is not group lesson with more than 1 attendance.
+  $numOfstudents = count(array($entity->field_students));
+  if ($numOfstudents <= 1) {
+
+    // Check that this event has up coming appointments.
+    // Other wise dont show the text blcok.
+    if ($nextEvents['upcomingEvent'] != NULL) {
+      $upcomingHtml = '<p>Upcoming Appointments' . $nextEvents['upcomingEvent'] . '</p>';
+    }
+    // prevent to Display the no upcoming title to group lesson of GRP
+    if ($lessenTypeAbbreviation == 'GRP' && $upcomingHtml == 'No Upcoming Appointment') {
+      $upcomingHtml = "";
+    }
+
+    // Build the Tooltip Text.
+    // Contains an if condition to check if the entity is
+    // Type of service then hide the text "Upcomming Appointments".
+    $tooltipText = '<div class="tooltip_dayview"><p class="student-details">' .
+      ($studentDetails['studentName'] ?? '') . '</p><p class="card-description">' .
+      ($studentDetails['description'] ?? '') . '</p>' . $upcomingHtml . '<div>';
+  }
+
+  $instructorName = '';
+  $resourceId = '';
+  $field = 'field_instructor';
+
+  if ($entity->bundle() == 'schedules') {
+    $field = 'field_schedule_instructor';
+  } else if ($entity->bundle() == 'services') {
+    // Old sevices were assigned to instructor, but new ones to executive.
+    $field = (is_null($entity->field_executive->target_id)) ? 'field_instructor' : 'field_executive';
+  }
+
+  $instructor = $entity->{$field}->entity;
+  $resourceId = $entity->{$field}->target_id;
+  if ($instructor) {
+    $instructorName = $instructor->field_first_name->value . ' ' . $instructor->field_last_name->value;
+  }
+
+  // Load all the child event of the given parent.
+  $result = \Drupal::entityQuery("events")
+    ->condition('field_parent', $entity->id(), '=')->execute();
+
+  // This flag is to avoid deleting of a parent event.
+  $isParent = (count($result) > 0);
+
+  // Show the status title for cancelled and rescheduled events.
+  $eventStatus = _amt_dayview_return_status($entity);
+  if ($eventStatus && $eventStatus == 'Rescheduled') {
+    if (isset($entity->field_reschedule_date)) {
+      $formattedDate = date_create($entity->field_reschedule_date->value)->format('j/n/y');
+      $dataToShow .= '<div class="text-center"><em>RS - ' . $formattedDate . '</em></div>';
+    }
+  }
+  if ($eventStatus && $eventStatus == 'Cancelled') {
+    $dataToShow .= '<div class="text-center"><em>Cancelled</em></div>';
+  }
+
+  return [
+    'color'      => $colorCode,
+    'className'  => $className,
+    'textColor'  => ($colorCode == '#FF4136') ? 'black' : 'white',
+    'title'      => $entity->title->value,
+    'start'      => $startTime,
+    'entityId'   => $entity->id(),
+    // Genertae the end time according to the strat time and druration.
+    'end'        => amt_dayview_find_end_date($startTime, $entity->field_duration->value),
+    // Resourece Id is the instructor Id that is needed for calendar.
+    'resourceId' => $resourceId,
+    // Tooltip Text.
+    'tooltip'    => $tooltipText,
+    // Generate data that should be shown in the dayview grids.
+    'dataToShow' => $dataToShow,
+    'instructorName' => $instructorName,
+    'appointmentType' => $entity->bundle(),
+    'status' => _amt_dayview_return_status($entity),
+    'isParent' => $isParent,
+  ];
+}
+
+/**
+ * Get Next Event Date and upcomming appointments.
+ *
+ * If event is a Standing Apointment it gets it from that.
+ *
+ * if not leads other event has (same Enrollment) and gets the closest date
+ *
+ * it returns that next date event and Up comming appointments.
+ *
+ * @param string $startDateAndTime
+ *   Current Event Start Date.
+ * @param string $students
+ *   Current Event Attendee Enrollment ID.
+ * @param string $currentEventID
+ *   Current Event ID.
+ * @param string $expirationDate
+ *   Event Expiration Date.
+ * @param string $repetition
+ *   Number of Repets of Event.
+ * @param string $repetitionUnits
+ *   repetation Unit like Days, Months, weeks.
+ *
+ * @return array
+ *   return 2 elements next date and list of Appointments
+ */
+function amt_dayview_get_next_event_date_and_appointments($startDateAndTime, $students, $currentEventID, $expirationDate, $repetition, $repetitionUnits)
+{
+
+  // Return NFA if there is not Event.
+  $theNextDate = ' NFA';
+
+  $nextEvent = NULL;
+  $theEarliestNextEvent = '';
+  $accountId = $students['studentAccountId'];
+
+  // Get the next events for any type of events.
+  // And show the earliest next event date for current event.
+  $nextEventHtml = $upcomingEventHtml = $upcomingEventHtmlExtra = '';
+
+  if (!empty($accountId)) {
+    $nextEvents = amt_dayview_find_next_event($accountId, $currentEventID, $startDateAndTime);
+    if ($nextEvents[0] != NULL) {
+      // The html data of the eariest next event to show in the event block.
+      $theEarliestNextEvent = $nextEvents[0][0]['nextdate'];
+      $nextEventHtml .= '<li class="list-group-item">' .
+        $nextEvents[0][0]['title'] . ' ' .
+        $theEarliestNextEvent . '</li>';
+
+      $totalNumFutureEvents = $nextEvents[1];
+
+      // If the student account of event that will shown in fullCalendar.
+      // Has atleast one next events (lesson or group lesson).
+      foreach ($nextEvents[0] as $key => $nextEvent) {
+        $upcomingEventHtml .= '<li class="list-group-item">' . $nextEvent['title'] . '</li>';
+      }
+
+      // If there are more than 5 events for specific student account.
+      // Then show a text of remaining events.
+      if ($nextEvents[1] != NULL) {
+        $upcomingEventHtmlExtra = '<li class="list-group-item">' . $nextEvents[1] . ' More Events.</li>';
+      }
+    } else {
+      $theEarliestNextEvent = 'NFA';
+    }
+  }
+  $upcomingEventHtml .= $upcomingEventHtmlExtra;
+
+  return [
+    'nextdate'      => $theEarliestNextEvent,
+    'nextEvent'     => $nextEventHtml,
+    'upcomingEvent' => $upcomingEventHtml,
+  ];
+}
+
+/**
+ * Load Events with specefic Enrollment ID.
+ *
+ * It Skips the event with $currentEventID id
+ * then it check for the upcoming events and date.
+ *
+ * @param string $studentAccountId
+ *   The student account of attendees of event to find next event.
+ * @param string $currentEventID
+ *   The id of event that will check to find next event.
+ * @param string $date
+ *   The date of event that will check to find next event.
+ *
+ * @return array
+ *   retuan an array (Date, title, nextdate).
+ */
+function amt_dayview_find_next_event($studentAccountId, $currentEventID, $date)
+{
+
+  // Gets Events with $attendee ID.
+  // Skip the Event that has $currentEventID id.
+  $eventsListQuery = \Drupal::entityQuery('events')
+    ->condition('field_date_and_time', date("Y-m-d\T59:59:59", strtotime($date)), '>')
+    ->condition('id', ($currentEventID), '<>')
+    ->sort('field_date_and_time');
+
+  // Get Attendees with $enrollmentID.
+  $attendeesListQuery = \Drupal::entityQuery('attendees')
+    ->condition('field_student_account', $studentAccountId, '=');
+
+  // Filter upcoming events based on status that was not cancel.
+  $attendeesListQuery->condition('field_status', 63, '<>');
+
+  $noneCancelAttendeesId = $attendeesListQuery->execute();
+  $eventId = [];
+
+  if (count($noneCancelAttendeesId) > 0) {
+    // Or condition for group events and non group events.
+    $orGroup = $eventsListQuery->orConditionGroup()
+      ->condition('field_students', $noneCancelAttendeesId, 'IN')
+      ->condition('field_student', $noneCancelAttendeesId, 'IN');
+    $eventsListQuery = $eventsListQuery->condition($orGroup);
+  }
+
+  $eventsId = $eventsListQuery->execute();
+
+  // All future evens for an specific student account.
+  $futureEvents = \Drupal::entityTypeManager()->getStorage('events')->loadMultiple($eventsId);
+  $nextFiveEvents = [];
+
+  // Entity query returns events IDs as index.
+  // But an autoincrement index needed.
+  $key = 0;
+  foreach ($futureEvents as $event) {
+
+    if ($event->field_date_and_time->value != NULL && $key < 5) {
+      $nextFiveEvents[$key]['date'] = $event->field_date_and_time->value;
+      $nextFiveEvents[$key]['title'] = $event->title->value;
+      $nextFiveEvents[$key]['nextdate'] = date('m/d', strtotime($nextFiveEvents[$key]['date']));
+      $key++;
+    } else {
+      break;
+    }
+  }
+
+  // Find the remaining future events.
+  $totalNumFutureEvents = count($futureEvents) - 5;
+  $totalNumFutureEvents = ($totalNumFutureEvents > 0) ? $totalNumFutureEvents : NULL;
+
+  return [$nextFiveEvents, $totalNumFutureEvents];
+}
+
+/**
+ * Full Callendar call resource and events seperately.
+ *
+ * The events loaded basesd on filter data tht user setuped.
+ *
+ * @param string $date
+ *   The date that data should filter.
+ *
+ * @return object
+ *   Object of events filterd data.
+ */
+function amt_dayview_load_filterd_events($date, $filteringData, $endDate)
+{
+  // Provide the array of instructor ids based on category.
+  // These array will be used for all events filter.
+  $date = date("Y-m-d", strtotime($date));
+  $userId = \Drupal::currentUser()->id();
+  $isInstructor = (User::load($userId)->roles->getString() == 'instructor') ? TRUE : FALSE;
+
+  // Query database based on given date for service type.
+  $calendarEventsQuery = \Drupal::entityQuery('events')
+    ->condition('type', $filteringData[0], 'IN');
+  // Check that the date range is for a week or not.
+  // Week view for instructor has diffrent instructor filter than general.
+  if (date_diff(date_create($date), date_create($endDate))->format("%R%a") == '+7') {
+    $calendarEventsQuery->condition($filteringData[1]['date'], [$date, $endDate], 'BETWEEN');
+    // If instructor seeing the page just show own events.
+    if ($isInstructor) {
+      $calendarEventsQuery->condition('field_instructor', $userId, '=');
+    } else {
+      // Add filter condition based on search term.
+      $orGroup = $calendarEventsQuery->orConditionGroup()
+        ->condition('field_schedule_instructor', $_GET['instructor'], '=') // For schedules.
+        ->condition('field_executive', $_GET['instructor'], '=') // For services.
+        ->condition('field_instructor', $_GET['instructor'], '=');  // For other event types.
+      $calendarEventsQuery->condition($orGroup);
+    }
+  } else {
+    $calendarEventsQuery->condition($filteringData[1]['date'], ($date) . "%", 'LIKE');
+    // Add filter condition based on search term.
+    if (!empty($_GET['instructor'])) {
+      // If is not instuctor, check that filter setuped or not.
+      if ($_GET['instructor'] != '') {
+        if ($_GET['instructor'] != NULL) {
+          $calendarEventsQuery->condition('field_instructor', $_GET['instructor'], '=');
+        }
+      }
+    } else {
+      // Load all instructors with category.
+      $instructorIds = _amt_dayview_instructor_filter_category();
+      if (count($instructorIds) > 0) {
+        // Or condition for schedules and services.
+        $orGroup = $calendarEventsQuery->orConditionGroup()
+          ->condition('field_schedule_instructor', $instructorIds, 'IN') // For schedules.
+          ->condition('field_executive', $instructorIds, 'IN') // For services.
+          ->condition('field_instructor', $instructorIds, 'IN');  // For other event types.
+        $calendarEventsQuery->condition($orGroup);
+      }
+    }
+  }
+  // Apply more condition according to the filter data.
+  amt_dayview_public_filter_conditions($calendarEventsQuery, $filteringData[1]);
+
+  $eventsId = $calendarEventsQuery->execute();
+
+  // Load the entities based on query result from database.
+  $entities = \Drupal::entityTypeManager()->getStorage('events')->loadMultiple($eventsId);
+  return $entities;
+}
+
+/**
+ * We need end date that is used on calendar view to set the end of grid.
+ *
+ * Events just has the start date, but they also has the duration.
+ *
+ * @param string $date
+ *   This is the event date in this format "07/18/2019 - 07:30".
+ * @param string $duration
+ *   Duration of events like "02:15".
+ *
+ * @return string
+ *   End date will be return like "07/18/2019 - 09:45".
+ */
+function amt_dayview_find_end_date($date, $duration)
+{
+  // Explode the duration to array to use
+  // it in the callendar to find the end time.
+  $duration = explode(":", $duration);
+  // Convert duration to seconds to add it to first date.
+  $seconds = (($duration[0] * 60) + $duration[1]) * 60;
+  $selectedTime = explode("T", $date);
+  $endTime = strtotime($selectedTime[1]) + $seconds;
+  // Just the time changed then the date is the same and
+  // can prepend to the new time.
+  return $selectedTime[0] . 'T' . date('H:i:s', $endTime);
+}
+
+/**
+ * Each event type has its fields machine name but logic is the same.
+ *
+ * Here the array of same fields but diffrent machine name received.
+ *
+ * According to the order of array the correct field name will use
+ * in diffrent parts of conditions.
+ *
+ * To affect on the main query, reference param used.
+ *
+ * @param object &$query
+ *   Reference query that will modify.
+ * @param array $fieldsName
+ *   List of fields name with specific order.
+ */
+function amt_dayview_public_filter_conditions(&$query, array $fieldsName)
+{
+  if ($_GET['lessonType'] != '') {
+    $query->condition($fieldsName['type'], $_GET['lessonType'], '=');
+  }
+  if ($_GET['student'] != '') {
+    // Remove the brackets.
+    preg_match_all('!\d+!', $_GET['student'], $matches);
+    // Get the result from inside of the brackets.
+    $term = end($matches[0]);
+    // Load attendees from  student account id.
+    $attendenceIds = Drupal::service('entity.query')
+      ->get('attendees')
+      ->condition('field_student_account', $term)->execute();
+    $query->condition($fieldsName['student'], $attendenceIds, 'IN');
+  }
+}
+
+/**
+ * In filter instructor we need the list of them based on category.
+ *
+ * Here just the field machine name needed with the category id
+ * to load the instructor user based on category for day view.
+ *
+ * @return array
+ *   List of matched instructors.
+ */
+function amt_dayview_instructor_based_category($reverseThis = FALSE)
+{
+  $client = \Drupal::httpClient();
+  // Set base path.
+  global $base_url;
+  // Set Url.
+  if ($reverseThis) {
+    $_GET['instructor_category'] = ($_GET['instructor_category'] == 3) ? 78 : 3;
+  }
+  if ($_GET['instructor_category'] == 78) {
+    // Call view rest to get instructor json data.
+    $request = $client->get($base_url . '/primary-instructors-api?_format=json', ['http_errors' => FALSE]);
+  } elseif ($_GET['instructor_category'] == 3) {
+    // Call view rest to get instructor json data.
+    $request = $client->get($base_url . '/secondary-instructors-api?_format=json', ['http_errors' => FALSE]);
+  }
+  return json_decode($request->getBody());
+}
+
+/**
+ * Events has multiple coloring that used on FullCalendar.
+ *
+ * Check conditions and return a color code of an event.
+ *
+ * @param int $typeID
+ *   Lesson or Service type to find its color.
+ * @param object $entity
+ *   The entity that color will check for it.
+ *
+ * @return string
+ *   The color of event based on status and lesson type.
+ */
+function amt_dayview_event_color($typeID, $entity)
+{
+  // Load the entity of the configuration of the dayview full calendar.
+  $configPageEntity = ConfigPages::config('day_view_settings');
+  $color = NULL;
+  if ($configPageEntity->field_time_zone->value != NULL) {
+    // Get and set the default time zone.
+    date_default_timezone_set($configPageEntity->field_time_zone->value);
+  } else {
+    date_default_timezone_set('UTC');
+  }
+  // If the events is passed.
+  if (date('Y-m-d H:i:s') > str_replace("T", " ", $entity->field_date_and_time->value)) {
+    if ($entity->bundle() == 'group_lesson') {
+      $color = '#666';
+    } elseif ($entity->bundle() == 'services') {
+      // If the bundle is services and passed then get event status color.
+      $term = (isset($entity->field_status->target_id)) ? Term::load($entity->field_status->target_id) : NULL;
+      if (isset($term)) {
+        $color = $term->field_color->color;
+      }
+    } elseif ($entity->bundle() == 'lesson') {
+      // For Lessons get color from attendance.
+      $attendace = $entity->field_student->referencedEntities()[0];
+      $term = Term::load($attendace->field_status->target_id);
+      if (isset($term)) {
+        $color = $term->field_color->color;
+      }
+    }
+  } else {
+    $term = is_null($typeID) ? NULL : Term::load($typeID);
+    if ($term != NULL) {
+      $color = ($term->hasField('field_color')) ? $term->field_color->color : NULL;
+    }
+  }
+  if ($color == NULL) {
+    $color = '#666';
+  }
+  return $color;
+}
+
+/**
+ * Provid the data for showing the event popup.
+ *
+ * It get the all appontment detials from event and pass to ajax function.
+ *
+ * @param int $eventID
+ *   Get the Id of appointment that show the detail in popup.
+ *
+ * @return string
+ *   Data of HTML with table tag for popup module.
+ */
+function _amt_dayview_popup_details($eventID)
+{
+  $entity = \Drupal::entityTypeManager()->getStorage('events')->load($eventID);
+
+  $startDate = explode("T", $entity->field_date_and_time->value);
+
+  $endDate = explode("T", amt_dayview_find_end_date($entity->field_date_and_time->value, $entity->field_duration->value));
+
+  $numberOfStudents = 0;
+  $studentsDashboardLinks = [];
+  $studentsDashboardStatus = [];
+  $instructorData = [];
+  if ($entity->bundle() == 'group_lesson') {
+    // Take students from students field for group lesson.
+    $studentList = $entity->field_students->referencedEntities();
+    $numberStatus = 0;
+    foreach ($studentList as $key => $entityAttendees) {
+      // Get attendees id.
+      $attendessId = $entityAttendees->id->value;
+
+      // Get attendess Status Id.
+      $attendessStatusId = $entityAttendees->field_status->target_id;
+      if ($attendessStatusId != NULL) {
+        // Load term based on the status Id.
+        $attendessStatus = Term::load($attendessStatusId)->name->value;
+      }
+
+      // provide the data for edit status tab.
+      $studentsDashboardStatus[$numberStatus]['name'] = $entityAttendees->title->value;
+      $studentsDashboardStatus[$numberStatus]['status'] = $attendessStatus;
+      $studentsDashboardStatus[$numberStatus]['attendees_id'] = $attendessId;
+      $numberStatus++;
+
+      // Increment the number of students for each selected student.
+      // Get each student contact's id and name
+      // for student dashboard link generation.
+      foreach ($entityAttendees->field_students as $studentContactKey => $studentContactValue) {
+        // Get the Id of the student contact.
+        $studentsDashboardLinks[$numberOfStudents]['id'] = $studentContactValue->target_id;
+        // Get the title of the student contact.
+        $studentsDashboardLinks[$numberOfStudents]['name'] = $studentContactValue->entity->title->value;
+        // Get the status of the attendees.
+        $studentsDashboardLinks[$numberOfStudents]['status'] = $attendessStatus;
+        // Get the attendees id.
+        $studentsDashboardLinks[$numberOfStudents]['attendees_id'] = $attendessId;
+        // Increment the number of students for each selected student.
+        $numberOfStudents++;
+      }
+    }
+  } else if ($entity->bundle() == 'services') {
+
+    // Get the Id of service.
+    $studentsDashboardLinks[$numberOfStudents]['entity_id'] = $eventID;
+
+    // Take students from student field for lesson.
+    $studentsDashboardLinks[$numberOfStudents]['name'] = $entity->field_student->entity->title->value;
+
+    // Get the status of the attendees.
+    $studentsDashboardLinks[$numberOfStudents]['status'] = Term::load($entity->field_status->target_id)->name->value;
+
+    // Get the attendees id.
+    $studentsDashboardLinks[$numberOfStudents]['attendees_id'] = $attendessId;
+
+    $studentsDashboardStatus = $studentsDashboardLinks;
+  } else {
+    // Check if event has any student field, since schedules don't have this field (schedules are only for teachers)
+    if ($entity->hasField('field_student')) {
+      // Take students from student field for lesson.
+      $studentList = $entity->field_student->referencedEntities();
+      $numberStatus = 0;
+      foreach ($studentList as $key => $entityAttendees) {
+        // Get attendees id.
+        $attendessId = $entityAttendees->id->value;
+        // Get status id.
+        $attendessStatusId = $entityAttendees->field_status->target_id;
+        if ($attendessStatusId != NULL) {
+          // Load term based on status id.
+          $attendessStatus = Term::load($attendessStatusId)->name->value;
+        }
+
+        // provide the data for edit status tab.
+        $studentsDashboardStatus[$numberStatus]['name'] = $entityAttendees->title->value;
+        $studentsDashboardStatus[$numberStatus]['status'] = $attendessStatus;
+        $studentsDashboardStatus[$numberStatus]['attendees_id'] = $attendessId;
+        $studentsDashboardStatus[$numberStatus]['entity_id'] = $eventID;
+        
+        $numberStatus++;
+
+        // Get each student contact's id and name
+        // for student dashboard link generation.
+        foreach ($entityAttendees->field_students as $studentContactKey => $studentContactValue) {
+          // Get the Id of the student contact.
+          $studentsDashboardLinks[$numberOfStudents]['id'] = $studentContactValue->target_id;
+          // Get the title of the student contact.
+          $studentsDashboardLinks[$numberOfStudents]['name'] = $studentContactValue->entity->title->value;
+          // Get the status of the attendees.
+          $studentsDashboardLinks[$numberOfStudents]['status'] = $attendessStatus;
+          // Get the attendees id.
+          $studentsDashboardLinks[$numberOfStudents]['attendees_id'] = $attendessId;
+          $studentsDashboardLinks[$numberOfStudents]['entity_id'] = $eventID;
+
+
+          // Increment the number of students for each selected student.
+          $numberOfStudents++;
+        }
+      }
+    }
+  }
+
+
+  if ($entity->hasField('field_instructor') && isset($entity->field_instructor->referencedEntities()[0])) {
+    $instructorData = $entity->field_instructor->referencedEntities()[0];
+  } else if ($entity->hasField('field_schedule_instructor')) {
+    $instructorData =  $entity->field_schedule_instructor->referencedEntities()[0];
+  } else {
+    // For services. since they are not going for instructors, they go for executives.
+    $instructorData =  $entity->field_executive->referencedEntities()[0];
+  }
+
+  // Provide instructor name from first and last name.
+  $instructorName = $instructorData->field_first_name->value . ' ' . $instructorData->field_last_name->value;
+
+  // Provide data that will shown on the event detals popup.
+  $data = [
+    'id'               => $eventID,
+    'instructor'       => $instructorName,
+    'eventType'        => Term::load($entity->field_type->target_id)->name->value,
+    'date'             => date('m-d-Y', strtotime($startDate[0])),
+    'startTime'        => date('h:i A', strtotime($startDate[1])),
+    'endTime'          => date('h:i A', strtotime($endDate[1])),
+    'numberOfStudents' => $numberOfStudents,
+  ];
+  $htmlData = '<table style="width:100%; margin:0 15px;">
+   <tr>
+     <th>ID</th>
+     <td>' . $data['id'] . '</td>
+   </tr>
+   <tr>
+     <th>Instructor</th>
+     <td>' . $data['instructor'] . '</td>
+   </tr>
+   <tr>
+     <th>Appointment Type</th>
+     <td>' . $data['eventType'] . '</td>
+   </tr>
+   <tr>
+     <th>Date</th>
+     <td>' . $data['date'] . '</td>
+   </tr>
+   <tr>
+     <th>Start Time</th>
+     <td>' . $data['startTime'] . '</td>
+   </tr>
+   <tr>
+     <th>End Time</th>
+     <td>' . $data['endTime'] . '</td>
+   </tr>';
+
+  // Check if this is an standing event.
+  $isStanding = ($entity->field_expiration_date->value != null);
+
+  if ($isStanding) {
+
+    $parentID = 0; // For parent events.
+
+    // if parent gets the event self id, if not then get parent id from the event.
+    if ($entity->field_parent->value != 0) {
+      $parentID = $entity->field_parent->value;
+    }
+
+    $title = "This will remove all future instances of this appointment, but keep this current one.";
+
+    $htmlData .= '<tr></tr><th></th><td></td><tr>
+       <th>Future Appoitments </th>
+       <td><button type="button" ' . $title . ' class="btn btn-sm btn-success" 
+       id="cancelFutureAppts" eventID="' . $eventID . '" parentID="' . $parentID . '">
+       Cancel All Future appointments</button></td>
+      </tr>';
+  }
+
+  $htmlData .= '</table>';
+
+  return [$htmlData, $studentsDashboardLinks, $studentsDashboardStatus];
+}
+
+/**
+ * Our cusom input search needs to be auto complete.
+ *
+ * Search in system by ajax data and retun best match.
+ *
+ * @param string $eckType
+ *   The Entity type machine name.
+ * @param string $term
+ *   The key word that use types.
+ * @param string $bundle
+ *   The Entity bundle type machine name.
+ * @param string $field
+ *   The field name that the filter should be done based on.
+ *
+ * @return array
+ *   An associative array of matched data.
+ */
+function amt_dayview_autocomplete($eckType, $term, $bundle, $field, $excludedTeachers = FALSE)
+{
+  /* If the field is filterBasedOnNameAndLastName.
+   *
+   * This condition is only met in the students list page,
+   * where we want to display both
+   * first name and last name of the student as there
+   * may be a lot of student having the same first name or last name,
+   * and it would.
+   * make it hard for the user to identify without having the last name
+   * displayed.
+   * This condition is also going to search for the last names too based on
+   * the data inserted.
+   * The boolean variable initialized down here is used
+   * at the bottom of this function to make the other condition avaible.
+   */
+  if ($field == 'filterBasedOnNameAndLastName') {
+    $studentNameIndicator = TRUE;
+    // Build the search query.
+    $searchQuery = \Drupal::entityQuery($eckType)
+      ->range(0, 10);
+    // Assigning the real field name to field variable.
+    $orGroup = $searchQuery->orConditionGroup()
+      ->condition('field_first_name', "%" . ($term) . "%", 'LIKE')
+      ->condition('field_last_name', "%" . ($term) . "%", 'LIKE');
+    $searchQuery->condition($orGroup);
+  } else {
+    // Build the search query.
+    $searchQuery = \Drupal::entityQuery($eckType)
+      ->range(0, 10)
+      ->condition($field, "%" . ($term) . "%", 'LIKE');
+  }
+
+  if ($bundle != NULL) {
+    if ($eckType == 'taxonomy_term') {
+      // If it is taxomany it has vid instead of type for bundle.
+      $searchQuery->condition('vid', explode(',', $bundle), 'IN');
+    } elseif ($eckType == 'user') {
+      $searchQuery->condition('roles', explode(',', $bundle), 'IN');
+
+      // Restricted instructor to current teacher category.
+      if ($_POST['priority'] != NULL) {
+        $searchQuery->condition('field_teacher_category', $_POST['priority'], 'IN');
+      }
+    } else {
+      $searchQuery->condition('type', explode(',', $bundle), 'IN');
+    }
+  }
+  $searchResults = $searchQuery->execute();
+  // Get all Matched details.
+  $entities = \Drupal::entityTypeManager()->getStorage($eckType)->loadMultiple($searchResults);
+  $manipulatedData = [];
+  foreach ($entities as $entity) {
+    // Each search fields may has diffrent field name.
+    // Most of them is entity, user and term.
+    if ($eckType == 'taxonamy') {
+      $manipulatedData[] = [
+        'value' => $entity->id(),
+        'label' => Term::load($entity->id())->name->value,
+      ];
+    } elseif ($eckType == 'user') {
+
+      if ($field == 'filterBasedOnNameAndLastName') {
+        $manipulatedData[] = [
+          'value' => $entity->id(),
+          'label' => $entity->field_first_name->value . ' ' . $entity->field_last_name->value,
+        ];
+      } else {
+        $manipulatedData[] = [
+          'value' => $entity->id(),
+          'label' => $entity->name->value,
+        ];
+      }
+    } else {
+      /* If the field sent here was filterBasedOnNameAndLastName.
+       * This field comes only from students list page.
+       * We are also passing another field that contains only the first name
+       * of the student. "label" is used to display name and last name
+       * of the student in the autocomplete list.
+       */
+
+      if (isset($studentNameIndicator) && $studentNameIndicator == TRUE) {
+        $manipulatedData[] = [
+          'value' => $entity->id(),
+          'label' => $entity->get('field_first_name')->getValue()[0]['value'] . ' ' . $entity->get('field_last_name')->getValue()[0]['value'],
+        ];
+      } else {
+        $manipulatedData[] = [
+          'value' => $entity->id(),
+          'label' => $entity->get($field)->getValue()[0]['value'],
+        ];
+      }
+    }
+  }
+  return $manipulatedData;
+}
+/**
+ * Get the Configuration of dayview.
+ *
+ * Get the dayview setting value and assign it to an array
+ * and return it to an ajax call.
+ *
+ * @return array
+ *   An associative array of matched data.
+ */
+function _amt_dayview_full_calendar_settings()
+{
+  // Load the entity of the configuration of the dayview full calendar.
+  $configPageEntity = ConfigPages::config('day_view_settings');
+  $data = [
+    'duration'      => $configPageEntity->field_duration_time_slot->value,
+    'day_slot'      => (bool) $configPageEntity->field_all_day_slot->value,
+    'view'          => $configPageEntity->field_default_view->value,
+    'event_time'    => (bool) $configPageEntity->field_display_event_time->value,
+    'date_resource' => (bool) $configPageEntity->field_group_by_date_and_resource->value,
+    'resource'      => (bool) $configPageEntity->field_group_by_resource->value,
+    'center'        => $configPageEntity->field_header_center->value,
+    'left'          => $configPageEntity->field_header_left->value,
+    'right'         => $configPageEntity->field_header_right->value,
+    'resource_ajax' => (bool) $configPageEntity->field_refetch_resource_ajax->value,
+    'slot_format'   => $configPageEntity->field_slot_label_format->value,
+    'slot_interval' => $configPageEntity->field_slot_label_interval->value,
+    'office_hours'  => amt_dayview_clean_studio_working_hours($configPageEntity->get("field_studio_working_hours")->getValue()),
+    'instructor_trigger'    => $configPageEntity->field_instructor_trigger->value,
+    'instructor_placement'  => $configPageEntity->field_instructor_placement->value,
+    'instructor_container'  => $configPageEntity->field_instructor_container->value,
+    'tooltip_trigger'       => $configPageEntity->field_tooltip_trigger->value,
+    'tooltip_placement'     => $configPageEntity->field_tooltip_placement->value,
+    'tooltip_container'     => $configPageEntity->field_tooltip_container->value,
+    // 'start_day'             => $configPageEntity->field_start_day->value, // This field was not available.
+  ];
+  return $data;
+}
+
+/**
+ * Get the Session Start Configuration of dayview.
+ *
+ * Get the dayview Session Start values and set to array
+ * and return it to an ajax call.
+ *
+ * @return array
+ *   An associative array of matched data.
+ */
+function _amt_dayview_full_calendar_start_session_settings()
+{
+  // Load the entity of the session_start_times of the dayview full calendar.
+  $configPageEntity = ConfigPages::config('session_start_times');
+  $data = [
+    'sunday'    => _amt_dayview_clean_config_session_start($configPageEntity->field_sunday->value),
+    'monday'    => _amt_dayview_clean_config_session_start($configPageEntity->field_monday->value),
+    'tuesday'   => _amt_dayview_clean_config_session_start($configPageEntity->field_tuesday->value),
+    'wednesday' => _amt_dayview_clean_config_session_start($configPageEntity->field_wednesday->value),
+    'thursday'  => _amt_dayview_clean_config_session_start($configPageEntity->field_thursday->value),
+    'friday'    => _amt_dayview_clean_config_session_start($configPageEntity->field_friday->value),
+    'saturday'  => _amt_dayview_clean_config_session_start($configPageEntity->field_saturday->value),
+  ];
+  return $data;
+}
+
+/**
+ * Clean studio working Hours for better use in javascript.
+ *
+ * @param array $hours
+ *   Get Hours from Config Page.
+ *
+ * @return array
+ *   An associative array of Time on all days.
+ */
+function amt_dayview_clean_studio_working_hours(array $hours)
+{
+  $return_hours = [];
+  // Label of the Days.
+  $dayName = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
+  foreach ($hours as $dayNumber => $times) {
+    // Set Array with Key and store A clean Time in each Array.
+    $return_hours[$dayName[$dayNumber]]['start'] = date('H:i:s', strtotime(clean_time_table($times['starthours'])));
+    $return_hours[$dayName[$dayNumber]]['end'] = date('H:i:s', strtotime(clean_time_table($times['endhours'])));
+  }
+
+  // Set Today min,max Time to load as default.
+  $return_hours['minTime'] = $return_hours[ucwords(date("l"))]['start'];
+  $return_hours['maxTime'] = $return_hours[date("l")]['end'];
+  return $return_hours;
+}
+
+/**
+ * Clean Config Text Field and Convert to Array.
+ *
+ * @param string $valueString
+ *   String Value of Each Field.
+ *
+ * @return array
+ *   Return array of Times.
+ */
+function _amt_dayview_clean_config_session_start($valueString)
+{
+  $vals = [];
+  // Check if $valueString has data.
+  if (!empty($valueString)) {
+    // Separate each with a comma and store to an array.
+    $values = explode(',', $valueString);
+    foreach ($values as $value) {
+      $value = trim($value);
+      if (!empty($value)) {
+        // Add Second to Data.
+        $vals[] = $value . ':00';
+      }
+    }
+  }
+  return $vals;
+}
+
+/**
+ * Load Today Instructor Events Number.
+ *
+ * @param int $id
+ *   ID of Instructor.
+ * @param string $calanderDate
+ *   Date of passed from calender view.
+ *
+ * @return string
+ *   HTML String Text to Tooltip.
+ */
+function amt_dayview_load_instructor_info($id, $calanderDate, $instructorName)
+{
+
+  // Clean Date.
+  $datey = date('Y-m-d', strtotime($calanderDate));
+  $rangeWeek = rangeWeek($datey);
+
+  // Get the Private Lesson for every Instructor or Executive.
+  $dateRange['week_start'] = $rangeWeek[0];
+  $dateRange['week_end'] = $rangeWeek[1];
+  $privateBookedLessonWeek = _amt_dayview_get_private_num_in_class('lesson', $id, $dateRange);
+
+  $privatePostedLessonWeek = _amt_dayview_get_private_num_in_class('lesson', $id, $dateRange, ['Showed', 'No Showed, Charged']);
+
+  $dateRange['week_start'] = $datey;
+  $datetime = new DateTime($dateRange['week_start']);
+  $datetime->modify('+1 day');
+  $dateRange['week_end'] = $datetime->format('Y-m-d');
+
+  $privateBookedLessonDaily = _amt_dayview_get_private_num_in_class('lesson', $id, $dateRange);
+
+  $privatePostedLessonDaily = _amt_dayview_get_private_num_in_class('lesson', $id, $dateRange, ['Showed', 'No Showed, Charged']);
+
+  // Take the counts for day-view summary count.
+  $privateLesson[] = $privateBookedLessonDaily ? (int) $privateBookedLessonDaily : 0;
+  $privateLesson[] = $privateBookedLessonWeek ? (int) $privateBookedLessonWeek  : 0;
+
+  $privatePostedLesson[] = $privatePostedLessonDaily ? (int) $privatePostedLessonDaily : 0;
+  $privatePostedLesson[] = $privatePostedLessonWeek ? (int) $privatePostedLessonWeek  : 0;
+
+  // Total private lessons scheduled (pending status) for the day and week.
+  $totalBookedLessons = '<div><p>Day/Week: <strong>' . ((int) $privateBookedLessonDaily) . ' / ' . ((int) $privateBookedLessonWeek) . '</strong> (<b>Booked</b>)</p></div>';
+
+  // Total private lessons posted (Showed status) for the day and week.
+  $totalPostedLessons = '<div><p>Day/Week: <strong>' . ((int) $privatePostedLessonDaily) . ' / ' . ((int) $privatePostedLessonWeek) . '</strong> (<b>Taken</b>)</p></div>';
+
+  $hTMLResponse = '<div><strong class="card-title">Summary for ' . $instructorName .
+    ':</strong> <p class="card-text">' . $totalBookedLessons . '</p>
+  <p class="card-text">' . $totalPostedLessons . '</p>
+  <div>';
+
+  return [$hTMLResponse, $privateLesson, $privatePostedLesson];
+}
+
+/**
+ * Find the first and last date of the week from a date.
+ *
+ * @param string $calanderDate
+ *   The date that should find the first and last day.
+ *
+ * @return array
+ *   Array contain the first and last days of the week date.
+ */
+function rangeWeek($datestr)
+{
+  date_default_timezone_set(date_default_timezone_get());
+  $dt = strtotime($datestr);
+  return [
+    date('N', $dt) == 1 ? date('Y-m-d', $dt) : date('Y-m-d', strtotime('last monday', $dt)),
+    date('N', $dt) == 7 ? date('Y-m-d', $dt) : date('Y-m-d', strtotime('next sunday', $dt))
+  ];
+}
+
+/**
+ * Implements theme_page_attachments_alter().
+ *
+ * Add Some Javascript files to pages for menu collapse.
+ */
+function amt_page_attachments_alter(array &$attachments)
+{
+  // Get the current url.
+  $path = $_SERVER['REQUEST_URI'];
+  // Check if URL contains these chracters, It mean almost all pages.
+  // We check this URL to attach JS to every page becuase of menu collpasing
+  // There were a problem that collapsable navigation didnt work on some pages
+  // Because of not existence of Bootstrap JS, So We added Manually.
+  if (strpos($path, 'a') !== FALSE || strpos($path, 'i') !== FALSE || strpos($path, 'e') !== FALSE) {
+    // Attach Javascript file.
+    $attachments['#attached']['library'][] = 'amt_dayview/amt_collapse_menu';
+  }
+}
+
+/**
+ * Load an array of all lesson types.
+ *
+ * This function is used to laod the list of
+ * all lesson types in key value pairs. This function is for example
+ * called in dayview page load to get all lesson types
+ * and use'em in the Lesson Type select list in the filters.
+ */
+function _amt_dayview_load_all_lesson_types($realID = false, $defaultValue = false)
+{
+
+  // Load list of all lesson types.
+  $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree('lesson_type');
+
+  $new_options = [];
+  foreach ($terms as $key => $term) {
+    $obj = Term::load($term->tid) ?? null;
+    if (isset($obj->field_hide) && $obj->field_hide->value != 1) {
+      if ($realID) {
+        $new_options[$term->tid] = $term->name;
+      } else {
+        $new_options[$key] = $term->name;
+      }
+    }
+  }
+  // for move the default value to top of the lesson types
+  if ($defaultValue !== false) {
+    $key = array_search($defaultValue, $new_options);
+    unset($new_options[$key]);
+    $new_options = [$key => $defaultValue] + $new_options;
+  }
+  return $new_options;
+}
+
+/**
+ * Provide the Number in Class for staff.
+ *
+ * We load the group lesson in specific date range and get the count of
+ * all student for every group lesson of staff for that range of date.
+ *
+ * @param int $type
+ *   The type of the event bundle.
+ * @param int $staffId
+ *   Have the staff Id.
+ * @param object $dateRange
+ *   The start and end of the week date.
+ * @param object $exceptionTypeIds
+ *   The showed and no showed, charge attendance status Id.
+ *
+ * @return int
+ *   Return Number In Class.
+ */
+function _amt_dayview_get_private_num_in_class($type, $staffId, &$dateRange, $lessonStatus = false)
+{
+
+  // Getting IDs of lessons that are not being counted.
+  $nuteralLessons = amt_general_load_nuteral_lessons();
+
+  // Custom query for providing the number of private
+  // and number in class student.
+  $connection = \Drupal::database();
+  // Select the event database for loading all events.
+  $lessonQuery = db_select('events__field_date_and_time', 'ev_dt');
+  // Join the other table with parent of events table.
+  $lessonQuery->innerjoin('events__field_instructor', 'ev_ins', 'ev_ins.entity_id = ev_dt.entity_id');
+
+  // Join private lesson attendance to events. (Caneled events should not be counted.)
+  $lessonQuery->innerjoin('events__field_student', 'ev_st', 'ev_st.entity_id = ev_dt.entity_id');
+  // Join the attendance status in event for filtering. (Caneled events should not be counted.)
+  $lessonQuery->innerjoin('attendees__field_status', 'att_st', 'att_st.entity_id = ev_st.field_student_target_id');
+
+  $lessonQuery->innerjoin('events__field_type', 'ev_type', 'ev_type.entity_id = ev_dt.entity_id');
+
+  // Join the lessons with texonomy to filter only the ones that are not hide.
+  $lessonQuery->innerjoin('taxonomy_term__field_hide', 'tax_st', 'tax_st.entity_id = ev_type.field_type_target_id');
+
+  // Set condition for filtering the events.
+  $lessonQuery->condition('ev_dt.field_date_and_time_value', $dateRange, 'BETWEEN');
+  // Limiting to the result of a single instructor.
+  $lessonQuery->condition('ev_ins.field_instructor_target_id', $staffId, '=');
+  // Limiting to only lessons bundle.
+  $lessonQuery->condition('ev_type.bundle', $type);
+
+  // Limiting to visible lesson types.
+  $lessonQuery->condition('tax_st.field_hide_value', '0');
+
+  // Caneled, "No Showed Not Charged" and Rescheduled events should not be counted.
+  $lessonQuery->condition('att_st.field_status_target_id', $nuteralLessons, 'NOT IN');
+
+  if ($lessonStatus) {
+    $postedLessons = amt_general_load_nuteral_lessons($lessonStatus);
+    // Consider only lesson with Showed status.
+    $lessonQuery->condition('att_st.field_status_target_id', $postedLessons, 'IN');
+  }
+
+  // Choosing one sinlge field to return.
+  $lessonQuery->addField('ev_type', 'entity_id', 'en_id');
+  $finalQuery = $connection->select($lessonQuery);
+  $finalQuery->fields(NULL, ['en_id']);
+
+  // Return the number of student account in private lesson.
+  return $finalQuery->countQuery()->execute()->fetchCol()[0];
+}
+
+/**
+ * This function is used to load the list
+ * of statuses for either lessons or services
+ * depending on the parameter. The statuses list
+ * is needed in dayview page for select box when
+ * the user wants to update multiple events' statuses.
+ */
+function _amt_dayview_load_statuses($type)
+{
+  $terms_appointment_status = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree($type);
+  $status_list = [];
+  foreach ($terms_appointment_status as $key => $term) {
+    $status_list[$key]['id'] = $term->tid;
+    $status_list[$key]['name'] = $term->name;
+  }
+
+  return $status_list;
+}
+
+/**
+ * This function is called for updating the status
+ * for the attendees of a given event. This function is
+ * provided with an array of attendees IDs as the array's
+ * index and the status as the value. The function is also provided
+ * with an eventID in case of lessons so that we may exclude
+ * free lessons agains costing the student from their
+ * available lessons.
+ */
+function _amt_dayview_update_attendees_status()
+{
+
+  // Get the status with attendees ids.
+  $selectedStatus = $_POST['selectedStatus'];
+  // Get event Id.
+  $eventId = $_POST['eventId'];
+
+  $result = [];
+  // Load each attendees.
+  foreach ($selectedStatus as $key => $status) {
+    // Load attendees entity based on the posted value.
+    $attendeesEntity = \Drupal::entityTypeManager()->getStorage('attendees')->load($key);
+    // If it has an id (we returned id only for lessons).
+    if ($eventId != "undefined") {
+      // Load events based on event id.
+      $entity = \Drupal::entityTypeManager()->getStorage('events')->load($eventId);
+      // Checking if the lesson type is not NULL.
+      if ($entity->field_type->target_id != NULL) {
+
+        // Get Label Of Status.
+        $attendanceNewStatus = Term::load($status)->getName();
+
+        // Prevent future lessons from being marked as showed.
+        if(_amt_dayview_is_future_lesson_is_posting($attendanceNewStatus, $entity->field_date_and_time->value)) {
+          $result[$attendeesEntity->title->value] = 'Future lesson can not be posted.';
+          continue;
+        }
+
+        // Determining the free lesson types to be excluded from lesson used.
+        $freeLessons = _amt_general_get_free_lessons();
+
+        // Checking if the lesson type chosen is
+        // not among the free lesson types.
+        if (!in_array($entity->field_type->entity->name->value, $freeLessons)) {
+          // Get previous status of attendees.
+          $previousStatus = Term::load($attendeesEntity->field_status->target_id)->getName();
+          
+          // Take selected value from status input.
+          if (_amt_dayview_status_charge($previousStatus, 2) && _amt_dayview_status_charge($attendanceNewStatus, 1)) {
+
+            // Check if paid ahead is zero. Stop if it was.           
+            $student_id = $attendeesEntity->field_students->target_id;
+            $paidAheadVal = amt_dashboard_total_lessons_paid_ahead_taken($student_id);
+            $paidAhead = isset($paidAheadVal['paid_ahead']) ? $paidAheadVal['paid_ahead'] : 0;
+
+            // Check if status really updated.
+            if ($previousStatus == $attendanceNewStatus) {
+              $result[$attendeesEntity->title->value] = 'This lesson has already been posted.';
+              continue;
+            }
+
+            if ($paidAhead == 0) {
+              $result[$attendeesEntity->title->value] = 'Sorry, Paid Ahead is 0.';
+              continue;
+            }
+
+            $result[$attendeesEntity->title->value] = 'Status updated.';
+          }
+        }
+        // If lesson type is Dance Evaluation (DE).
+        if ($entity->field_type->entity->name->value == "Dance Evaluation (DE)") {
+          $new_status = Term::load($status)->getName();
+          // Check if this is the first lesson of the student,
+          // then set the inquiry showed date to this lesson's date.
+          _amt_general_check_and_set_inquiry_showed($entity, $new_status);
+        }
+      }
+    }
+
+    // Update status to given id.
+    $attendeesEntity->set('field_status', $status);
+
+    if(isset($_SESSION['attached_enrollment'][0])) {
+            
+      $message = "Enrollment: " . $_SESSION['attached_enrollment'] . " attached to Attendance: " . $attendeesEntity->id();
+      \Drupal::logger('Update Status')->info($message);
+
+      $attendeesEntity->set('field_enrollment', $_SESSION['attached_enrollment']);
+      
+      unset($_SESSION['attached_enrollment']);
+    }
+
+    // Save the update.
+    try {
+      $attendeesEntity->save();
+      if (empty($result[$attendeesEntity->title->value]) || $result[$attendeesEntity->title->value] == null) {
+        $result[$attendeesEntity->title->value] = true;
+      }
+    } catch (\Throwable $th) {
+      $result[$attendeesEntity->title->value] = 'Failed to update the status';
+    }
+  }
+
+  return $result;
+}
+
+/**
+ * Detect the the status that is applied on the attendace should be charge the student or not.
+ *
+ * @param  mixed $status
+ *   The status of the attendace.
+ * @param  mixed $operator
+ *   The operator to check charge or not charge status.
+ * @return boolean
+ *   Return the condition result.
+ */
+function _amt_dayview_status_charge($status, $operator)
+{
+  if ($operator == 1) {
+    return ($status == "Showed" || $status == "No Showed, Charged");
+  } else if ($operator == 2) {
+    return ($status != "Showed"  || $status != "No Showed, Charged");
+  } else {
+    return ($status != "Showed"  && $status != "No Showed, Charged");
+  }
+}
+
+/**
+ * This function is used when we want to update
+ * multiple events' statuses via day view in
+ * bulk mode. This function gets IDs of the events
+ * in an array, the status ID in $_POST['status_id'] variable
+ * and type of the events like "lesson, group_lesson, services"
+ * in $_POST['type'] variable. It then prepares the another
+ * post request data to be sent to the _amt_dayview_update_attendees_status()
+ * function to actually do the status update for each of the events and their
+ * attendees.
+ */
+function _amt_dayview_update_multiple_status()
+{
+
+  // Load the events that their statuses should be changed.
+  $events = \Drupal::entityTypeManager()->getStorage('events')->loadMultiple($_POST['data']);
+
+  $events_titles = [];
+  // Run through each one of the events.
+  foreach ($events as $entity) {
+
+    // Create an empty array to hold newly created data.
+    $selectedStatus = [];
+
+    // Here is diffrent field name (student & students).
+    if ($entity->bundle() == 'group_lesson') {
+      $collectionAttendees = $entity->field_students->referencedEntities();
+      foreach ($collectionAttendees as $attendees) {
+        $selectedStatus[$attendees->id()] = $_POST['status_id'];
+      }
+    } else if ($entity->bundle() == 'lesson') {
+      // If the entity type is lesson or service.
+      $collectionAttendees = $entity->field_student->referencedEntities();
+      foreach ($collectionAttendees as $attendees) {
+        $selectedStatus[$attendees->id()] = $_POST['status_id'];
+      }
+    }
+    // If the entity is service.
+    else {
+
+      // The status is entit itselt. so we just save it.
+      $entity->field_status->target_id = $_POST['status_id'];
+
+      try {
+        $entity->save();
+      } catch (\Throwable $th) {
+        $events_titles[$entity->title->value] = 'Uknown reason';
+      }
+
+      // Continue to the next item in the loop.
+      // And skip below code as they are for lesson
+      // and group lesson.
+      continue;
+    }
+
+    // Put newly created data in post variable.
+    $_POST['selectedStatus'] = $selectedStatus;
+
+    // If this appointment is a lesson.
+    if ($_POST['type'] == 'lesson') {
+
+      // Put it's id in the post variable.
+      $_POST['eventId'] = $entity->id();
+    } else {
+      $_POST['eventId'] = 'undefined';
+    }
+
+    // If this event has attendees attached.
+    if (!empty($selectedStatus)) {
+      // The actual function to update the statuses.
+      $events_titles[$entity->title->value] = _amt_dayview_update_attendees_status();
+    }
+
+    // If no attendees attaches to this event.
+    else {
+      $events_titles[$entity->title->value] = 'No attendees attached';
+    }
+  }
+  // Extract failed updates for all status list.
+  $events_titles = _amt_dayview_extract_failed_status_update($events_titles);
+  return $events_titles;
+}
+
+/**
+ * This function is used to return the status
+ * of the given event in text mode. If the event
+ * happens not to have a status, null value is
+ * returned by default.
+ */
+function _amt_dayview_return_status($entity)
+{
+  $status = null;
+  if ($entity->bundle() == 'lesson') {
+    if (isset($entity->field_student)) {
+      if (isset($entity->field_student->referencedEntities()[0])) {
+        $attendee = $entity->field_student->referencedEntities()[0];
+        if (isset($attendee->field_status->referencedEntities()[0])) {
+          $status = $attendee->field_status->referencedEntities()[0]->name->value;
+        }
+      }
+    }
+  } else if ($entity->bundle() == 'services') {
+    if (isset($entity->field_status) && isset($entity->field_status->referencedEntities()[0])) {
+      $status = $entity->field_status->referencedEntities()[0]->name->value;
+    } else {
+      $status = null;
+    }
+  }
+
+  return $status;
+}
+
+/**
+ * This function receives an array of events
+ * titles as index and either an array or
+ * a text as a value for that index. The function
+ * loop through the array to extract the failed
+ * status update attempt. Successful updates are
+ * the nested arrays with value of true.
+ */
+function _amt_dayview_extract_failed_status_update($events_titles)
+{
+
+  // Holding the final result list.
+  $final_result = [];
+
+  // Loop through the list of statuses.
+  foreach ($events_titles as $title => $event) {
+
+    // If value is a nested array.
+    if (is_array($event)) {
+
+      // loop through each nested array.
+      foreach ($event as $attendee) {
+
+        // If value is rather than true.
+        if ($attendee !== true) {
+          $final_result[$title] = $attendee;
+        }
+      }
+    }
+
+    // If value is not array but simple string.
+    else {
+      if ($event !== true) {
+        $final_result[$title] = $event;
+      }
+    }
+  }
+  return $final_result;
+}
+
+/**
+ * Determine if a lesson is in future and is going to be marked as showed.
+ */
+function _amt_dayview_is_future_lesson_is_posting($status, $lessonDate) {
+
+  $isInFuture = (strtotime($lessonDate) > strtotime($_POST['dateTime']));
+  $isStatusShowed = _amt_dayview_status_charge($status, 1);
+  
+  return ($isInFuture && $isStatusShowed);
+}

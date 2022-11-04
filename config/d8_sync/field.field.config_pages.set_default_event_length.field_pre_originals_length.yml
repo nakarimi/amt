@@ -1,0 +1,32 @@
+uuid: 88faccc0-2397-4fe3-9ab0-21bcfe672b94
+langcode: en
+status: true
+dependencies:
+  config:
+    - config_pages.type.set_default_event_length
+    - field.storage.config_pages.field_pre_originals_length
+  module:
+    - disable_field
+    - options
+third_party_settings:
+  disable_field:
+    add_disable: none
+    add_disable_roles: {  }
+    edit_disable: none
+    edit_disable_roles: {  }
+    add_enable_roles: {  }
+    edit_enable_roles: {  }
+id: config_pages.set_default_event_length.field_pre_originals_length
+field_name: field_pre_originals_length
+entity_type: config_pages
+bundle: set_default_event_length
+label: 'Pre Originals Length'
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 30
+default_value_callback: ''
+settings: {  }
+field_type: list_integer
